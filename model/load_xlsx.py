@@ -1,7 +1,7 @@
 import pandas as pd
 import xlrd
 
-print("Data load initiated, expect data load time of up to 3 minutes.")
+print("Data load initiated, expect data load time of up to 3 minutes for all sheets.")
 timeStart = pd.Timestamp.now()
 # sheet_name = None: read all sheets
 data = pd.read_excel(
