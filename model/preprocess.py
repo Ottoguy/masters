@@ -30,7 +30,7 @@ for row in doc2:
     # Extract time without the first 11 and last 7characters
     time_str = row[1][11:-7]
     timestamps.append(time_str)
-    status.append(row[2])
+    status.append(row[-2])
     phase1_effect.append(float(row[3]))
     phase2_effect.append(float(row[4]))
     phase3_effect.append(float(row[5]))
@@ -67,7 +67,14 @@ ax1.grid(alpha=0.3, linestyle='--')
 ax2.grid(alpha=0.3, linestyle='--')
 
 # Determine the color for the horizontal bar based on the status
-bar_color = 'green' if status[0] == 'Online' else 'red'
+if status[0] == 'Connected':
+    bar_color = 'blue'
+elif status[0] == 'Charging':
+    bar_color = 'green'
+elif status[0] == 'None':
+    bar_color = 'red'
+else:
+    bar_color = 'orange'
 
 # Add a horizontal bar between the subplots
 fig.subplots_adjust(hspace=0.4)  # Adjust the space between subplots
