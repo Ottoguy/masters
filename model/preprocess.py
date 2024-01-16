@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from datetime import datetime
+from matplotlib.lines import Line2D
 
 # from load_xlsx import data as xlsx_data
 # from load_ångan import data as ångan_data
@@ -70,16 +71,35 @@ plt.xticks(timestamps[::20])
 # Create a separate subplot for the horizontal bar
 ax3 = plt.subplot(gs[2], sharex=ax1)
 
+hasColourLegend = [False, False, False, False]
+
 # Iterate over timestamps and change color based on status
+legend_handles = []  # For custom legend
 for i, timestamp in enumerate(timestamps[:-1]):
     if status[i] == 'Connected':
         bar_color = 'blue'
+        if not hasColourLegend[0]:
+            legend_handles.append(
+                Line2D([0], [0], marker='s', color=bar_color, label='Connected'))
+        hasColourLegend[0] = True
     elif status[i] == 'Charging':
         bar_color = 'green'
+        if not hasColourLegend[1]:
+            legend_handles.append(
+                Line2D([0], [0], marker='s', color=bar_color, label='Charging'))
+        hasColourLegend[1] = True
     elif status[i] == 'None':
         bar_color = 'red'
+        if not hasColourLegend[2]:
+            legend_handles.append(
+                Line2D([0], [0], marker='s', color=bar_color, label='None'))
+        hasColourLegend[2] = True
     else:
         bar_color = 'orange'
+        if not hasColourLegend[3]:
+            legend_handles.append(
+                Line2D([0], [0], marker='s', color=bar_color, label='Offline'))
+        hasColourLegend[3] = True
 
     # Add a horizontal bar
     ax3.axhspan(-0.5, 0.5, xmin=i / len(timestamps), xmax=(i + 1) / len(timestamps),
@@ -88,12 +108,18 @@ for i, timestamp in enumerate(timestamps[:-1]):
 # Set the title of the graph
 plt.suptitle(doc2[0][0])
 
+# Manually adjust the height of the third subplot (Connectivity subplot)
+ax3.set_ylim([-0.5, 0.5])
+
 # Set the title for ax3
 ax3.set_title('Connectivity')
 
 # Hide y-axis and x-axis tick labels on ax3
 ax3.set_yticklabels([])
 ax3.set_xticklabels([])
+
+# Add small legend on the side of ax3
+fig.legend(handles=legend_handles, loc='lower left')
 
 # Show the plot
 plt.show()
