@@ -23,6 +23,11 @@ for csv_file in csv_files:
         # Add the filename as the first column in each row
         file_data_with_filename = [[csv_file] + row for row in file_data]
 
+        # Check and fill missing values with "None"
+        for row in file_data_with_filename:
+            while len(row) < 13:
+                row.append(None)
+
         # Group data by filename in the dictionary
         if csv_file not in data_by_filename:
             data_by_filename[csv_file] = []
@@ -32,5 +37,6 @@ for csv_file in csv_files:
 all_data = list(data_by_filename.values())
 
 # Now 'all_data' contains one list for every filename, each containing lists of data
-for i in range(10):
+for i in range(100):
     print(all_data[1][i])
+# Ok du märker att vid denna utskrift byts bil efter ett par rader, känns bra att visualisera de 6 värdena för att påvisa det? Sen så ser du i slutet att värdena fastnar om den går offline, värt att ha i åtanke
