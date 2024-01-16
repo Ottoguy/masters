@@ -1,6 +1,8 @@
 import os
 import csv
 
+print("Loading CSV files...")
+
 # Specify the path to your folder containing CSV files
 folder_path = 'data/Dansmästaren/Charger_Data/'
 
@@ -10,11 +12,12 @@ csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 # Initialize a dictionary to store data grouped by filename
 data_by_filename = {}
 
+print("Reading ", len(csv_files), " CSV files...")
 # Loop through each CSV file and read its content
 for csv_file in csv_files:
     file_path = os.path.join(folder_path, csv_file)
 
-    with open(file_path, 'r', newline='') as file:
+    with open(file_path, 'r', newline='', encoding="utf8") as file:
         csv_reader = csv.reader(file)
 
         # Read the data
@@ -32,11 +35,12 @@ for csv_file in csv_files:
         if csv_file not in data_by_filename:
             data_by_filename[csv_file] = []
         data_by_filename[csv_file].extend(file_data_with_filename)
+        print("Reading ", csv_file, end='\r')
 
+print("Converting csv dictionary to list...", end='\n')
 # Convert the dictionary values to a list
 all_data = list(data_by_filename.values())
 
 # Now 'all_data' contains one list for every filename, each containing lists of data
-for i in range(100):
-    print(all_data[1][i])
+print("CSV files loaded")
 # Ok du märker att vid denna utskrift byts bil efter ett par rader, känns bra att visualisera de 6 värdena för att påvisa det? Sen så ser du i slutet att värdena fastnar om den går offline, värt att ha i åtanke
