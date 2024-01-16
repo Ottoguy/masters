@@ -13,11 +13,12 @@ print(len(data))
 # Choosing which files to use
 doc1 = data[1]
 print(doc1[0])
-doc2 = data[2]
+doc2 = data[22]
 print(doc2[0])
 
 # Extract relevant data for plotting
 timestamps = []
+status = []  # Added for Online/Offline status
 phase1_effect = []
 phase2_effect = []
 phase3_effect = []
@@ -29,6 +30,7 @@ for row in doc2:
     # Extract time without the first 11 and last 7characters
     time_str = row[1][11:-7]
     timestamps.append(time_str)
+    status.append(row[2])
     phase1_effect.append(float(row[3]))
     phase2_effect.append(float(row[4]))
     phase3_effect.append(float(row[5]))
@@ -63,6 +65,13 @@ plt.xticks(timestamps[::20])
 # Add unintrusive grid to both subplots
 ax1.grid(alpha=0.3, linestyle='--')
 ax2.grid(alpha=0.3, linestyle='--')
+
+# Determine the color for the horizontal bar based on the status
+bar_color = 'green' if status[0] == 'Online' else 'red'
+
+# Add a horizontal bar between the subplots
+fig.subplots_adjust(hspace=0.4)  # Adjust the space between subplots
+ax1.axhspan(-0.5, 0.5, facecolor=bar_color, alpha=0.8)
 
 # Show the plot
 plt.show()
