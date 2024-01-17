@@ -4,8 +4,6 @@ import os
 from matplotlib.lines import Line2D
 from os import path
 
-# from load_xlsx import data as xlsx_data
-# from load_ångan import data as ångan_data
 from load_dans import all_data as dans_data
 
 # Choose which data to use
