@@ -83,16 +83,28 @@ for i in range(1, len(data)):
         ax2.grid(alpha=0.3, linestyle='--')
 
         # Only display as many timestamps as are needed for the plot
+        timeStep = " Default"
         if (len(timestamps) > 2000):
-            plt.xticks(timestamps[::160])
+            timeStep = " (240 step)"
+            plt.xticks(timestamps[::240])
         if (len(timestamps) > 1000):
-            plt.xticks(timestamps[::80])
+            timeStep = " (120 step)"
+            plt.xticks(timestamps[::120])
         elif (len(timestamps) > 500):
-            plt.xticks(timestamps[::40])
+            timeStep = " (60 step)"
+            plt.xticks(timestamps[::60])
         elif (len(timestamps) > 250):
+            timeStep = " (40 step)"
+            plt.xticks(timestamps[::40])
+        elif (len(timestamps) > 100):
+            timeStep = " (20 step)"
             plt.xticks(timestamps[::20])
-        else:
+        elif (len(timestamps) > 50):
+            timeStep = " (10 step)"
             plt.xticks(timestamps[::10])
+        else:
+            timeStep = " (5 step)"
+            plt.xticks(timestamps[::5])
 
         # Create a separate subplot for the horizontal bar
         ax3 = plt.subplot(gs[2], sharex=ax1)
@@ -140,7 +152,7 @@ for i in range(1, len(data)):
 
         # Hide y-axis tick labels on ax3
         ax3.set_yticklabels([])
-        ax3.set_xlabel('Time')
+        ax3.set_xlabel('Time' + timeStep)
 
         # Add small legend on the side of ax3
         fig.legend(handles=legend_handles, loc='lower left')
