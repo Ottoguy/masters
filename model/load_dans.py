@@ -13,9 +13,12 @@ csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 data_by_filename = {}
 
 print("Reading ", len(csv_files), " CSV files...")
+i = 0
+
 # Loop through each CSV file and read its content
 for csv_file in csv_files:
     file_path = os.path.join(folder_path, csv_file)
+    i = i+1
 
     with open(file_path, 'r', newline='', encoding="utf8") as file:
         csv_reader = csv.reader(file)
@@ -35,9 +38,9 @@ for csv_file in csv_files:
         if csv_file not in data_by_filename:
             data_by_filename[csv_file] = []
         data_by_filename[csv_file].extend(file_data_with_filename)
-        print("Reading ", csv_file, end='\r')
+        print("Reading file " + str(i) + " of " +
+              str(len(csv_files)) + ": ", csv_file, end='\r')
 
-print("Converting csv dictionary to list...", end='\n')
 # Convert the dictionary values to a list
 all_data = list(data_by_filename.values())
 
