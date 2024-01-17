@@ -9,7 +9,6 @@ from load_dans import all_data as dans_data
 
 # Choose which data to use
 data = dans_data
-print(len(data))
 
 # Choosing which files to use
 doc1 = data[1]
@@ -45,18 +44,19 @@ gs = gridspec.GridSpec(3, 1, height_ratios=[8, 8, 1], hspace=0.4, wspace=0.0)
 
 # Plot the effects in the first subplot
 ax1 = plt.subplot(gs[0])
-ax1.plot(timestamps, phase1_effect, label='Phase 1 effect')
-ax1.plot(timestamps, phase2_effect, label='Phase 2 effect')
-ax1.plot(timestamps, phase3_effect, label='Phase 3 effect')
+ax1.plot(timestamps, phase1_effect, label='Phase 1 effect', linestyle='--')
+ax1.plot(timestamps, phase2_effect,
+         label='Phase 2 effect', linestyle='-.')
+ax1.plot(timestamps, phase3_effect, label='Phase 3 effect', linestyle=':')
 ax1.set_ylabel('Effect Values')
 ax1.legend()
 ax1.margins(x=0)
 
 # Plot the voltages in the second subplot
 ax2 = plt.subplot(gs[1], sharex=ax1)
-ax2.plot(timestamps, phase1_voltage, label='Phase 1 voltage')
-ax2.plot(timestamps, phase2_voltage, label='Phase 2 voltage')
-ax2.plot(timestamps, phase3_voltage, label='Phase 3 voltage')
+ax2.plot(timestamps, phase1_voltage, label='Phase 1 voltage', linestyle='--')
+ax2.plot(timestamps, phase2_voltage, label='Phase 2 voltage', linestyle='-.')
+ax2.plot(timestamps, phase3_voltage, label='Phase 3 voltage', linestyle=':')
 ax2.set_ylabel('Voltage Values')
 ax2.legend()
 ax2.margins(x=0)
@@ -65,8 +65,16 @@ ax2.margins(x=0)
 ax1.grid(alpha=0.3, linestyle='--')
 ax2.grid(alpha=0.3, linestyle='--')
 
-# Display every 10th timestamp on the x-axis
-plt.xticks(timestamps[::40])
+# Only display as many timestamps as are needed for the plot
+print(len(timestamps))
+if (len(timestamps) > 1000):
+    plt.xticks(timestamps[::80])
+elif (len(timestamps) > 500):
+    plt.xticks(timestamps[::40])
+elif (len(timestamps) > 250):
+    plt.xticks(timestamps[::20])
+else:
+    plt.xticks(timestamps[::10])
 
 # Create a separate subplot for the horizontal bar
 ax3 = plt.subplot(gs[2], sharex=ax1)
