@@ -14,7 +14,7 @@ print(len(data))
 # Choosing which files to use
 doc1 = data[1]
 print(doc1[0])
-doc2 = data[25]
+doc2 = data[26]
 print(doc2[0])
 
 # Extract relevant data for plotting
@@ -41,7 +41,7 @@ for row in doc2:
 
 # Create subplots using gridspec
 fig = plt.figure(figsize=(10, 8))
-gs = gridspec.GridSpec(3, 1, height_ratios=[8, 8, 1], hspace=0.4)
+gs = gridspec.GridSpec(3, 1, height_ratios=[8, 8, 1], hspace=0.4, wspace=0.0)
 
 # Plot the effects in the first subplot
 ax1 = plt.subplot(gs[0])
@@ -50,23 +50,23 @@ ax1.plot(timestamps, phase2_effect, label='Phase 2 effect')
 ax1.plot(timestamps, phase3_effect, label='Phase 3 effect')
 ax1.set_ylabel('Effect Values')
 ax1.legend()
+ax1.margins(x=0)
 
 # Plot the voltages in the second subplot
 ax2 = plt.subplot(gs[1], sharex=ax1)
 ax2.plot(timestamps, phase1_voltage, label='Phase 1 voltage')
 ax2.plot(timestamps, phase2_voltage, label='Phase 2 voltage')
 ax2.plot(timestamps, phase3_voltage, label='Phase 3 voltage')
-ax2.set_xlabel('Time')
 ax2.set_ylabel('Voltage Values')
 ax2.legend()
-
+ax2.margins(x=0)
 
 # Add unintrusive grid to both subplots
 ax1.grid(alpha=0.3, linestyle='--')
 ax2.grid(alpha=0.3, linestyle='--')
 
 # Display every 10th timestamp on the x-axis
-plt.xticks(timestamps[::20])
+plt.xticks(timestamps[::40])
 
 # Create a separate subplot for the horizontal bar
 ax3 = plt.subplot(gs[2], sharex=ax1)
@@ -102,21 +102,18 @@ for i, timestamp in enumerate(timestamps[:-1]):
         hasColourLegend[3] = True
 
     # Add a horizontal bar
-    ax3.axhspan(-0.5, 0.5, xmin=i / len(timestamps), xmax=(i + 1) / len(timestamps),
-                facecolor=bar_color, alpha=0.8)
+    ax3.axhspan(-0.5, 0.5, xmin=(i / len(timestamps)), xmax=((i + 1) / len(timestamps)),
+                facecolor=bar_color, alpha=1)
 
 # Set the title of the graph
 plt.suptitle(doc2[0][0])
 
-# Manually adjust the height of the third subplot (Connectivity subplot)
-ax3.set_ylim([-0.5, 0.5])
-
 # Set the title for ax3
 ax3.set_title('Connectivity')
 
-# Hide y-axis and x-axis tick labels on ax3
+# Hide y-axis tick labels on ax3
 ax3.set_yticklabels([])
-ax3.set_xticklabels([])
+ax3.set_xlabel('Time')
 
 # Add small legend on the side of ax3
 fig.legend(handles=legend_handles, loc='lower left')
