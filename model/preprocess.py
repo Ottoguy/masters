@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from datetime import datetime
+import os
 from matplotlib.lines import Line2D
+from os import path
 
 # from load_xlsx import data as xlsx_data
 # from load_ångan import data as ångan_data
@@ -10,121 +11,139 @@ from load_dans import all_data as dans_data
 # Choose which data to use
 data = dans_data
 
-# Choosing which files to use
-doc1 = data[1]
-print(doc1[0])
-doc2 = data[26]
-print(doc2[0])
+# Create a directory for the result pictures
+script_dir = os.path.dirname(__file__)
+results_dir = os.path.join(script_dir, 'Figures/')
+if not os.path.isdir(results_dir):
+    os.makedirs(results_dir)
 
-# Extract relevant data for plotting
-timestamps = []
-status = []  # Added for Online/Offline status
-phase1_effect = []
-phase2_effect = []
-phase3_effect = []
-phase1_voltage = []
-phase2_voltage = []
-phase3_voltage = []
+# Iterate over all files
+for i in range(1, len(data)):
+    # Get the data for the current file (doc is a csv file)
+    doc = data[i]
 
-for row in doc2:
-    # Extract time without the first 11 and last 7 characters
-    time_str = row[1][11:-7]
-    timestamps.append(time_str)
-    status.append(row[-3])
-    phase1_effect.append(float(row[3]))
-    phase2_effect.append(float(row[4]))
-    phase3_effect.append(float(row[5]))
-    phase1_voltage.append(float(row[6]))
-    phase2_voltage.append(float(row[7]))
-    phase3_voltage.append(float(row[8]))
+    # Extract relevant data for plotting
+    timestamps = []
+    status = []  # Added for Online/Offline status
+    phase1_effect = []
+    phase2_effect = []
+    phase3_effect = []
+    phase1_voltage = []
+    phase2_voltage = []
+    phase3_voltage = []
 
-# Create subplots using gridspec
-fig = plt.figure(figsize=(10, 8))
-gs = gridspec.GridSpec(3, 1, height_ratios=[8, 8, 1], hspace=0.4, wspace=0.0)
+    for row in doc:
+        # Extract time without the first 11 and last 7 characters (Only the time left)
+        time_str = row[1][11:-7]
+        timestamps.append(time_str)
+        status.append(row[-3])
+        phase1_effect.append(float(row[3]))
+        phase2_effect.append(float(row[4]))
+        phase3_effect.append(float(row[5]))
+        phase1_voltage.append(float(row[6]))
+        phase2_voltage.append(float(row[7]))
+        phase3_voltage.append(float(row[8]))
 
-# Plot the effects in the first subplot
-ax1 = plt.subplot(gs[0])
-ax1.plot(timestamps, phase1_effect, label='Phase 1 effect', linestyle='--')
-ax1.plot(timestamps, phase2_effect,
-         label='Phase 2 effect', linestyle='-.')
-ax1.plot(timestamps, phase3_effect, label='Phase 3 effect', linestyle=':')
-ax1.set_ylabel('Effect Values')
-ax1.legend()
-ax1.margins(x=0)
+    # Create subplots using gridspec
+    fig = plt.figure(figsize=(10, 8))
+    gs = gridspec.GridSpec(3, 1, height_ratios=[
+                           8, 8, 1], hspace=0.4, wspace=0.0)
 
-# Plot the voltages in the second subplot
-ax2 = plt.subplot(gs[1], sharex=ax1)
-ax2.plot(timestamps, phase1_voltage, label='Phase 1 voltage', linestyle='--')
-ax2.plot(timestamps, phase2_voltage, label='Phase 2 voltage', linestyle='-.')
-ax2.plot(timestamps, phase3_voltage, label='Phase 3 voltage', linestyle=':')
-ax2.set_ylabel('Voltage Values')
-ax2.legend()
-ax2.margins(x=0)
+    # Plot the effects in the first subplot
+    ax1 = plt.subplot(gs[0])
+    ax1.plot(timestamps, phase1_effect, label='Phase 1 effect', linestyle='--')
+    ax1.plot(timestamps, phase2_effect,
+             label='Phase 2 effect', linestyle='-.')
+    ax1.plot(timestamps, phase3_effect, label='Phase 3 effect', linestyle=':')
+    ax1.set_ylabel('Effect Values')
+    ax1.legend()
+    ax1.margins(x=0)
 
-# Add unintrusive grid to both subplots
-ax1.grid(alpha=0.3, linestyle='--')
-ax2.grid(alpha=0.3, linestyle='--')
+    # Plot the voltages in the second subplot
+    ax2 = plt.subplot(gs[1], sharex=ax1)
+    ax2.plot(timestamps, phase1_voltage,
+             label='Phase 1 voltage', linestyle='--')
+    ax2.plot(timestamps, phase2_voltage,
+             label='Phase 2 voltage', linestyle='-.')
+    ax2.plot(timestamps, phase3_voltage,
+             label='Phase 3 voltage', linestyle=':')
+    ax2.set_ylabel('Voltage Values')
+    ax2.legend()
+    ax2.margins(x=0)
 
-# Only display as many timestamps as are needed for the plot
-print(len(timestamps))
-if (len(timestamps) > 1000):
-    plt.xticks(timestamps[::80])
-elif (len(timestamps) > 500):
-    plt.xticks(timestamps[::40])
-elif (len(timestamps) > 250):
-    plt.xticks(timestamps[::20])
-else:
-    plt.xticks(timestamps[::10])
+    # Add unintrusive grid to both subplots
+    ax1.grid(alpha=0.3, linestyle='--')
+    ax2.grid(alpha=0.3, linestyle='--')
 
-# Create a separate subplot for the horizontal bar
-ax3 = plt.subplot(gs[2], sharex=ax1)
-
-hasColourLegend = [False, False, False, False]
-
-# Iterate over timestamps and change color based on status
-legend_handles = []  # For custom legend
-for i, timestamp in enumerate(timestamps[:-1]):
-    if status[i] == 'Connected':
-        bar_color = 'blue'
-        if not hasColourLegend[0]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Connected'))
-        hasColourLegend[0] = True
-    elif status[i] == 'Charging':
-        bar_color = 'green'
-        if not hasColourLegend[1]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Charging'))
-        hasColourLegend[1] = True
-    elif status[i] == 'None':
-        bar_color = 'red'
-        if not hasColourLegend[2]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='None'))
-        hasColourLegend[2] = True
+    # Only display as many timestamps as are needed for the plot
+    print(len(timestamps))
+    if (len(timestamps) > 1000):
+        plt.xticks(timestamps[::80])
+    elif (len(timestamps) > 500):
+        plt.xticks(timestamps[::40])
+    elif (len(timestamps) > 250):
+        plt.xticks(timestamps[::20])
     else:
-        bar_color = 'orange'
-        if not hasColourLegend[3]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Offline'))
-        hasColourLegend[3] = True
+        plt.xticks(timestamps[::10])
 
-    # Add a horizontal bar
-    ax3.axhspan(-0.5, 0.5, xmin=(i / len(timestamps)), xmax=((i + 1) / len(timestamps)),
-                facecolor=bar_color, alpha=1)
+    # Create a separate subplot for the horizontal bar
+    ax3 = plt.subplot(gs[2], sharex=ax1)
 
-# Set the title of the graph
-plt.suptitle(doc2[0][0])
+    # Keep track of which colors have been added to the legend already
+    hasColourLegend = [False, False, False, False]
 
-# Set the title for ax3
-ax3.set_title('Connectivity')
+    # Iterate over timestamps and change color based on status
+    legend_handles = []  # For custom legend
+    for i, timestamp in enumerate(timestamps[:-1]):
+        if status[i] == 'Connected':
+            bar_color = 'blue'
+            if not hasColourLegend[0]:
+                legend_handles.append(
+                    Line2D([0], [0], marker='s', color=bar_color, label='Connected'))
+            hasColourLegend[0] = True
+        elif status[i] == 'Charging':
+            bar_color = 'green'
+            if not hasColourLegend[1]:
+                legend_handles.append(
+                    Line2D([0], [0], marker='s', color=bar_color, label='Charging'))
+            hasColourLegend[1] = True
+        elif status[i] == 'None':
+            bar_color = 'red'
+            if not hasColourLegend[2]:
+                legend_handles.append(
+                    Line2D([0], [0], marker='s', color=bar_color, label='None'))
+            hasColourLegend[2] = True
+        else:
+            bar_color = 'orange'
+            if not hasColourLegend[3]:
+                legend_handles.append(
+                    Line2D([0], [0], marker='s', color=bar_color, label='Offline'))
+            hasColourLegend[3] = True
 
-# Hide y-axis tick labels on ax3
-ax3.set_yticklabels([])
-ax3.set_xlabel('Time')
+        # Add a horizontal bar
+        ax3.axhspan(-0.5, 0.5, xmin=(i / len(timestamps)), xmax=((i + 1) / len(timestamps)),
+                    facecolor=bar_color, alpha=1)
 
-# Add small legend on the side of ax3
-fig.legend(handles=legend_handles, loc='lower left')
+    # Set the title of the graph
+    plt.suptitle(doc[0][0])
+
+    # Set the title for ax3
+    ax3.set_title('Connectivity')
+
+    # Hide y-axis tick labels on ax3
+    ax3.set_yticklabels([])
+    ax3.set_xlabel('Time')
+
+    # Add small legend on the side of ax3
+    fig.legend(handles=legend_handles, loc='lower left')
+
+    if path.exists(results_dir + "/" + doc[0][0] + ".png"):
+        print("File " + doc[0][0] + ".png already exists, skipping...")
+    else:
+        # Save the figure
+        print("Saving figure " + i + " of " + len(data) +
+              " as " + doc[0][0] + ".png", end='\r')
+        plt.savefig(results_dir + doc[0][0] + '.png')
 
 # Show the plot
 plt.show()
