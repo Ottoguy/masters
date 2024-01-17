@@ -14,7 +14,7 @@ print(len(data))
 # Choosing which files to use
 doc1 = data[1]
 print(doc1[0])
-doc2 = data[22]
+doc2 = data[25]
 print(doc2[0])
 
 # Extract relevant data for plotting
