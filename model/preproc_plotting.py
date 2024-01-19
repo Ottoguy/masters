@@ -212,10 +212,10 @@ for i in range(1, len(data)):
 
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
-        if (len(timestamps) > 1500):
+        if (len(timestamps) > 2000):
             timeStep = " (240 step)"
             plt.xticks(timestamps[::240])
-        if (len(timestamps) > 1000):
+        elif (len(timestamps) > 1000):
             timeStep = " (120 step)"
             plt.xticks(timestamps[::120])
         elif (len(timestamps) > 500):
