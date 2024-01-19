@@ -1,3 +1,4 @@
+from load_dans import all_data as dans_data
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
@@ -5,31 +6,36 @@ import os
 from matplotlib.lines import Line2D
 from os import path
 
-from load_dans import all_data as dans_data
-
 # Choose which data to use
 data = dans_data
-
-# Find script directory
-script_dir = os.path.dirname(__file__)
 
 # Choose preprocessing type
 # preprocessing_type = "none"
 # preprocessing_type = "diff"
 # preprocessing_type = "mean"
-preprocessing_type = "std"
+# preprocessing_type = "std"
 
-if preprocessing_type == "none":
-    results_dir = os.path.join(script_dir, 'Preprocessing_figures/none/')
-elif preprocessing_type == "diff":
-    results_dir = os.path.join(script_dir, 'Preprocessing_figures/diff/')
-elif preprocessing_type == "mean":
-    results_dir = os.path.join(script_dir, 'Preprocessing_figures/mean/')
-elif preprocessing_type == "std":
-    results_dir = os.path.join(script_dir, 'Preprocessing_figures/std/')
-else:
-    print("Invalid preprocessing type, exiting...")
-    exit()
+while True:
+    print('Enter data type (none, diff, mean, or std):')
+    preprocessing_type = input()
+
+    # Find script directory
+    script_dir = os.path.dirname(__file__)
+
+    if preprocessing_type == "none":
+        results_dir = os.path.join(script_dir, 'Preprocessing_figures/none/')
+        break
+    elif preprocessing_type == "diff":
+        results_dir = os.path.join(script_dir, 'Preprocessing_figures/diff/')
+        break
+    elif preprocessing_type == "mean":
+        results_dir = os.path.join(script_dir, 'Preprocessing_figures/mean/')
+        break
+    elif preprocessing_type == "std":
+        results_dir = os.path.join(script_dir, 'Preprocessing_figures/std/')
+        break
+    else:
+        print("Invalid data type, please enter a valid data type.")
 
 if not os.path.isdir(results_dir):
     os.makedirs(results_dir)
