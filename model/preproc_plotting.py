@@ -16,7 +16,7 @@ data = dans_data
 # preprocessing_type = "std"
 
 while True:
-    print('Enter data type (none, diff, mean, or std):')
+    print('Enter preferred preprocessing (none, diff, mean, or std):')
     preprocessing_type = input()
 
     # Find script directory
@@ -35,7 +35,7 @@ while True:
         results_dir = os.path.join(script_dir, 'Preprocessing_figures/std/')
         break
     else:
-        print("Invalid data type, please enter a valid data type.")
+        print("Invalid preprocessing type, please enter a valid data type.")
 
 if not os.path.isdir(results_dir):
     os.makedirs(results_dir)
@@ -54,8 +54,8 @@ for i in range(1, len(data)):
         status = []  # Added for Online/Offline status
 
         if preprocessing_type == "none":
-            label_upper = "Effect"
-            label_lower = "Voltage"
+            label_upper = "Effect (kW)"
+            label_lower = "Voltage (V)"
             phase1_effect = []
             phase2_effect = []
             phase3_effect = []
@@ -63,8 +63,8 @@ for i in range(1, len(data)):
             phase2_voltage = []
             phase3_voltage = []
         elif preprocessing_type == "diff":
-            label_upper = "Effect Diff"
-            label_lower = "Voltage Diff"
+            label_upper = "Effect Diff (kW)"
+            label_lower = "Voltage Diff (V)"
             effect_12_diff = []
             effect_23_diff = []
             effect_13_diff = []
@@ -72,8 +72,8 @@ for i in range(1, len(data)):
             voltage_23_diff = []
             voltage_13_diff = []
         elif preprocessing_type == "mean":
-            label_upper = "Effect Mean"
-            label_lower = "Voltage Mean"
+            label_upper = "Effect Mean (kW)"
+            label_lower = "Voltage Mean (V)"
             effect_mean = []
             effect_12_mean = []
             effect_23_mean = []
