@@ -5,6 +5,7 @@ from matplotlib import gridspec
 import os
 from matplotlib.lines import Line2D
 from os import path
+from datetime import datetime
 
 # Choose which data to use
 data = dans_data
@@ -211,7 +212,7 @@ for i in range(1, len(data)):
 
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
-        if (len(timestamps) > 2000):
+        if (len(timestamps) > 1500):
             timeStep = " (240 step)"
             plt.xticks(timestamps[::240])
         if (len(timestamps) > 1000):
@@ -281,8 +282,14 @@ for i in range(1, len(data)):
         ax3.set_yticklabels([])
         ax3.set_xlabel('Time' + timeStep)
 
+        # Get the current date and time
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Add date and time information as text annotation
+        plt.annotate(f"Created: {current_datetime}", xy=(10, 10),
+                     xycoords="figure pixels", fontsize=8, color='dimgray')
+
         # Add small legend on the side of ax3
-        fig.legend(handles=legend_handles, loc='lower left')
+        fig.legend(handles=legend_handles, loc='lower right')
 
         # Save the figure
         print("Saving figure " + str(i) + " of " + str(len(data)) +
