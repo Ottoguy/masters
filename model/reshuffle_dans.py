@@ -17,4 +17,11 @@ df = df.sort_values(by=['ID'])
 # Reset index
 df = df.reset_index(drop=True)
 
-print(df)
+# Specify the desired ID
+desired_id = "0"  # Replace this with the ID you want
+
+# Filter DataFrame based on the desired ID
+desired_rows = df[df['ID'] == desired_id]
+
+# Print the filtered DataFrame
+print(desired_rows)
