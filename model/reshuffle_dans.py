@@ -12,15 +12,15 @@ columns = ['Filename', 'Timestamp', 'Status', 'Phase1Effect', 'Phase2Effect', 'P
 
 print("Creating dataframe...")
 df = pd.DataFrame(merged_data, columns=columns)
-# Sort by ID
-df = df.sort_values(by=['ID'])
+# Sort by ID and Timestamp
+df = df.sort_values(by=['ID', 'Timestamp'])
 # Reset index
 df = df.reset_index(drop=True)
 
 # Filter DataFrame based on the desired ID
-# desired_id = "0"
-# desired_rows = df[df['ID'] == desired_id]
-# print(desired_rows)
+desired_id = "59449840"
+desired_rows = df[df['ID'] == desired_id]
+print(desired_rows)
 
 print("Creating meta dataframe...")
 # Create a new DataFrame with one row for each unique ID and a 'Rows' column
