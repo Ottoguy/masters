@@ -1,5 +1,7 @@
 from load_dans import all_data as data
 import pandas as pd
+import os
+from datetime import datetime
 
 print("Merging data...")
 merged_data = []
@@ -12,6 +14,8 @@ columns = ['Filename', 'Timestamp', 'Status', 'Phase1Effect', 'Phase2Effect', 'P
 
 print("Creating dataframe...")
 df = pd.DataFrame(merged_data, columns=columns)
+# Drop rows with ID 0
+df = df[df['ID'] != 0]
 # Sort by ID and Timestamp
 df = df.sort_values(by=['ID', 'Timestamp'])
 # Reset index
@@ -25,6 +29,10 @@ df = df.reset_index(drop=True)
 print("Creating meta dataframe...")
 # Create a new DataFrame with one row for each unique ID and a 'Rows' column
 meta_df = df.groupby('ID').size().reset_index(name='Rows')
+
+# Drop the first row in meta_df
+meta_df = meta_df.iloc[1:]
+
 
 # Add new columns for 'Charging' and 'Connected'
 charging_counts = df[df['ChargingStatus'] == 'Charging'].groupby(
@@ -89,9 +97,43 @@ meta_df['kWh'] = meta_df['kWh'].fillna(0)
 meta_df['kWh'] = meta_df['kWh'].astype(float)
 
 # Rename the 'kWh' column to 'kWh Charged'
-meta_df.rename(columns={'kWh': 'kWh Charged'}, inplace=True)
+meta_df.rename(columns={'kWh': 'kWh_Charged'}, inplace=True)
 
-# Sort meta_df by 'kWh Charged' in descending order
-meta_df = meta_df.sort_values(by='kWh Charged', ascending=False)
+# Round 'kWh_Charged' to 3 decimals
+meta_df['kWh_Charged'] = meta_df['kWh_Charged'].round(3)
+
+# Add new column 'Current Type' based on conditions in df
+df['Current Type'] = '3-Phase'
+df.loc[(df['Phase1Effect'] != 0) | (
+    df['Phase2Effect'] != 0), 'Current Type'] = '2-Phase'
+df.loc[df['Phase1Effect'] != 0, 'Current Type'] = '1-Phase'
+df.loc[df['Phase2Effect'] != 0, 'Current Type'] = '1-Phase'
+df.loc[df['Phase3Effect'] != 0, 'Current Type'] = '1-Phase'
+
+# Add 'Current Type' column to meta_df
+current_type_column = df.groupby(
+    'ID')['Current Type'].first().reset_index(name='Current Type')
+meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
+meta_df['Current Type'] = meta_df['Current Type'].fillna('3-Phase')
 
 print(meta_df)
+# Create a folder named "prints" if it doesn't exist
+output_folder_parent = "prints"
+if not os.path.exists(output_folder_parent):
+    os.makedirs(output_folder_parent)
+
+# Create a folder named "meta_df" inside "prints" if it doesn't exist
+output_folder = os.path.join(output_folder_parent, "meta_df")
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# Get the current date and time
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+# Create the file name
+output_file = f"{output_folder}/meta_df_{current_datetime}.csv"
+
+# Print meta_df to a CSV file
+meta_df.to_csv(output_file, index=False)
+
+print(f"meta_df exported to: {output_file}")
