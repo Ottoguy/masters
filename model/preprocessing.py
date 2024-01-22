@@ -97,10 +97,10 @@ meta_df['kWh'] = meta_df['kWh'].fillna(0)
 meta_df['kWh'] = meta_df['kWh'].astype(float)
 
 # Rename the 'kWh' column to 'kWh Charged'
-meta_df.rename(columns={'kWh': 'kWh_Charged'}, inplace=True)
+meta_df.rename(columns={'kWh': 'Energy_Uptake'}, inplace=True)
 
 # Round 'kWh_Charged' to 3 decimals
-meta_df['kWh_Charged'] = meta_df['kWh_Charged'].round(3)
+meta_df['Energy_Uptake'] = meta_df['Energy_Uptake'].round(3)
 
 # Add new column 'Current Type' based on conditions in df
 df['Current Type'] = '3-Phase'
@@ -114,7 +114,7 @@ df.loc[df['Phase3Effect'] != 0, 'Current Type'] = '1-Phase'
 current_type_column = df.groupby(
     'ID')['Current Type'].first().reset_index(name='Current Type')
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
-meta_df['Current Type'] = meta_df['Current Type'].fillna('3-Phase')
+meta_df['Current Type'] = meta_df['Current Type'].fillna('Unknown')
 
 print(meta_df)
 # Create a folder named "prints" if it doesn't exist
