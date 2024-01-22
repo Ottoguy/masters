@@ -36,10 +36,6 @@ connected_counts = df[df['ChargingStatus'] == 'Connected'].groupby(
 meta_df = pd.merge(meta_df, charging_counts, on='ID', how='left')
 meta_df = pd.merge(meta_df, connected_counts, on='ID', how='left')
 
-# Fill NaN values with 0
-meta_df[['ChargingCount', 'ConnectedCount']] = meta_df[[
-    'ChargingCount', 'ConnectedCount']].fillna(0).astype(int)
-
 # Add new column 'FullyCharged', indicating whether or not the car was (presumably) fully charged when disconnected
 last_status = df.groupby(
     'ID')['ChargingStatus'].last().reset_index(name='LastStatus')
@@ -56,5 +52,15 @@ last_timestamps = df.groupby('ID')['Timestamp'].last(
 # Merge the new columns into meta_df
 meta_df = pd.merge(meta_df, first_timestamps, on='ID', how='left')
 meta_df = pd.merge(meta_df, last_timestamps, on='ID', how='left')
+
+# Add new column 'FilenameSubstring'
+filename_substrings = df.groupby('ID')['Filename'].first(
+).str[11:-4].reset_index(name='ChargingPoint')
+
+# Merge the new column into meta_df
+meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
+
+# Fill NaN values with 0
+meta_df = meta_df.fillna(0)
 
 print(meta_df)
