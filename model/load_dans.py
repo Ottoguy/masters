@@ -31,7 +31,7 @@ for csv_file in csv_files:
 
         # Check and fill missing values with "None"
         for row in file_data_with_filename:
-            while len(row) < 13:
+            while len(row) < 12:
                 row.append(None)
 
         # Group data by filename in the dictionary
