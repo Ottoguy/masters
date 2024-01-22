@@ -36,6 +36,13 @@ connected_counts = df[df['ChargingStatus'] == 'Connected'].groupby(
 meta_df = pd.merge(meta_df, charging_counts, on='ID', how='left')
 meta_df = pd.merge(meta_df, connected_counts, on='ID', how='left')
 
+# Fill NaN values with 0
+meta_df = meta_df.fillna(0)
+
+# Convert 'ChargingCount' and 'ConnectedCount' to integers
+meta_df['ChargingCount'] = meta_df['ChargingCount'].astype(int)
+meta_df['ConnectedCount'] = meta_df['ConnectedCount'].astype(int)
+
 # Add new column 'FullyCharged', indicating whether or not the car was (presumably) fully charged when disconnected
 last_status = df.groupby(
     'ID')['ChargingStatus'].last().reset_index(name='LastStatus')
@@ -60,7 +67,31 @@ filename_substrings = df.groupby('ID')['Filename'].first(
 # Merge the new column into meta_df
 meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
 
+# Convert 'Phase1Effect', 'Phase2Effect', 'Phase3Effect' to numeric
+df[['Phase1Effect', 'Phase2Effect', 'Phase3Effect']] = df[['Phase1Effect',
+                                                           'Phase2Effect', 'Phase3Effect']].apply(pd.to_numeric, errors='coerce')
+
+# Calculate accumulated kWh for each row in df
+# Assuming each row of effects lasts 30 seconds
+df['Accumulated_kWh'] = (df['Phase1Effect'] +
+                         df['Phase2Effect'] + df['Phase3Effect']) * 30 / 3600
+
+# Calculate total accumulated kWh for each ID
+total_kWh = df.groupby('ID')['Accumulated_kWh'].sum().reset_index(name='kWh')
+
+# Merge the new column into meta_df
+meta_df = pd.merge(meta_df, total_kWh, on='ID', how='left')
+
 # Fill NaN values with 0
-meta_df = meta_df.fillna(0)
+meta_df['kWh'] = meta_df['kWh'].fillna(0)
+
+# Convert 'kWh' to float
+meta_df['kWh'] = meta_df['kWh'].astype(float)
+
+# Rename the 'kWh' column to 'kWh Charged'
+meta_df.rename(columns={'kWh': 'kWh Charged'}, inplace=True)
+
+# Sort meta_df by 'kWh Charged' in descending order
+meta_df = meta_df.sort_values(by='kWh Charged', ascending=False)
 
 print(meta_df)
