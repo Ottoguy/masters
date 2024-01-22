@@ -17,11 +17,27 @@ df = df.sort_values(by=['ID'])
 # Reset index
 df = df.reset_index(drop=True)
 
-# Specify the desired ID
-desired_id = "0"  # Replace this with the ID you want
-
 # Filter DataFrame based on the desired ID
-desired_rows = df[df['ID'] == desired_id]
+# desired_id = "0"
+# desired_rows = df[df['ID'] == desired_id]
+# print(desired_rows)
 
-# Print the filtered DataFrame
-print(desired_rows)
+print("Creating meta dataframe...")
+# Create a new DataFrame with one row for each unique ID and a 'Rows' column
+meta_df = df.groupby('ID').size().reset_index(name='Rows')
+
+# Add new columns for 'Charging' and 'Connected'
+charging_counts = df[df['ChargingStatus'] == 'Charging'].groupby(
+    'ID').size().reset_index(name='ChargingCount')
+connected_counts = df[df['ChargingStatus'] == 'Connected'].groupby(
+    'ID').size().reset_index(name='ConnectedCount')
+
+# Merge the new columns into meta_df
+meta_df = pd.merge(meta_df, charging_counts, on='ID', how='left')
+meta_df = pd.merge(meta_df, connected_counts, on='ID', how='left')
+
+# Fill NaN values with 0
+meta_df[['ChargingCount', 'ConnectedCount']] = meta_df[[
+    'ChargingCount', 'ConnectedCount']].fillna(0).astype(int)
+
+print(meta_df)
