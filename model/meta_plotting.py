@@ -23,42 +23,75 @@ latest_file = file_list[0]
 meta_df = pd.read_csv(latest_file)
 
 # Set the threshold (half-minutes) for disregarding EVs
-#5760 is 48hrs
+# 5760 is 48hrs
 threshold = 5760  # Replace with your desired threshold
 
 # Filter out EVs with values over the threshold
 filtered_meta_df = meta_df[meta_df['Rows'] <= threshold]
-disregarded_count = len(meta_df) - len(filtered_meta_df)
 
 # Extract the 'Rows' and 'Type' columns from the filtered DataFrame
-connection_durations_1phase = filtered_meta_df[filtered_meta_df['Current_Type'] == '1-Phase']['Rows']
-connection_durations_3phase = filtered_meta_df[filtered_meta_df['Current_Type'] == '3-Phase']['Rows']
+connection_durations_1phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '1-Phase']['Rows']
+connection_durations_3phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '3-Phase']['Rows']
+
+# Filter out EVs with FullyCharged = False
+filtered_3phase_not_fully_charged = filtered_meta_df[(filtered_meta_df['Current_Type'] == '3-Phase') & (filtered_meta_df['FullyCharged'] == False)]
+filtered_1phase_not_fully_charged = filtered_meta_df[(filtered_meta_df['Current_Type'] == '1-Phase') & (filtered_meta_df['FullyCharged'] == False)]
+
+# Filter out EVs with FullyCharged = True
+filtered_3phase_fully_charged = filtered_meta_df[(filtered_meta_df['Current_Type'] == '3-Phase') & (filtered_meta_df['FullyCharged'] == True)]
+filtered_1phase_fully_charged = filtered_meta_df[(filtered_meta_df['Current_Type'] == '1-Phase') & (filtered_meta_df['FullyCharged'] == True)]
+
+disregarded_count = len(meta_df) - len(filtered_meta_df)
 
 # Convert durations to hours and minutes
-connection_durations_1phase_hours_minutes = connection_durations_1phase / 2 / 60
-connection_durations_3phase_hours_minutes = connection_durations_3phase / 2 / 60
+connection_durations_1phase_hours_minutes_all = connection_durations_1phase_all / 2 / 60
+connection_durations_3phase_hours_minutes_all = connection_durations_3phase_all / 2 / 60
+connection_durations_1phase_hours_minutes_not_fully_charged = filtered_1phase_not_fully_charged['Rows'] / 2 / 60
+connection_durations_3phase_hours_minutes_not_fully_charged = filtered_3phase_not_fully_charged['Rows'] / 2 / 60
+connection_durations_1phase_hours_minutes_fully_charged = filtered_1phase_fully_charged['Rows'] / 2 / 60
+connection_durations_3phase_hours_minutes_fully_charged = filtered_3phase_fully_charged['Rows'] / 2 / 60
 
 # Set the bins and range for both histograms in hours and minutes
 bins = 50
 range_vals_hours_minutes = (
-    min(connection_durations_1phase_hours_minutes.min(), connection_durations_3phase_hours_minutes.min()),
-    max(connection_durations_1phase_hours_minutes.max(), connection_durations_3phase_hours_minutes.max())
+    min(connection_durations_1phase_hours_minutes_all.min(), connection_durations_3phase_hours_minutes_all.min()),
+    max(connection_durations_1phase_hours_minutes_all.max(), connection_durations_3phase_hours_minutes_all.max())
 )
 
-# Plot the distribution with the bottom of bars as green for 1-Phase and blue for 3-Phase
-plt.hist(connection_durations_3phase_hours_minutes, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=1, label='3-Phase')
-plt.hist(connection_durations_1phase_hours_minutes, bins=bins, range=range_vals_hours_minutes, color='green', bottom=0, edgecolor='black', alpha=1, label='1-Phase')
+# Create subplots
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-plt.xlabel('Connection Duration (Hours)')  # Update x-axis label
-plt.ylabel('Number of EVs')
-plt.title('Distribution of EV Connection Durations')
+# Plot the distribution with the bottom of bars as red for 3-Phase (Not Fully Charged) and blue for 3-Phase (Fully Charged)
+counts_3phase_not_fully_charged, bins_3phase_not_fully_charged, _ = axes[0, 0].hist(connection_durations_3phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='red', edgecolor='black', alpha=0.7, label='3-Phase (Not Fully Charged)')
+axes[0, 0].set_title('3-Phase (Not Fully Charged)')
+
+counts_3phase_fully_charged, bins_3phase_fully_charged, _ = axes[0, 1].hist(connection_durations_3phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=0.7, label='3-Phase (Fully Charged)')
+axes[0, 1].set_title('3-Phase (Fully Charged)')
+
+# Plot the distribution with the bottom of bars as orange for 1-Phase (Not Fully Charged) and green for 1-Phase (Fully Charged)
+counts_1phase_not_fully_charged, bins_1phase_not_fully_charged, _ = axes[1, 0].hist(connection_durations_1phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='orange', edgecolor='black', alpha=0.7, label='1-Phase (Not Fully Charged)')
+axes[1, 0].set_title('1-Phase (Not Fully Charged)')
+
+counts_1phase_fully_charged, bins_1phase_fully_charged, _ = axes[1, 1].hist(connection_durations_1phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='green', edgecolor='black', alpha=0.7, label='1-Phase (Fully Charged)')
+axes[1, 1].set_title('1-Phase (Fully Charged)')
+
+# Find the maximum count among all histograms
+max_count = max([counts_3phase_not_fully_charged.max(), counts_3phase_fully_charged.max(), counts_1phase_not_fully_charged.max(), counts_1phase_fully_charged.max()])
+
+# Set common y-axis range for all subplots
+for ax in axes.flat:
+    ax.set_ylim(0, max_count + 5)
+
+# Set common labels
+for ax in axes.flat:
+    ax.set(xlabel='Connection Duration (Hours)', ylabel='Number of EVs')
+    ax.grid(True, which='both', linestyle=':', linewidth=0.3, color='gray', alpha=0.5)
+    ax.minorticks_on()
 
 # Add legend for disregarded EVs and types
 legend_text = f'Omitted EVs (>{threshold/120} hours): {disregarded_count}'
-plt.legend([legend_text, '3-Phase', '1-Phase'])
+fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1, fancybox=True, shadow=True)
 
-# Adjust the grid with a more subtle appearance
-plt.grid(True, which='both', linestyle=':', linewidth=0.3, color='gray', alpha=0.5)
-plt.minorticks_on()
-
+# Adjust layout
+plt.tight_layout()
 plt.show()
