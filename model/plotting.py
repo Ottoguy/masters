@@ -1,20 +1,35 @@
-from preprocessing import df as df
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import os
 from matplotlib.lines import Line2D
-from os import path
 from datetime import datetime
-
-# Choose which data to use
-data = df
-# Extract relevant data for plotting
-timestamps = []
-status = []  # Added for Online/Offline status
+import pandas as pd
+import glob
 
 # Specify the directory where your files are located
-results_dir = 'prints/df/'
+folder_path = 'prints/df/'
+
+# Create a pattern to match files in the specified format
+file_pattern = 'df_*'
+
+# Get a list of all files matching the pattern
+file_list = glob.glob(os.path.join(folder_path, file_pattern))
+
+# Sort the files based on modification time (latest first)
+file_list.sort(key=os.path.getmtime, reverse=True)
+
+# Take the latest file
+latest_file = file_list[0]
+
+# Load your df from the latest file
+df = pd.read_csv(latest_file)
+
+print(df.iloc[0])
+
+# Extract relevant df for plotting
+timestamps = []
+status = []  # Added for Online/Offline status
 
 phase1_effect = []
 phase2_effect = []
@@ -23,9 +38,9 @@ phase1_voltage = []
 phase2_voltage = []
 phase3_voltage = []
 
-print(data)
+print(df)
 
-for row in data:
+for row in df:
     # Extract time without the first 11 and last 7 characters (Only the time left)
     time_str = row[1][11:-7]
     timestamps.append(time_str)
@@ -143,7 +158,7 @@ for k, timestamp in enumerate(timestamps[:-1]):
                 facecolor=bar_color, alpha=1)
 
 # Set the title of the graph
-plt.suptitle(data[0][0])
+plt.suptitle(df[0][0])
 
 # Set the title for ax3
 ax3.set_title('Connectivity')
@@ -161,11 +176,11 @@ plt.annotate(f"Created: {current_datetime}", xy=(10, 10),
 # Add small legend on the side of ax3
 fig.legend(handles=legend_handles, loc='lower right')
 
-for i in enumerate(data):
+for i in enumerate(df):
     # Save the figure
-    print("Saving figure " + str(i) + " of " + str(len(data)) +
-        " as " + data[0][0] + ".png", end='\r')
-    plt.savefig(results_dir + data[0][0] +
+    print("Saving figure " + str(i) + " of " + str(len(df)) +
+        " as " + df[0][0] + ".png", end='\r')
+    plt.savefig(results_dir + df[0][0] +
             ".png")
     plt.close()
 
