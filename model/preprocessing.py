@@ -114,15 +114,6 @@ current_type_column = df.groupby(
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
 meta_df['Current_Type'] = meta_df['Current_Type'].fillna('Unknown')
 
-# Calculate 'Connection_Duration' for each row in meta_df based on 'Rows'
-meta_df['Connection_Duration'] = pd.to_timedelta(meta_df['Rows'] * 30, unit='s')
-
-# Convert 'Connection_Duration' to hours and minutes format (hh:mm)
-meta_df['Connection_Duration'] = meta_df['Connection_Duration'].apply(lambda x: "{:02}:{:02}".format(int(x.seconds // 3600), int((x.seconds // 60) % 60)))
-
-# Display the result
-print(meta_df)
-
 print(meta_df)
 # Create a folder named "prints" if it doesn't exist
 output_folder_parent = "prints"
