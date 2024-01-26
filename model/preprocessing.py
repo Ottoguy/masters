@@ -102,19 +102,17 @@ meta_df.rename(columns={'kWh': 'Energy_Uptake'}, inplace=True)
 # Round 'kWh_Charged' to 3 decimals
 meta_df['Energy_Uptake'] = meta_df['Energy_Uptake'].round(3)
 
-# Add new column 'Current Type' based on conditions in df
-df['Current Type'] = '3-Phase'
-df.loc[(df['Phase1Effect'] != 0) | (
-    df['Phase2Effect'] != 0), 'Current Type'] = '2-Phase'
-df.loc[df['Phase1Effect'] != 0, 'Current Type'] = '1-Phase'
-df.loc[df['Phase2Effect'] != 0, 'Current Type'] = '1-Phase'
-df.loc[df['Phase3Effect'] != 0, 'Current Type'] = '1-Phase'
+# Add new column 'Current_Type' based on conditions in df
+df['Current_Type'] = '3-Phase'
+df.loc[df['Phase1Effect'] != 0, 'Current_Type'] = '1-Phase'
+df.loc[df['Phase2Effect'] != 0, 'Current_Type'] = '1-Phase'
+df.loc[df['Phase3Effect'] != 0, 'Current_Type'] = '1-Phase'
 
-# Add 'Current Type' column to meta_df
+# Add 'Current_Type' column to meta_df
 current_type_column = df.groupby(
-    'ID')['Current Type'].first().reset_index(name='Current Type')
+    'ID')['Current_Type'].first().reset_index(name='Current_Type')
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
-meta_df['Current Type'] = meta_df['Current Type'].fillna('Unknown')
+meta_df['Current_Type'] = meta_df['Current_Type'].fillna('Unknown')
 
 print(meta_df)
 # Create a folder named "prints" if it doesn't exist
