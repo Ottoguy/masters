@@ -138,3 +138,19 @@ output_file = f"{output_folder}/meta_df_{current_datetime}.csv"
 meta_df.to_csv(output_file, index=False)
 
 print(f"meta_df exported to: {output_file}")
+
+# Create a folder named "df" inside "prints" if it doesn't exist
+output_folder = os.path.join(output_folder_parent, "df")
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# Get the current date and time
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+# Create the file name
+output_file = f"{output_folder}/df_{current_datetime}.csv"
+
+# Print meta_df to a CSV file
+df.to_csv(output_file, index=False)
+
+print(f"df exported to: {output_file}")
