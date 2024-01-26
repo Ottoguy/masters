@@ -24,8 +24,7 @@ latest_file = file_list[0]
 
 # Load your df from the latest file
 df = pd.read_csv(latest_file)
-
-print(df.iloc[0])
+df = df.iloc[0]
 
 # Extract relevant df for plotting
 timestamps = []
