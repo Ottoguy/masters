@@ -114,6 +114,9 @@ current_type_column = df.groupby(
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
 meta_df['Current_Type'] = meta_df['Current_Type'].fillna('Unknown')
 
+#SORTING
+#meta_df = meta_df.sort_values(by=['FullyCharged', 'Rows'], ascending=[False, False])
+
 print(meta_df)
 # Create a folder named "prints" if it doesn't exist
 output_folder_parent = "prints"

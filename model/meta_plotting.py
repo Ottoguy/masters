@@ -24,7 +24,8 @@ meta_df = pd.read_csv(latest_file)
 
 # Set the threshold (half-minutes) for disregarding EVs
 # 5760 is 48hrs
-threshold = 5760  # Replace with your desired threshold
+# 8640 is 72hrs
+threshold = 8640  # Replace with your desired threshold
 
 # Filter out EVs with values over the threshold
 filtered_meta_df = meta_df[meta_df['Rows'] <= threshold]
