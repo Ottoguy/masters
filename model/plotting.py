@@ -9,6 +9,7 @@ import glob
 
 # Specify the directory where your files are located
 folder_path = 'prints/df/'
+plot_path = 'plots/df/'
 
 # Create a pattern to match files in the specified format
 file_pattern = 'df_*'
@@ -24,7 +25,7 @@ latest_file = file_list[0]
 
 # Load your df from the latest file
 df = pd.read_csv(latest_file)
-df = df.iloc[0]
+#df = df.iloc[0]
 
 # Extract relevant df for plotting
 timestamps = []
@@ -37,55 +38,54 @@ phase1_voltage = []
 phase2_voltage = []
 phase3_voltage = []
 
-print(df)
-
-for row in df:
+# Iterate over timestamps and change color based on status
+total_iterations = len(df)
+for k, (index, row) in enumerate(df.iterrows()):
+    # Print the progress
+    print(f"Processing item {k + 1} of {total_iterations}", end='\r')
     # Extract time without the first 11 and last 7 characters (Only the time left)
-    time_str = row[1][11:-7]
+    time_str = row.iloc[1][11:-7]
     timestamps.append(time_str)
-    status.append(row[-3])
-
-    phase1_effect.append(float(row[3]))
-    phase2_effect.append(float(row[4]))
-    phase3_effect.append(float(row[5]))
-    phase1_voltage.append(float(row[6]))
-    phase2_voltage.append(float(row[7]))
-    phase3_voltage.append(float(row[8]))
     
-    upper1 = phase1_effect
-    upper2 = phase2_effect
-    upper3 = phase3_effect
-    lower1 = phase1_voltage
-    lower2 = phase2_voltage
-    lower3 = phase3_voltage
+    status.append(row.iloc[-3])
+    phase1_effect.append(float(row.iloc[3]))
+    phase2_effect.append(float(row.iloc[4]))
+    phase3_effect.append(float(row.iloc[5]))
+    phase1_voltage.append(float(row.iloc[6]))
+    phase2_voltage.append(float(row.iloc[7]))
+    phase3_voltage.append(float(row.iloc[8]))
 
+# Print a newline after the loop is done
+print()
+
+# Now you have lists containing the extracted information from the DataFrame
+# You can convert these lists back to a DataFrame if needed
+result_df = pd.DataFrame({
+    'Timestamp': timestamps,
+    'Status': status,
+    'Phase1_Effect': phase1_effect,
+    'Phase2_Effect': phase2_effect,
+    'Phase3_Effect': phase3_effect,
+    'Phase1_Voltage': phase1_voltage,
+    'Phase2_Voltage': phase2_voltage,
+    'Phase3_Voltage': phase3_voltage
+})
+    
 # Create subplots using gridspec
-fig = plt.figure(figsize=(10, 8))
-gs = gridspec.GridSpec(3, 1, height_ratios=[
-    8, 8, 1], hspace=0.4, wspace=0.0)
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8), gridspec_kw={'height_ratios': [8, 8, 1], 'hspace': 0.4, 'wspace': 0.0})
 
 # Plot the effects in the first subplot
-ax1 = plt.subplot(gs[0])
-ax1.plot(timestamps, upper1,
-            label="Phase 1 Effect (kW)", linestyle='--')
-ax1.plot(timestamps, upper2,
-            label="Phase 2 Effect (kW)", linestyle='-.')
-ax1.plot(timestamps, upper3,
-            label="Phase 3 Effect (kW)", linestyle=':')
-
+ax1.plot(result_df['Timestamp'], result_df['Phase1_Effect'], label="Phase 1 Effect (kW)", linestyle='--')
+ax1.plot(result_df['Timestamp'], result_df['Phase2_Effect'], label="Phase 2 Effect (kW)", linestyle='-.')
+ax1.plot(result_df['Timestamp'], result_df['Phase3_Effect'], label="Phase 3 Effect (kW)", linestyle=':')
 ax1.set_ylabel('Effect Values')
 ax1.legend()
 ax1.margins(x=0)
 
 # Plot the voltages in the second subplot
-ax2 = plt.subplot(gs[1], sharex=ax1)
-ax2.plot(timestamps, lower1,
-            label="Phase 1 Voltage (V)", linestyle='--')
-ax2.plot(timestamps, lower2,
-            label="Phase 2 Voltage (V)", linestyle='-.')
-ax2.plot(timestamps, lower3,
-            label="Phase 3 Voltage (V)", linestyle=':')
-
+ax2.plot(result_df['Timestamp'], result_df['Phase1_Voltage'], label="Phase 1 Voltage (V)", linestyle='--')
+ax2.plot(result_df['Timestamp'], result_df['Phase2_Voltage'], label="Phase 2 Voltage (V)", linestyle='-.')
+ax2.plot(result_df['Timestamp'], result_df['Phase3_Voltage'], label="Phase 3 Voltage (V)", linestyle=':')
 ax2.set_ylabel('Voltage Values')
 ax2.legend()
 ax2.margins(x=0)
@@ -126,38 +126,34 @@ hasColourLegend = [False, False, False, False]
 
 # Iterate over timestamps and change color based on status
 legend_handles = []  # For custom legend
-for k, timestamp in enumerate(timestamps[:-1]):
-    if status[k] == 'Connected':
+for k, timestamp in enumerate(result_df['Timestamp'][:-1]):
+    if result_df['Status'][k] == 'Connected':
         bar_color = 'blue'
         if not hasColourLegend[0]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Connected'))
+            legend_handles.append(Line2D([0], [0], marker='s', color=bar_color, label='Connected'))
         hasColourLegend[0] = True
-    elif status[k] == 'Charging':
+    elif result_df['Status'][k] == 'Charging':
         bar_color = 'green'
         if not hasColourLegend[1]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Charging'))
+            legend_handles.append(Line2D([0], [0], marker='s', color=bar_color, label='Charging'))
         hasColourLegend[1] = True
-    elif status[k] == 'None':
+    elif result_df['Status'][k] == 'None':
         bar_color = 'red'
         if not hasColourLegend[2]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='None'))
+            legend_handles.append(Line2D([0], [0], marker='s', color=bar_color, label='None'))
         hasColourLegend[2] = True
     else:
         bar_color = 'orange'
         if not hasColourLegend[3]:
-            legend_handles.append(
-                Line2D([0], [0], marker='s', color=bar_color, label='Offline'))
+            legend_handles.append(Line2D([0], [0], marker='s', color=bar_color, label='Offline'))
         hasColourLegend[3] = True
 
     # Add a horizontal bar
-    ax3.axhspan(-0.5, 0.5, xmin=(k / len(timestamps)), xmax=((k + 1) / len(timestamps)),
+    ax3.axhspan(-0.5, 0.5, xmin=(k / len(result_df['Timestamp'])), xmax=((k + 1) / len(result_df['Timestamp'])),
                 facecolor=bar_color, alpha=1)
 
 # Set the title of the graph
-plt.suptitle(df[0][0])
+plt.suptitle(result_df['Timestamp'].iloc[0])
 
 # Set the title for ax3
 ax3.set_title('Connectivity')
@@ -179,10 +175,10 @@ for i in enumerate(df):
     # Save the figure
     print("Saving figure " + str(i) + " of " + str(len(df)) +
         " as " + df[0][0] + ".png", end='\r')
-    plt.savefig(results_dir + df[0][0] +
+    plt.savefig(plot_path + df[0][0] +
             ".png")
     plt.close()
 
-print("All figures saved to " + results_dir, end='\n')
-# Show the plot
+# Save the figure
+plt.savefig(plot_path + result_df['Timestamp'].iloc[0] + ".png")
 plt.show()
