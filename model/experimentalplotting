@@ -67,7 +67,7 @@ def create_plot(id_value, data):
             lower1 = phase1_voltage
             lower2 = phase2_voltage
             lower3 = phase3_voltage
-            status.append(row[-3])
+            status.append(row[-5])
         print("Creating figure " + plot_name, end='\r')
 
         # Create subplots using gridspec
@@ -158,9 +158,6 @@ def create_plot(id_value, data):
             ax3.axhspan(-0.5, 0.5, xmin=(k / len(timestamps)), xmax=((k + 1) / len(timestamps)),
                         facecolor=bar_color, alpha=1)
 
-        # Add a horizontal bar
-        ax3.axhspan(-0.5, 0.5, xmin=0, xmax=1, facecolor='blue', alpha=1)
-
         # Set the title of the graph
         plt.suptitle(plot_name)
 
@@ -170,6 +167,9 @@ def create_plot(id_value, data):
         # Hide y-axis tick labels on ax3
         ax3.set_yticklabels([])
         ax3.set_xlabel('Time' + timeStep)
+
+        # Add small legend on the side of ax3
+        fig.legend(handles=legend_handles, loc='lower right')
 
         # Get the current date and time
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
