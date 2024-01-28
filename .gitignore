@@ -4,3 +4,4 @@ model/Figures
 model/Preprocessing_figures
 prints/meta_df
 prints/df
+plots/df
