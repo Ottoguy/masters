@@ -33,9 +33,8 @@ with open(latest_csv_file, 'r') as csv_file:
 data = data[1:]  # Remove the header row
 
 def create_plot(id_value, data):
-    # Create a unique plot name based on ID and creation time
-    plot_name = f"{id_value}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
-    timestamps = []
+    # Create a unique plot name based on ID
+    plot_name = f"{id_value}.png"
 
     if path.exists(results_dir + "/" + plot_name):
         print("File " + plot_name + ".png already exists, skipping...", end='\r')
@@ -90,20 +89,23 @@ def create_plot(id_value, data):
 
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
-        if (len(timestamps) > 2000):
-            timeStep = " (240 step, timestamplength: " + str(len(timestamps)"
+        if (len(timestamps) > 5000):
+            timeStep = " (480 step, timestamplength: " + str(len(timestamps))
+            plt.xticks(timestamps[::480])
+        elif (len(timestamps) > 2000):
+            timeStep = " (240 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::240])
         elif (len(timestamps) > 1000):
-            timeStep = " (120 step, timestamplength: " + str(len(timestamps)"
+            timeStep = " (120 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::120])
         elif (len(timestamps) > 500):
-            timeStep = " (60 step, timestamplength: " + str(len(timestamps)"
+            timeStep = " (60 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::60])
         elif (len(timestamps) > 250):
-            timeStep = " (40 step, timestamplength: " + str(len(timestamps)"
+            timeStep = " (40 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::40])
         elif (len(timestamps) > 100):
-            timeStep = " (20 step, timestamplength: " + str(len(timestamps)"
+            timeStep = " (20 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::20])
         elif (len(timestamps) > 50):
             timeStep = " (10 step), timestamplength: " + str(len(timestamps))
