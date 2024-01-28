@@ -59,8 +59,6 @@ def create_plot(id_value, data):
             phase1_voltage.append(float(row[6]))
             phase2_voltage.append(float(row[7]))
             phase3_voltage.append(float(row[8]))
-            label_upper = "Effect (kW)"
-            label_lower = "Voltage (V)"
             upper1 = phase1_effect
             upper2 = phase2_effect
             upper3 = phase3_effect
@@ -76,19 +74,19 @@ def create_plot(id_value, data):
 
         # Plot the effects in the first subplot
         ax1 = plt.subplot(gs[0])
-        ax1.plot(timestamps, upper1, label=label_upper + " 1", linestyle='--')
-        ax1.plot(timestamps, upper2, label=label_upper + " 2", linestyle='-.')
-        ax1.plot(timestamps, upper3, label=label_upper + " 3", linestyle=':')
-        ax1.set_ylabel('Effect Values')
+        ax1.plot(timestamps, upper1, label="Phase 1", linestyle='--')
+        ax1.plot(timestamps, upper2, label="Phase 2", linestyle='-.')
+        ax1.plot(timestamps, upper3, label="Phase 3", linestyle=':')
+        ax1.set_ylabel('Effect (kW)')
         ax1.legend()
         ax1.margins(x=0)
 
         # Plot the voltages in the second subplot
         ax2 = plt.subplot(gs[1], sharex=ax1)
-        ax2.plot(timestamps, lower1, label=label_lower + " 1", linestyle='--')
-        ax2.plot(timestamps, lower2, label=label_lower + " 2", linestyle='-.')
-        ax2.plot(timestamps, lower3, label=label_lower + " 3", linestyle=':')
-        ax2.set_ylabel('Voltage Values')
+        ax2.plot(timestamps, lower1, label="Phase 1", linestyle='--')
+        ax2.plot(timestamps, lower2, label="Phase 2", linestyle='-.')
+        ax2.plot(timestamps, lower3, label="Phase 3", linestyle=':')
+        ax2.set_ylabel('Voltage (V)')
         ax2.legend()
         ax2.margins(x=0)
 
