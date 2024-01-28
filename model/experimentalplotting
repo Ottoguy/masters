@@ -59,12 +59,6 @@ def create_plot(id_value, data):
             phase1_voltage.append(float(row[6]))
             phase2_voltage.append(float(row[7]))
             phase3_voltage.append(float(row[8]))
-            upper1 = phase1_effect
-            upper2 = phase2_effect
-            upper3 = phase3_effect
-            lower1 = phase1_voltage
-            lower2 = phase2_voltage
-            lower3 = phase3_voltage
             status.append(row[-5])
         print("Creating figure " + plot_name, end='\r')
 
@@ -74,18 +68,18 @@ def create_plot(id_value, data):
 
         # Plot the effects in the first subplot
         ax1 = plt.subplot(gs[0])
-        ax1.plot(timestamps, upper1, label="Phase 1", linestyle='--')
-        ax1.plot(timestamps, upper2, label="Phase 2", linestyle='-.')
-        ax1.plot(timestamps, upper3, label="Phase 3", linestyle=':')
+        ax1.plot(timestamps, phase1_effect, label="Phase 1", linestyle='--')
+        ax1.plot(timestamps, phase2_effect, label="Phase 2", linestyle='-.')
+        ax1.plot(timestamps, phase3_effect, label="Phase 3", linestyle=':')
         ax1.set_ylabel('Effect (kW)')
         ax1.legend()
         ax1.margins(x=0)
 
         # Plot the voltages in the second subplot
         ax2 = plt.subplot(gs[1], sharex=ax1)
-        ax2.plot(timestamps, lower1, label="Phase 1", linestyle='--')
-        ax2.plot(timestamps, lower2, label="Phase 2", linestyle='-.')
-        ax2.plot(timestamps, lower3, label="Phase 3", linestyle=':')
+        ax2.plot(timestamps, phase1_voltage, label="Phase 1", linestyle='--')
+        ax2.plot(timestamps, phase2_voltage, label="Phase 2", linestyle='-.')
+        ax2.plot(timestamps, phase3_voltage, label="Phase 3", linestyle=':')
         ax2.set_ylabel('Voltage (V)')
         ax2.legend()
         ax2.margins(x=0)
@@ -97,25 +91,25 @@ def create_plot(id_value, data):
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
         if (len(timestamps) > 2000):
-            timeStep = " (240 step)"
+            timeStep = " (240 step, timestamplength: " + str(len(timestamps)"
             plt.xticks(timestamps[::240])
         elif (len(timestamps) > 1000):
-            timeStep = " (120 step)"
+            timeStep = " (120 step, timestamplength: " + str(len(timestamps)"
             plt.xticks(timestamps[::120])
         elif (len(timestamps) > 500):
-            timeStep = " (60 step)"
+            timeStep = " (60 step, timestamplength: " + str(len(timestamps)"
             plt.xticks(timestamps[::60])
         elif (len(timestamps) > 250):
-            timeStep = " (40 step)"
+            timeStep = " (40 step, timestamplength: " + str(len(timestamps)"
             plt.xticks(timestamps[::40])
         elif (len(timestamps) > 100):
-            timeStep = " (20 step)"
+            timeStep = " (20 step, timestamplength: " + str(len(timestamps)"
             plt.xticks(timestamps[::20])
         elif (len(timestamps) > 50):
-            timeStep = " (10 step)"
+            timeStep = " (10 step), timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::10])
         else:
-            timeStep = " (5 step)"
+            timeStep = " (5 step), timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::5])
 
         # Create a separate subplot for the horizontal bar
