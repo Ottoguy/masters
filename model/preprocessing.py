@@ -3,6 +3,44 @@ import pandas as pd
 import os
 from datetime import datetime
 
+def export_csv_for_id(df, id_to_export, parent_folder="prints"):
+    # If the desired ID is "all", export all rows
+    if id_to_export.lower() == "all":
+        desired_rows = df.copy()
+        output_folder = os.path.join(parent_folder, "all")
+    # If the desired ID is "meta", export the meta_df
+    elif id_to_export.lower() == "meta":
+        desired_rows = meta_df.copy()
+        output_folder = os.path.join(parent_folder, "meta")
+    else:
+        # Filter DataFrame based on the desired ID
+        desired_rows = df[df['ID'] == id_to_export]
+        output_folder = os.path.join(parent_folder, str(id_to_export))
+
+    # Create a folder named "prints" if it doesn't exist
+    if not os.path.exists(parent_folder):
+        os.makedirs(parent_folder)
+
+    # Create a subfolder with the ID or "all" as its name
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Get the current date and time
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Create the file name
+    output_file = f"{output_folder}/{current_datetime}.csv"
+
+    # Print desired_rows to a CSV file
+    desired_rows.to_csv(output_file, index=False)
+
+    if id_to_export.lower() == "meta":
+        print(f"Meta exported to: {output_file}")
+    elif id_to_export.lower() == "all":
+        print(f"All rows exported to: {output_file}")
+    else:
+        print(f"Exported rows for ID {id_to_export} to: {output_file}")
+
 print("Merging data...")
 merged_data = []
 for i in enumerate(data):
@@ -14,6 +52,7 @@ columns = ['Filename', 'Timestamp', 'Status', 'Phase1Effect', 'Phase2Effect', 'P
 
 print("Creating dataframe...")
 df = pd.DataFrame(merged_data, columns=columns)
+
 # Drop rows with ID 0
 df = df[df['ID'] != 0]
 # Sort by ID and Timestamp
@@ -32,7 +71,6 @@ meta_df = df.groupby('ID').size().reset_index(name='Rows')
 
 # Drop the first row in meta_df
 meta_df = meta_df.iloc[1:]
-
 
 # Add new columns for 'Charging' and 'Connected'
 charging_counts = df[df['ChargingStatus'] == 'Charging'].groupby(
@@ -114,43 +152,6 @@ current_type_column = df.groupby(
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
 meta_df['Current_Type'] = meta_df['Current_Type'].fillna('Unknown')
 
-#SORTING
-#meta_df = meta_df.sort_values(by=['FullyCharged', 'Rows'], ascending=[False, False])
-
-print(meta_df)
-# Create a folder named "prints" if it doesn't exist
-output_folder_parent = "prints"
-if not os.path.exists(output_folder_parent):
-    os.makedirs(output_folder_parent)
-
-# Create a folder named "meta_df" inside "prints" if it doesn't exist
-output_folder = os.path.join(output_folder_parent, "meta_df")
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
-# Get the current date and time
-current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-# Create the file name
-output_file = f"{output_folder}/meta_df_{current_datetime}.csv"
-
-# Print meta_df to a CSV file
-meta_df.to_csv(output_file, index=False)
-
-print(f"meta_df exported to: {output_file}")
-
-# Create a folder named "df" inside "prints" if it doesn't exist
-output_folder = os.path.join(output_folder_parent, "df")
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
-# Get the current date and time
-current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-# Create the file name
-output_file = f"{output_folder}/df_{current_datetime}.csv"
-
-# Print meta_df to a CSV file
-df.to_csv(output_file, index=False)
-
-print(f"df exported to: {output_file}")
+# Example: Export CSV for a specific ID or all rows
+desired_id_to_export = "56533679"  # Or "all" for all rows, or "meta" for meta_df
+export_csv_for_id(df, desired_id_to_export)

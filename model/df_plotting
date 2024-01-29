@@ -12,7 +12,7 @@ from matplotlib.lines import Line2D
 preprocessing_type = "none"
 
 # Get the list of CSV files in the directory
-csv_files = glob.glob('prints/df/*.csv')
+csv_files = glob.glob('prints/all/*.csv')
 
 results_dir = "plots/df/"
 
@@ -96,7 +96,10 @@ def create_plot(id_value, data):
 
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
-        if (len(timestamps) > 5000):
+        if (len(timestamps) > 1000):
+            timeStep = " (960 step, timestamplength: " + str(len(timestamps))
+            plt.xticks(timestamps[::960])
+        elif (len(timestamps) > 5000):
             timeStep = " (480 step, timestamplength: " + str(len(timestamps))
             plt.xticks(timestamps[::480])
         elif (len(timestamps) > 2000):

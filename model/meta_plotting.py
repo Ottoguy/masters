@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Specify the directory where your files are located
-folder_path = 'prints/meta_df/'
+folder_path = 'prints/meta/'
 
 # Create a pattern to match files in the specified format
-file_pattern = 'meta_df_*'
+file_pattern = '*'
 
 # Get a list of all files matching the pattern
 file_list = glob.glob(os.path.join(folder_path, file_pattern))
@@ -101,8 +101,3 @@ if not os.path.exists(results_dir):
 print("Saving figure meta_df_plot", end='\r')
 plt.savefig(os.path.join(results_dir, 'meta_df_plot'))
 plt.close()
-
-
-# Adjust layout
-plt.tight_layout()
-plt.show()
