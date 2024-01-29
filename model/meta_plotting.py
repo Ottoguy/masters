@@ -93,6 +93,16 @@ for ax in axes.flat:
 legend_text = f'Omitted EVs (>{threshold/120} hours): {disregarded_count}'
 fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1, fancybox=True, shadow=True)
 
+results_dir = "plots/meta_df/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+# Save the figure
+print("Saving figure meta_df_plot", end='\r')
+plt.savefig(os.path.join(results_dir, 'meta_df_plot'))
+plt.close()
+
+
 # Adjust layout
 plt.tight_layout()
 plt.show()

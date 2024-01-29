@@ -46,4 +46,3 @@ all_data = list(data_by_filename.values())
 
 # Now 'all_data' contains one list for every filename, each containing lists of data
 print("CSV files loaded")
-# Ok du märker att vid denna utskrift byts bil efter ett par rader, känns bra att visualisera de 6 värdena för att påvisa det? Sen så ser du i slutet att värdena fastnar om den går offline, värt att ha i åtanke
