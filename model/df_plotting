@@ -37,7 +37,7 @@ def create_plot(id_value, data):
     plot_name = f"{id_value}.png"
 
     if path.exists(results_dir + "/" + plot_name):
-        print("File " + plot_name + ".png already exists, skipping...", end='\r')
+        print("File " + plot_name + "exists, skipping...", end='\r')
         return
     else:
         timestamps = []

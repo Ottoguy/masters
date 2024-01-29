@@ -152,6 +152,31 @@ current_type_column = df.groupby(
 meta_df = pd.merge(meta_df, current_type_column, on='ID', how='left')
 meta_df['Current_Type'] = meta_df['Current_Type'].fillna('Unknown')
 
+# List of holiday dates in the format 'YYYY-MM-DD'
+holiday_dates = ["2023-12-24", "2023-12-25", "2023-12-26", "2023-12-31", '2024-01-01', "2024-01-06", "2024-03-29", "2024-04-01", "2024-05-01", "2024-05-09", "2024-05-19", "2024-06-06", "2024-06-22", "2024-11-02", "2024-12-25", "2024-12-26"]
+
+# Function to determine if a date is a weekend or a holiday
+def is_weekend_or_holiday(timestamp):
+    date_format = "%Y-%m-%d-%H:%M:%S.%f" if '.' in timestamp else "%Y-%m-%d-%H:%M:%S"
+    date_obj = datetime.strptime(timestamp, date_format)
+    
+    # Check if the date is a weekend (Saturday or Sunday)
+    is_weekend = date_obj.weekday() >= 5
+    
+    # Check if the date is a holiday
+    date_str = date_obj.strftime("%Y-%m-%d")
+    is_holiday = date_str in holiday_dates
+
+    return is_weekend or is_holiday
+
+# Add new column 'Weekend' to meta_df
+meta_df['Weekend_Disconnected'] = meta_df['TimeDisconnected'].apply(is_weekend_or_holiday)
+meta_df['Weekend_Connected'] = meta_df['TimeConnected'].apply(is_weekend_or_holiday)
+
+# Convert 'Weekend' to boolean
+meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
+meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
+
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "56533679"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
