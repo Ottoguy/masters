@@ -47,7 +47,7 @@ for i in enumerate(data):
     for j in enumerate(i[1]):
         merged_data.append(j[1])
 
-columns = ['Filename', 'Timestamp', 'Status', 'Phase1Effect', 'Phase2Effect', 'Phase3Effect',
+columns = ['Filename', 'Timestamp', 'Status', 'Phase1Current', 'Phase2Current', 'Phase3Current',
            'Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage', 'Value7', 'ChargingStatus', 'ID', 'Value10']
 
 print("Creating dataframe...")
@@ -113,14 +113,14 @@ filename_substrings = df.groupby('ID')['Filename'].first(
 # Merge the new column into meta_df
 meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
 
-# Convert 'Phase1Effect', 'Phase2Effect', 'Phase3Effect' to numeric
-df[['Phase1Effect', 'Phase2Effect', 'Phase3Effect']] = df[['Phase1Effect',
-                                                           'Phase2Effect', 'Phase3Effect']].apply(pd.to_numeric, errors='coerce')
+# Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
+df[['Phase1Current', 'Phase2Current', 'Phase3Current']] = df[['Phase1Current',
+                                                           'Phase2Current', 'Phase3Current']].apply(pd.to_numeric, errors='coerce')
 
 # Calculate accumulated kWh for each row in df
-# Assuming each row of effects lasts 30 seconds
-df['Accumulated_kWh'] = (df['Phase1Effect'] +
-                         df['Phase2Effect'] + df['Phase3Effect']) * 30 / 3600
+# Assuming each row of current lasts 30 seconds
+df['Accumulated_kWh'] = (df['Phase1Current'] +
+                         df['Phase2Current'] + df['Phase3Current']) * 30 / 3600
 
 # Calculate total accumulated kWh for each ID
 total_kWh = df.groupby('ID')['Accumulated_kWh'].sum().reset_index(name='kWh')
@@ -142,9 +142,9 @@ meta_df['Energy_Uptake'] = meta_df['Energy_Uptake'].round(3)
 
 # Add new column 'Current_Type' based on conditions in df
 df['Current_Type'] = '3-Phase'
-df.loc[df['Phase1Effect'] != 0, 'Current_Type'] = '1-Phase'
-df.loc[df['Phase2Effect'] != 0, 'Current_Type'] = '1-Phase'
-df.loc[df['Phase3Effect'] != 0, 'Current_Type'] = '1-Phase'
+df.loc[df['Phase1Current'] != 0, 'Current_Type'] = '1-Phase'
+df.loc[df['Phase2Current'] != 0, 'Current_Type'] = '1-Phase'
+df.loc[df['Phase3Current'] != 0, 'Current_Type'] = '1-Phase'
 
 # Add 'Current_Type' column to meta_df
 current_type_column = df.groupby(
@@ -178,5 +178,5 @@ meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)

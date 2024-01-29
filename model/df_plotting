@@ -45,9 +45,9 @@ def create_plot(id_value, data):
         days = []
         day = []
         day_count = 0
-        phase1_effect = []
-        phase2_effect = []
-        phase3_effect = []
+        phase1_current = []
+        phase2_current = []
+        phase3_current = []
         phase1_voltage = []
         phase2_voltage = []
         phase3_voltage = []
@@ -59,9 +59,9 @@ def create_plot(id_value, data):
                 days.append(day)
                 day_count += 1
             timestamps.append(str(day_count) + "-" + str(timestamp))
-            phase1_effect.append(float(row[3]))
-            phase2_effect.append(float(row[4]))
-            phase3_effect.append(float(row[5]))
+            phase1_current.append(float(row[3]))
+            phase2_current.append(float(row[4]))
+            phase3_current.append(float(row[5]))
             phase1_voltage.append(float(row[6]))
             phase2_voltage.append(float(row[7]))
             phase3_voltage.append(float(row[8]))
@@ -72,12 +72,12 @@ def create_plot(id_value, data):
         fig = plt.figure(figsize=(10, 8))
         gs = gridspec.GridSpec(3, 1, height_ratios=[8, 8, 1], hspace=0.4, wspace=0.0)
 
-        # Plot the effects in the first subplot
+        # Plot the currents in the first subplot
         ax1 = plt.subplot(gs[0])
-        ax1.plot(timestamps, phase1_effect, label="Phase 1", linestyle='--')
-        ax1.plot(timestamps, phase2_effect, label="Phase 2", linestyle='-.')
-        ax1.plot(timestamps, phase3_effect, label="Phase 3", linestyle=':')
-        ax1.set_ylabel('Effect (kW)')
+        ax1.plot(timestamps, phase1_current, label="Phase 1", linestyle='--')
+        ax1.plot(timestamps, phase2_current, label="Phase 2", linestyle='-.')
+        ax1.plot(timestamps, phase3_current, label="Phase 3", linestyle=':')
+        ax1.set_ylabel('Current (A)')
         ax1.legend()
         ax1.margins(x=0)
 
@@ -181,7 +181,6 @@ def create_plot(id_value, data):
         plt.annotate(f"Created: {current_datetime}", xy=(10, 10), xycoords="figure pixels", fontsize=8, color='dimgray')
 
         # Save the figure
-        print("Saving figure " + plot_name, end='\r')
         plt.savefig(os.path.join(results_dir, plot_name))
         plt.close()
 
