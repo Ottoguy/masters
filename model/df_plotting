@@ -67,9 +67,6 @@ def create_plot(id_value, data):
             phase3_voltage.append(float(row[8]))
             status.append(row[-5])
         print("Creating figure " + plot_name, end='\r')
-        print(days)
-        print(day_count)
-        print(day)
 
         # Create subplots using gridspec
         fig = plt.figure(figsize=(10, 8))

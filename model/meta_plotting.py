@@ -3,6 +3,9 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from datetime import datetime
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -93,11 +96,14 @@ for ax in axes.flat:
 legend_text = f'Omitted EVs (>{threshold/120} hours): {disregarded_count}'
 fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1, fancybox=True, shadow=True)
 
+plt.annotate(f"Created: {current_datetime}", xy=(10, 10), xycoords="figure pixels", fontsize=8, color='dimgray')
+
+
 results_dir = "plots/meta_df/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-# Save the figure
-print("Saving figure meta_df_plot", end='\r')
-plt.savefig(os.path.join(results_dir, 'meta_df_plot'))
+# Save the figure with the current date and time in the filename
+print(f"Saving figure {current_datetime}", end='\r')
+plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
 plt.close()
