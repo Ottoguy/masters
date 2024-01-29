@@ -54,7 +54,7 @@ def create_plot(id_value, data):
         for row in data:
             # Extract relevant data for plotting
             timestamp = row[1][11:-7]  # Assuming the timestamp is in the second column
-            day = row[1][7:9]
+            day = row[1][8:9]
             if day not in days:
                 days.append(day)
                 day_count += 1
@@ -67,6 +67,9 @@ def create_plot(id_value, data):
             phase3_voltage.append(float(row[8]))
             status.append(row[-5])
         print("Creating figure " + plot_name, end='\r')
+        print(days)
+        print(day_count)
+        print(day)
 
         # Create subplots using gridspec
         fig = plt.figure(figsize=(10, 8))
@@ -97,25 +100,25 @@ def create_plot(id_value, data):
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
         if (len(timestamps) > 1000):
-            timeStep = " (960 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (960 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::960])
         elif (len(timestamps) > 5000):
-            timeStep = " (480 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (480 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::480])
         elif (len(timestamps) > 2000):
-            timeStep = " (240 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (240 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::240])
         elif (len(timestamps) > 800):
-            timeStep = " (120 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (120 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::120])
         elif (len(timestamps) > 400):
-            timeStep = " (60 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (60 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::60])
         elif (len(timestamps) > 250):
-            timeStep = " (40 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (40 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::40])
         elif (len(timestamps) > 100):
-            timeStep = " (20 step, timestamplength: " + str(len(timestamps))
+            timeStep = " (20 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::20])
         elif (len(timestamps) > 50):
             timeStep = " (10 step), timestamplength: " + str(len(timestamps))
