@@ -116,14 +116,19 @@ meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
 # Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
 df[['Phase1Current', 'Phase2Current', 'Phase3Current']] = df[['Phase1Current',
                                                            'Phase2Current', 'Phase3Current']].apply(pd.to_numeric, errors='coerce')
+df[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']] = df[['Phase1Voltage',
+                                                              'Phase2Voltage', 'Phase3Voltage']].apply(pd.to_numeric, errors='coerce')
 
 # Calculate accumulated kWh for each row in df
 # Assuming each row of current lasts 30 seconds
-df['Accumulated_kWh'] = (df['Phase1Current'] +
-                         df['Phase2Current'] + df['Phase3Current']) * 30 / 3600
+df['Effect'] = (df['Phase1Current']*df["Phase1Voltage"] +
+                         df['Phase2Current']*df["Phase2Voltage"] + df['Phase3Current']*df["Phase3Voltage"]) * 30 / 3600
 
 # Calculate total accumulated kWh for each ID
-total_kWh = df.groupby('ID')['Accumulated_kWh'].sum().reset_index(name='kWh')
+total_kWh = df.groupby('ID')['Effect'].sum().reset_index(name='kWh')
+
+# Divide the 'kWh' column by 1000 so it's in kWh instead of Wh
+total_kWh['kWh'] = total_kWh['kWh'] / 1000
 
 # Merge the new column into meta_df
 meta_df = pd.merge(meta_df, total_kWh, on='ID', how='left')
@@ -178,5 +183,5 @@ meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
