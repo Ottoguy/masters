@@ -89,12 +89,29 @@ meta_df = meta_df.fillna(0)
 meta_df['ChargingCount'] = meta_df['ChargingCount'].astype(int)
 meta_df['ConnectedCount'] = meta_df['ConnectedCount'].astype(int)
 
-# Add new column 'FullyCharged', indicating whether or not the car was (presumably) fully charged when disconnected
-last_status = df.groupby(
-    'ID')['ChargingStatus'].last().reset_index(name='LastStatus')
+# Assuming 'Rows' is a column in the 'meta_df' DataFrame
+df['Rows'] = meta_df['Rows']
+
+# Add new column 'FullyCharged', considering the last contiguous streak of "Charging" values
+last_status = df.groupby('ID')['ChargingStatus'].last().reset_index(name='LastStatus')
+
+# Get the last contiguous streak size for each ID
+last_streak_size = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='LastStreakSize')
+
+# Merge the last status and last streak size into the meta_df
 meta_df = pd.merge(meta_df, last_status, on='ID', how='left')
-meta_df['FullyCharged'] = meta_df['LastStatus'] == 'Connected'
-meta_df.drop(columns='LastStatus', inplace=True)
+meta_df = pd.merge(meta_df, last_streak_size, on='ID', how='left')
+
+# Calculate the percentage of the last contiguous streak size
+meta_df['StreakPercentage'] = meta_df['LastStreakSize'] / meta_df['Rows']
+
+# Determine if the car is fully charged based on the conditions
+meta_df['FullyCharged'] = (meta_df['LastStatus'] == 'Connected') | (meta_df['StreakPercentage'] < 0.1)
+
+# Drop unnecessary columns
+meta_df.drop(columns=['LastStatus', 'LastStreakSize', 'StreakPercentage'], inplace=True)
+# Assuming 'Rows' and 'Value10' are columns in the 'df' DataFrame
+df.drop(columns=['Rows', 'Value10'], inplace=True)
 
 # Add new columns for 'Time connected' and 'Time disconnected'
 first_timestamps = df.groupby(
@@ -183,5 +200,5 @@ meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "58315644"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
