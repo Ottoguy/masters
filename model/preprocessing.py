@@ -110,8 +110,6 @@ meta_df['FullyCharged'] = (meta_df['LastStatus'] == 'Connected') | (meta_df['Str
 
 # Drop unnecessary columns
 meta_df.drop(columns=['LastStatus', 'LastStreakSize', 'StreakPercentage'], inplace=True)
-# Assuming 'Rows' and 'Value10' are columns in the 'df' DataFrame
-df.drop(columns=['Rows', 'Value10'], inplace=True)
 
 # Add new columns for 'Time connected' and 'Time disconnected'
 first_timestamps = df.groupby(
@@ -199,6 +197,14 @@ meta_df['Weekend_Connected'] = meta_df['TimeConnected'].apply(is_weekend_or_holi
 meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
+# Drop in df
+df.drop(columns=['Rows', 'Value10', "Current_Type"], inplace=True)
+
+# Sort by ID and Timestamp
+meta_df = meta_df.sort_values(by=['FullyCharged', 'Rows'])
+# Reset index
+meta_df = meta_df.reset_index(drop=True)
+
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "58315644"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "57808884"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)

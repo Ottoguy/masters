@@ -96,7 +96,7 @@ def create_plot(id_value, data):
 
         # Only display as many timestamps as are needed for the plot
         timeStep = " Default"
-        if (len(timestamps) > 1000):
+        if (len(timestamps) > 10000):
             timeStep = " (960 step, # of data rows: " + str(len(timestamps)) + ")"
             plt.xticks(timestamps[::960])
         elif (len(timestamps) > 5000):
