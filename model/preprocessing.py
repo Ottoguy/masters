@@ -97,6 +97,7 @@ last_status = df.groupby('ID')['ChargingStatus'].last().reset_index(name='LastSt
 
 # Get the last contiguous streak size for each ID
 last_streak_size = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='LastStreakSize')
+print(last_streak_size)
 
 # Merge the last status and last streak size into the meta_df
 meta_df = pd.merge(meta_df, last_status, on='ID', how='left')
@@ -106,7 +107,7 @@ meta_df = pd.merge(meta_df, last_streak_size, on='ID', how='left')
 meta_df['StreakPercentage'] = meta_df['LastStreakSize'] / meta_df['Rows']
 
 # Determine if the car is fully charged based on the conditions
-meta_df['FullyCharged'] = (meta_df['LastStatus'] == 'Connected') | (meta_df['StreakPercentage'] < 0.1)
+meta_df['FullyCharged'] = (meta_df['LastStatus'] == 'Connected') | (meta_df['StreakPercentage'] < 0.2)
 
 # Drop unnecessary columns
 meta_df.drop(columns=['LastStatus', 'LastStreakSize', 'StreakPercentage'], inplace=True)
@@ -200,11 +201,11 @@ meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 # Drop in df
 df.drop(columns=['Rows', 'Value10', "Current_Type"], inplace=True)
 
-# Sort by ID and Timestamp
-meta_df = meta_df.sort_values(by=['FullyCharged', 'Rows'])
+# Sort by ID
+meta_df = meta_df.sort_values(by=['ID'])
 # Reset index
 meta_df = meta_df.reset_index(drop=True)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "57808884"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
