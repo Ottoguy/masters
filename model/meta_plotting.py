@@ -32,7 +32,7 @@ threshold = 8640  # Replace with your desired threshold
 
 # Filter out EVs with values over the threshold
 filtered_meta_df = meta_df[meta_df['Half_Minutes'] <= threshold]
-
+ 
 # Extract the 'Half_Minutes' and 'Type' columns from the filtered DataFrame
 connection_durations_1phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '1-Phase']['Half_Minutes']
 connection_durations_3phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '3-Phase']['Half_Minutes']
@@ -63,31 +63,33 @@ range_vals_hours_minutes = (
 )
 
 # Create subplots
-fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+fig, axes = plt.subplots(2, 1, figsize=(12, 10))
 
 # Plot the distribution with the bottom of bars as red for 3-Phase (Not Fully Charged) and blue for 3-Phase (Fully Charged)
-counts_3phase_not_fully_charged, bins_3phase_not_fully_charged, _ = axes[0, 0].hist(connection_durations_3phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='red', edgecolor='black', alpha=0.7, label='3-Phase (Not Fully Charged)')
-axes[0, 0].set_title('3-Phase (Not Fully Charged)')
+counts_3phase_not_fully_charged, bins_3phase_not_fully_charged, _ = axes[0].hist(connection_durations_3phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='red', edgecolor='black', alpha=0.7, label='3-Phase (Not Fully Charged)')
+counts_3phase_fully_charged, bins_3phase_fully_charged, _ = axes[0].hist(connection_durations_3phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=0.7, label='3-Phase (Fully Charged)')
 
-counts_3phase_fully_charged, bins_3phase_fully_charged, _ = axes[0, 1].hist(connection_durations_3phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=0.7, label='3-Phase (Fully Charged)')
-axes[0, 1].set_title('3-Phase (Fully Charged)')
+# Set title and legend for the first subplot
+axes[0].set_title('Connection Durations for 3-Phase EVs')
+axes[0].legend()
 
 # Plot the distribution with the bottom of bars as orange for 1-Phase (Not Fully Charged) and green for 1-Phase (Fully Charged)
-counts_1phase_not_fully_charged, bins_1phase_not_fully_charged, _ = axes[1, 0].hist(connection_durations_1phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='orange', edgecolor='black', alpha=0.7, label='1-Phase (Not Fully Charged)')
-axes[1, 0].set_title('1-Phase (Not Fully Charged)')
+counts_1phase_not_fully_charged, bins_1phase_not_fully_charged, _ = axes[1].hist(connection_durations_1phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='orange', edgecolor='black', alpha=0.7, label='1-Phase (Not Fully Charged)')
+counts_1phase_fully_charged, bins_1phase_fully_charged, _ = axes[1].hist(connection_durations_1phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='green', edgecolor='black', alpha=0.7, label='1-Phase (Fully Charged)')
 
-counts_1phase_fully_charged, bins_1phase_fully_charged, _ = axes[1, 1].hist(connection_durations_1phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='green', edgecolor='black', alpha=0.7, label='1-Phase (Fully Charged)')
-axes[1, 1].set_title('1-Phase (Fully Charged)')
+# Set title and legend for the second subplot
+axes[1].set_title('Connection Durations for 1-Phase EVs')
+axes[1].legend()
 
 # Find the maximum count among all histograms
 max_count = max([counts_3phase_not_fully_charged.max(), counts_3phase_fully_charged.max(), counts_1phase_not_fully_charged.max(), counts_1phase_fully_charged.max()])
 
 # Set common y-axis range for all subplots
-for ax in axes.flat:
+for ax in axes:
     ax.set_ylim(0, max_count + 5)
 
 # Set common labels
-for ax in axes.flat:
+for ax in axes:
     ax.set(xlabel='Connection Duration (Hours)', ylabel='Number of EVs')
     ax.grid(True, which='both', linestyle=':', linewidth=0.3, color='gray', alpha=0.5)
     ax.minorticks_on()
@@ -97,7 +99,6 @@ legend_text = f'Omitted EVs (>{threshold/120} hours): {disregarded_count}'
 fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1, fancybox=True, shadow=True)
 
 plt.annotate(f"Created: {current_datetime}", xy=(10, 10), xycoords="figure pixels", fontsize=8, color='dimgray')
-
 
 results_dir = "plots/meta_df/"
 if not os.path.exists(results_dir):
