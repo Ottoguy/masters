@@ -66,19 +66,19 @@ range_vals_hours_minutes = (
 fig, axes = plt.subplots(2, 1, figsize=(12, 10))
 
 # Plot the distribution with the bottom of bars as red for 3-Phase (Not Fully Charged) and blue for 3-Phase (Fully Charged)
-counts_3phase_not_fully_charged, bins_3phase_not_fully_charged, _ = axes[0].hist(connection_durations_3phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='red', edgecolor='black', alpha=0.7, label='3-Phase (Not Fully Charged)')
-counts_3phase_fully_charged, bins_3phase_fully_charged, _ = axes[0].hist(connection_durations_3phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=0.7, label='3-Phase (Fully Charged)')
+counts_3phase_fully_charged, bins_3phase_fully_charged, _ = axes[0].hist(connection_durations_3phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='blue', edgecolor='black', alpha=1, label='3-Phase (Fully Charged)', histtype='barstacked', stacked=True)
+counts_1phase_fully_charged, bins_1phase_fully_charged, _ = axes[0].hist(connection_durations_1phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='green', edgecolor='black', alpha=1, label='1-Phase (Fully Charged)', histtype='barstacked', stacked=True)
 
 # Set title and legend for the first subplot
-axes[0].set_title('Connection Durations for 3-Phase EVs')
+axes[0].set_title('Connection Durations for Fully Charged EVs')
 axes[0].legend()
 
 # Plot the distribution with the bottom of bars as orange for 1-Phase (Not Fully Charged) and green for 1-Phase (Fully Charged)
-counts_1phase_not_fully_charged, bins_1phase_not_fully_charged, _ = axes[1].hist(connection_durations_1phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='orange', edgecolor='black', alpha=0.7, label='1-Phase (Not Fully Charged)')
-counts_1phase_fully_charged, bins_1phase_fully_charged, _ = axes[1].hist(connection_durations_1phase_hours_minutes_fully_charged, bins=bins, range=range_vals_hours_minutes, color='green', edgecolor='black', alpha=0.7, label='1-Phase (Fully Charged)')
+counts_3phase_not_fully_charged, bins_3phase_not_fully_charged, _ = axes[1].hist(connection_durations_3phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='red', edgecolor='black', alpha=1, label='3-Phase (Not Fully Charged)', histtype='barstacked', stacked=True)
+counts_1phase_not_fully_charged, bins_1phase_not_fully_charged, _ = axes[1].hist(connection_durations_1phase_hours_minutes_not_fully_charged, bins=bins, range=range_vals_hours_minutes, color='orange', edgecolor='black', alpha=1, label='1-Phase (Not Fully Charged)', histtype='barstacked', stacked=True)
 
 # Set title and legend for the second subplot
-axes[1].set_title('Connection Durations for 1-Phase EVs')
+axes[1].set_title('Connection Durations for Not Fully Charged EVs')
 axes[1].legend()
 
 # Find the maximum count among all histograms
