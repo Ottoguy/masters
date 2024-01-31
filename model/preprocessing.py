@@ -198,6 +198,16 @@ meta_df['Weekend_Connected'] = meta_df['TimeConnected'].apply(is_weekend_or_holi
 meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
+# Add new column 'Charging_Half_Minutes' to meta_df
+charging_half_minutes = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='Charging_Half_Minutes')
+meta_df = pd.merge(meta_df, charging_half_minutes, on='ID', how='left')
+
+# Fill NaN values with 0
+meta_df['Charging_Half_Minutes'] = meta_df['Charging_Half_Minutes'].fillna(0)
+
+# Convert to integer
+meta_df['Charging_Half_Minutes'] = meta_df['Charging_Half_Minutes'].astype(int)
+
 # Drop in df
 df.drop(columns=['Half_Minutes', 'Value10', "Current_Type"], inplace=True)
 
