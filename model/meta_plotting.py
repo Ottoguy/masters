@@ -31,11 +31,11 @@ meta_df = pd.read_csv(latest_file)
 threshold = 8640  # Replace with your desired threshold
 
 # Filter out EVs with values over the threshold
-filtered_meta_df = meta_df[meta_df['Rows'] <= threshold]
+filtered_meta_df = meta_df[meta_df['Half_Minutes'] <= threshold]
 
-# Extract the 'Rows' and 'Type' columns from the filtered DataFrame
-connection_durations_1phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '1-Phase']['Rows']
-connection_durations_3phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '3-Phase']['Rows']
+# Extract the 'Half_Minutes' and 'Type' columns from the filtered DataFrame
+connection_durations_1phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '1-Phase']['Half_Minutes']
+connection_durations_3phase_all = filtered_meta_df[filtered_meta_df['Current_Type'] == '3-Phase']['Half_Minutes']
 
 # Filter out EVs with FullyCharged = False
 filtered_3phase_not_fully_charged = filtered_meta_df[(filtered_meta_df['Current_Type'] == '3-Phase') & (filtered_meta_df['FullyCharged'] == False)]
@@ -50,10 +50,10 @@ disregarded_count = len(meta_df) - len(filtered_meta_df)
 # Convert durations to hours and minutes
 connection_durations_1phase_hours_minutes_all = connection_durations_1phase_all / 2 / 60
 connection_durations_3phase_hours_minutes_all = connection_durations_3phase_all / 2 / 60
-connection_durations_1phase_hours_minutes_not_fully_charged = filtered_1phase_not_fully_charged['Rows'] / 2 / 60
-connection_durations_3phase_hours_minutes_not_fully_charged = filtered_3phase_not_fully_charged['Rows'] / 2 / 60
-connection_durations_1phase_hours_minutes_fully_charged = filtered_1phase_fully_charged['Rows'] / 2 / 60
-connection_durations_3phase_hours_minutes_fully_charged = filtered_3phase_fully_charged['Rows'] / 2 / 60
+connection_durations_1phase_hours_minutes_not_fully_charged = filtered_1phase_not_fully_charged['Half_Minutes'] / 2 / 60
+connection_durations_3phase_hours_minutes_not_fully_charged = filtered_3phase_not_fully_charged['Half_Minutes'] / 2 / 60
+connection_durations_1phase_hours_minutes_fully_charged = filtered_1phase_fully_charged['Half_Minutes'] / 2 / 60
+connection_durations_3phase_hours_minutes_fully_charged = filtered_3phase_fully_charged['Half_Minutes'] / 2 / 60
 
 # Set the bins and range for both histograms in hours and minutes
 bins = 50

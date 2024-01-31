@@ -66,8 +66,8 @@ df = df.reset_index(drop=True)
 # print(desired_rows)
 
 print("Creating meta dataframe...")
-# Create a new DataFrame with one row for each unique ID and a 'Rows' column
-meta_df = df.groupby('ID').size().reset_index(name='Rows')
+# Create a new DataFrame with one row for each unique ID and a 'Half_Minutes' column
+meta_df = df.groupby('ID').size().reset_index(name='Half_Minutes')
 
 # Drop the first row in meta_df
 meta_df = meta_df.iloc[1:]
@@ -89,8 +89,8 @@ meta_df = meta_df.fillna(0)
 meta_df['ChargingCount'] = meta_df['ChargingCount'].astype(int)
 meta_df['ConnectedCount'] = meta_df['ConnectedCount'].astype(int)
 
-# Assuming 'Rows' is a column in the 'meta_df' DataFrame
-df['Rows'] = meta_df['Rows']
+# Assuming 'Half_Minutes' is a column in the 'meta_df' DataFrame
+df['Half_Minutes'] = meta_df['Half_Minutes']
 
 # Add new column 'FullyCharged', considering the last contiguous streak of "Charging" values
 last_status = df.groupby('ID')['ChargingStatus'].last().reset_index(name='LastStatus')
@@ -104,7 +104,7 @@ meta_df = pd.merge(meta_df, last_status, on='ID', how='left')
 meta_df = pd.merge(meta_df, last_streak_size, on='ID', how='left')
 
 # Calculate the percentage of the last contiguous streak size
-meta_df['StreakPercentage'] = meta_df['LastStreakSize'] / meta_df['Rows']
+meta_df['StreakPercentage'] = meta_df['LastStreakSize'] / meta_df['Half_Minutes']
 
 # Determine if the car is fully charged based on the conditions
 meta_df['FullyCharged'] = (meta_df['LastStatus'] == 'Connected') | (meta_df['StreakPercentage'] < 0.2)
@@ -199,7 +199,7 @@ meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
 meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
 
 # Drop in df
-df.drop(columns=['Rows', 'Value10', "Current_Type"], inplace=True)
+df.drop(columns=['Half_Minutes', 'Value10', "Current_Type"], inplace=True)
 
 # Sort by ID
 meta_df = meta_df.sort_values(by=['ID'])
