@@ -74,20 +74,16 @@ meta_df = meta_df.iloc[1:]
 
 # Add new columns for 'Charging' and 'Connected'
 charging_counts = df[df['ChargingStatus'] == 'Charging'].groupby(
-    'ID').size().reset_index(name='ChargingCount')
-connected_counts = df[df['ChargingStatus'] == 'Connected'].groupby(
-    'ID').size().reset_index(name='ConnectedCount')
+    'ID').size().reset_index(name='Charging_Half_Minutes')
 
 # Merge the new columns into meta_df
 meta_df = pd.merge(meta_df, charging_counts, on='ID', how='left')
-meta_df = pd.merge(meta_df, connected_counts, on='ID', how='left')
 
 # Fill NaN values with 0
 meta_df = meta_df.fillna(0)
 
-# Convert 'ChargingCount' and 'ConnectedCount' to integers
-meta_df['ChargingCount'] = meta_df['ChargingCount'].astype(int)
-meta_df['ConnectedCount'] = meta_df['ConnectedCount'].astype(int)
+# Convert 'Charging_Half_Minutes' to integers
+meta_df['Charging_Half_Minutes'] = meta_df['Charging_Half_Minutes'].astype(int)
 
 # Assuming 'Half_Minutes' is a column in the 'meta_df' DataFrame
 df['Half_Minutes'] = meta_df['Half_Minutes']
@@ -191,22 +187,10 @@ def is_weekend_or_holiday(timestamp):
     return is_weekend or is_holiday
 
 # Add new column 'Weekend' to meta_df
-meta_df['Weekend_Disconnected'] = meta_df['TimeDisconnected'].apply(is_weekend_or_holiday)
-meta_df['Weekend_Connected'] = meta_df['TimeConnected'].apply(is_weekend_or_holiday)
+meta_df['Weekend'] = meta_df['TimeConnected'].apply(is_weekend_or_holiday)
 
 # Convert 'Weekend' to boolean
-meta_df['Weekend_Disconnected'] = meta_df['Weekend_Disconnected'].astype(bool)
-meta_df['Weekend_Connected'] = meta_df['Weekend_Connected'].astype(bool)
-
-# Add new column 'Charging_Half_Minutes' to meta_df
-charging_half_minutes = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='Charging_Half_Minutes')
-meta_df = pd.merge(meta_df, charging_half_minutes, on='ID', how='left')
-
-# Fill NaN values with 0
-meta_df['Charging_Half_Minutes'] = meta_df['Charging_Half_Minutes'].fillna(0)
-
-# Convert to integer
-meta_df['Charging_Half_Minutes'] = meta_df['Charging_Half_Minutes'].astype(int)
+meta_df['Weekend'] = meta_df['Weekend'].astype(bool)
 
 # Drop in df
 df.drop(columns=['Half_Minutes', 'Value10', "Current_Type"], inplace=True)
