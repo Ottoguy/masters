@@ -86,7 +86,7 @@ fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1
 
 plt.annotate(f"Created: {current_datetime}", xy=(10, 10), xycoords="figure pixels", fontsize=8, color='dimgray')
 
-results_dir = "plots/meta_df/"
+results_dir = "plots/connection_duration_b/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
