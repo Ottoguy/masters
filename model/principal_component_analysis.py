@@ -56,40 +56,41 @@ print("Standardizing...")
 scaler = StandardScaler()
 features_standardized = scaler.fit_transform(features)
 
-print("Creating PCA model...")
-# Get all possible combinations of components
-all_combinations = []
-for r in range(1, len(features.columns) + 1):
-    all_combinations.extend(itertools.combinations(features.columns, r))
-
-print("Creating DataFrame...")
 # Create a DataFrame to store the results
 results_df = pd.DataFrame(columns=['Components', 'ExplainedVariance', 'CumulativeVariance'])
 
 print("Performing PCA...")
 # Iterate over all combinations and perform PCA
-total_combinations = len(all_combinations)
-for idx, components in enumerate(all_combinations, 1):
-    # Convert the combination to a list for indexing
-    components_list = list(components)
+for r in range(1, len(features.columns) + 1):
+    # Generate combinations on the fly
+    combinations = itertools.combinations(features.columns, r)
     
-    # Extract selected features
-    selected_features = features[components_list]
-
-    # Apply PCA
-    pca = PCA()
-    principal_components = pca.fit_transform(selected_features)
-
-    # Calculate cumulative explained variance
-    explained_variance_ratio = pca.explained_variance_ratio_
-    cumulative_variance = explained_variance_ratio.cumsum()[-1]  # Cumulative variance of the last component
+    total_combinations = sum(1 for _ in combinations)  # Correct way to calculate total combinations
     
-    # Append results to the DataFrame
-    results_df = results_df.append({'Components': components_list, 'ExplainedVariance': explained_variance_ratio[-1], 'CumulativeVariance': cumulative_variance}, ignore_index=True)
+    for idx, components in enumerate(itertools.combinations(features.columns, r), 1):
+        # Convert the combination to a list for indexing
+        components_list = list(components)
+        
+        # Extract selected features
+        selected_features = features[components_list]
 
-    # Print progress
-    progress_percent = (idx / total_combinations) * 100
-    print(f"Progress: {idx}/{total_combinations} combinations analyzed ({progress_percent:.2f}%)", end='\r', flush=True)
+        # Apply PCA
+        pca = PCA()
+        principal_components = pca.fit_transform(selected_features)
+
+        # Calculate cumulative explained variance
+        explained_variance_ratio = pca.explained_variance_ratio_
+        cumulative_variance = explained_variance_ratio.cumsum()[-1]  # Cumulative variance of the last component
+        
+        # Create a new DataFrame for each iteration
+        iteration_df = pd.DataFrame({'Components': [components_list], 'ExplainedVariance': [explained_variance_ratio[-1]], 'CumulativeVariance': [cumulative_variance]})
+        
+        # Concatenate the new DataFrame to the results_df
+        results_df = pd.concat([results_df, iteration_df], ignore_index=True)
+
+        # Print progress
+        progress_percent = (idx / total_combinations) * 100
+        print(f"Progress: {idx}/{total_combinations} combinations analyzed ({progress_percent:.2f}%)", end='\r', flush=True)
 
 # Sort the DataFrame by the desired metric (e.g., cumulative variance)
 results_df = results_df.sort_values(by='CumulativeVariance', ascending=False)
