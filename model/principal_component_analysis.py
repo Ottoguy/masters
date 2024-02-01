@@ -25,15 +25,13 @@ latest_file = file_list[0]
 # Load your data from the latest file
 df = pd.read_csv(latest_file)
 
-print(df.columns)
-
-
-# Extract relevant columns (excluding ID and boolean columns)
-#ID,Half_Minutes,Charging_Half_Minutes,FullyCharged,TimeConnected,TimeDisconnected,ChargingPoint,Energy_Uptake,Current_Type,Weekend
+print("CSV file loaded")
 
 # Convert 'TimeConnected' and 'TimeDisconnected' to datetime
-df['TimeConnected'] = pd.to_datetime(df['TimeConnected'])
-df['TimeDisconnected'] = pd.to_datetime(df['TimeDisconnected'])
+df['TimeConnected'] = pd.to_datetime(df['TimeConnected'].copy())
+df['TimeDisconnected'] = pd.to_datetime(df['TimeDisconnected'].copy())
+
+print("Extracting features...")
 
 # Extract relevant columns (excluding ID)
 features = df[['Half_Minutes', 'Charging_Half_Minutes', 'Energy_Uptake', 'ChargingPoint', 'Current_Type', 'FullyCharged', 'Weekend']].copy()
@@ -48,21 +46,27 @@ features['Minute_Disconnected'] = df['TimeDisconnected'].dt.minute.copy()
 features['FullyCharged'] = features['FullyCharged'].astype(int)
 features['Weekend'] = features['Weekend'].astype(int)
 
+print("One-hot encoding...")
+
 # One-hot encode 'ChargingPoint' and 'CurrentType'
 features = pd.get_dummies(features, columns=['ChargingPoint', 'Current_Type'], prefix=['ChargingPoint', 'CurrentType'])
 
+print("Standardizing...")
 # Standardize the data
 scaler = StandardScaler()
 features_standardized = scaler.fit_transform(features)
 
+print("Creating PCA model...")
 # Get all possible combinations of components
 all_combinations = []
 for r in range(1, len(features.columns) + 1):
     all_combinations.extend(itertools.combinations(features.columns, r))
 
+print("Creating DataFrame...")
 # Create a DataFrame to store the results
 results_df = pd.DataFrame(columns=['Components', 'ExplainedVariance', 'CumulativeVariance'])
 
+print("Performing PCA...")
 # Iterate over all combinations and perform PCA
 total_combinations = len(all_combinations)
 for idx, components in enumerate(all_combinations, 1):
@@ -84,7 +88,8 @@ for idx, components in enumerate(all_combinations, 1):
     results_df = results_df.append({'Components': components_list, 'ExplainedVariance': explained_variance_ratio[-1], 'CumulativeVariance': cumulative_variance}, ignore_index=True)
 
     # Print progress
-    print(f"Progress: {idx}/{total_combinations} combinations analyzed", end='\r', flush=True)
+    progress_percent = (idx / total_combinations) * 100
+    print(f"Progress: {idx}/{total_combinations} combinations analyzed ({progress_percent:.2f}%)", end='\r', flush=True)
 
 # Sort the DataFrame by the desired metric (e.g., cumulative variance)
 results_df = results_df.sort_values(by='CumulativeVariance', ascending=False)
