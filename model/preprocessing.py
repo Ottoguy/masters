@@ -125,6 +125,12 @@ filename_substrings = df.groupby('ID')['Filename'].first(
 # Merge the new column into meta_df
 meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
 
+# Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
+df[['Phase1Current', 'Phase2Current', 'Phase3Current']] = df[['Phase1Current',
+                                                           'Phase2Current', 'Phase3Current']].apply(pd.to_numeric, errors='coerce')
+df[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']] = df[['Phase1Voltage',
+                                                              'Phase2Voltage', 'Phase3Voltage']].apply(pd.to_numeric, errors='coerce')
+
 #Make sure all Current and voltag values are positive
 df['Phase1Current'] = df['Phase1Current'].abs()
 df['Phase2Current'] = df['Phase2Current'].abs()
@@ -132,12 +138,6 @@ df['Phase3Current'] = df['Phase3Current'].abs()
 df['Phase1Voltage'] = df['Phase1Voltage'].abs()
 df['Phase2Voltage'] = df['Phase2Voltage'].abs()
 df['Phase3Voltage'] = df['Phase3Voltage'].abs()
-
-# Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
-df[['Phase1Current', 'Phase2Current', 'Phase3Current']] = df[['Phase1Current',
-                                                           'Phase2Current', 'Phase3Current']].apply(pd.to_numeric, errors='coerce')
-df[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']] = df[['Phase1Voltage',
-                                                              'Phase2Voltage', 'Phase3Voltage']].apply(pd.to_numeric, errors='coerce')
 
 # Calculate accumulated kWh for each row in df
 # Assuming each row of current lasts 30 seconds
