@@ -2,9 +2,10 @@ import os
 import glob
 import pandas as pd
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -43,33 +44,32 @@ for n_clusters in range(1, 11):
     inertia.append(kmeans.inertia_)
 
 # Plot the elbow method to find the optimal number of clusters
-plt.figure(figsize=(12, 5))
-
-plt.subplot(1, 2, 1)
 plt.plot(range(1, 11), inertia, marker='o')
 plt.title('Elbow Method')
 plt.xlabel('Number of Clusters')
 plt.ylabel('Inertia')
+plt.show()
 
 # Based on the elbow method, choose the optimal number of clusters and perform K-Means clustering
-optimal_clusters = 3  # Adjust this based on the plot
+optimal_clusters = 4  # Adjust this based on the plot
 kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
 clusters = kmeans.fit_predict(data_scaled)
 
-# Visualize the clusters in 2D space using PCA
-plt.subplot(1, 2, 2)
-plt.scatter(data_pca[:, 0], data_pca[:, 1], c=clusters, cmap='viridis', alpha=0.5)
-plt.title('K-Means Clustering')
-plt.xlabel('Principal Component 1')
-plt.ylabel('Principal Component 2')
+# Create a scatter plot using plotly.graph_objects with hover text for IDs
+fig = go.Figure()
 
-# Show both plots
-plt.tight_layout()
-plt.show()
+for cluster_num in range(optimal_clusters):
+    cluster_data = data_pca[clusters == cluster_num]
+    ids = data['ID'][clusters == cluster_num]
 
-# Print relevant information
-print(f"Optimal Number of Clusters: {optimal_clusters}")
-print("Cluster Centers:")
-print(kmeans.cluster_centers_)
-print("Cluster Sizes:")
-print(pd.Series(clusters).value_counts())
+    fig.add_trace(go.Scatter(
+        x=cluster_data[:, 0],
+        y=cluster_data[:, 1],
+        mode='markers',
+        hovertext=ids,
+        marker=dict(color=cluster_num),
+        name=f'Cluster {cluster_num}'
+    ))
+
+fig.update_layout(title='K-Means Clustering with Hover Text')
+fig.show()
