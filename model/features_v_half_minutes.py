@@ -115,7 +115,6 @@ current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
 # Save the figure with the current date and time in the filename
 print(f"Saving figure {current_datetime}", end='\r')
 plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
-plt.close()
 
 # Show the plots
-plt.show()
+#plt.show()
