@@ -3,8 +3,8 @@ import pandas as pd
 import os
 import glob
 import mplcursors  # Import the mplcursors library
-import matplotlib.patches as mpatches  # Import mpatches for creating custom legend handles
 import matplotlib.lines as mlines  # Import mlines for creating Line2D objects
+from datetime import datetime
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -105,6 +105,17 @@ axes[-1].legend(handles=legend_handles)  # Use the last subplot for the legend, 
 
 # Adjust layout for better spacing
 plt.tight_layout()
+
+results_dir = "plots/features_v_half_minutes/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+# Save the figure with the current date and time in the filename
+print(f"Saving figure {current_datetime}", end='\r')
+plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
+plt.close()
 
 # Show the plots
 plt.show()
