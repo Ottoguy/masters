@@ -24,6 +24,17 @@ latest_file = file_list[0]
 # Load your data from the latest file
 data = pd.read_csv(latest_file)
 
+# Extract only the hh:mm part from TimeDisconnected and TimeConnected
+data['TimeDisconnected'] = pd.to_datetime(data['TimeDisconnected']).dt.strftime('%H:%M')
+data['TimeConnected'] = pd.to_datetime(data['TimeConnected']).dt.strftime('%H:%M')
+
+# Convert TimeDisconnected and TimeConnected to datetime objects
+data['TimeDisconnected'] = pd.to_datetime(data['TimeDisconnected'], format='%H:%M')
+data['TimeConnected'] = pd.to_datetime(data['TimeConnected'], format='%H:%M')
+
+# Sort DataFrame chronologically based on TimeDisconnected and TimeConnected
+data.sort_values(['TimeDisconnected', 'TimeConnected'], inplace=True)
+
 print("CSV file loaded")
 
 # Columns to exclude
@@ -83,6 +94,12 @@ for i, x_column in enumerate(x_columns):
     # Enable hover over points to display ID
     mplcursors.cursor(scatter1, hover=True).connect("add", lambda sel: sel.annotation.set_text(f"ID: {non_weekend_data['ID'].iloc[sel.target.index]}"))
     mplcursors.cursor(scatter2, hover=True).connect("add", lambda sel: sel.annotation.set_text(f"ID: {weekend_data['ID'].iloc[sel.target.index]}"))
+
+    # Improve x-axis readability for TimeConnected and TimeDisconnected
+    if x_column in ['TimeConnected', 'TimeDisconnected']:
+        axes[i].tick_params(axis='x', rotation=0)  # No rotation
+        axes[i].xaxis.set_major_locator(plt.MaxNLocator(12))  # Adjust the number of x-axis ticks
+        axes[i].xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%H:%M'))  # Format x-axis labels
 
 axes[-1].legend(handles=legend_handles)  # Use the last subplot for the legend, providing handles and labels
 
