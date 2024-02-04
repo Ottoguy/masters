@@ -43,11 +43,13 @@ for n_clusters in range(1, 11):
     inertia.append(kmeans.inertia_)
 
 # Plot the elbow method to find the optimal number of clusters
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
 plt.plot(range(1, 11), inertia, marker='o')
 plt.title('Elbow Method')
 plt.xlabel('Number of Clusters')
 plt.ylabel('Inertia')
-plt.show()
 
 # Based on the elbow method, choose the optimal number of clusters and perform K-Means clustering
 optimal_clusters = 3  # Adjust this based on the plot
@@ -55,8 +57,19 @@ kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
 clusters = kmeans.fit_predict(data_scaled)
 
 # Visualize the clusters in 2D space using PCA
+plt.subplot(1, 2, 2)
 plt.scatter(data_pca[:, 0], data_pca[:, 1], c=clusters, cmap='viridis', alpha=0.5)
 plt.title('K-Means Clustering')
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
+
+# Show both plots
+plt.tight_layout()
 plt.show()
+
+# Print relevant information
+print(f"Optimal Number of Clusters: {optimal_clusters}")
+print("Cluster Centers:")
+print(kmeans.cluster_centers_)
+print("Cluster Sizes:")
+print(pd.Series(clusters).value_counts())
