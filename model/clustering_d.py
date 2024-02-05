@@ -43,26 +43,32 @@ linkage_matrix = linkage(data_pca, method='ward')
 threshold = 10  # Adjust as needed
 clusters = fcluster(linkage_matrix, threshold, criterion='distance')
 
-# Visualize the hierarchical clustering tree
-fig, ax = plt.subplots(figsize=(10, 6))
-dendrogram(linkage_matrix, labels=data.index, leaf_rotation=90, leaf_font_size=8, ax=ax)
-ax.set_title('Ward\'s Hierarchical Clustering Dendrogram')
-ax.set_xlabel('Sample Index')
-ax.set_ylabel('Distance')
+# Create a subplot with two columns
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
-plt.show()
+# Visualize the hierarchical clustering tree
+dendrogram(linkage_matrix, labels=data.index, leaf_rotation=90, leaf_font_size=8, ax=ax1)
+ax1.set_title('Ward\'s Hierarchical Clustering Dendrogram')
+ax1.set_xlabel('Sample Index')
+ax1.set_ylabel('Distance')
 
 # Visualize the clusters in 2D space
-fig, ax = plt.subplots()
-
 for cluster_num in set(clusters):
     cluster_data = data_pca[clusters == cluster_num]
     ids = data['ID'][clusters == cluster_num]
-    ax.scatter(
+    ax2.scatter(
         cluster_data[:, 0],
         cluster_data[:, 1],
         label=f'Cluster {cluster_num}'
     )
+
+# Add labels and title to the scatter plot
+ax2.set_xlabel('PCA Component 1')
+ax2.set_ylabel('PCA Component 2')
+ax2.set_title('Ward\'s Hierarchical Clustering')
+
+# Add legend to the scatter plot
+ax2.legend()
 
 # Access loadings (components)
 loadings = pca.components_
@@ -73,13 +79,6 @@ for i, component in enumerate(loadings):
     print(f"PCA Component {i + 1}:")
     for j, loading in enumerate(component):
         print(f"  Feature {data_numeric.columns[j]}: {loading}")
-
-# Add labels and title
-ax.set_xlabel('PCA Component 1')
-ax.set_ylabel('PCA Component 2')
-ax.set_title('Ward\'s Hierarchical Clustering')
-
-plt.legend()
 
 # Save the figure with the current date and time in the filename
 results_dir = "plots/clustering_d/"

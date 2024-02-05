@@ -72,6 +72,16 @@ plt.title('K-Means Clustering with Hover Text')
 legend_labels = [f'Cluster {cluster_num}' for cluster_num in range(optimal_clusters)]
 plt.legend(handles=scatter.legend_elements()[0], labels=legend_labels)
 
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings with annotations
+print("Loadings:")
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
+
 # Save the figure with the current date and time in the filename
 results_dir = "plots/clustering_a/"
 if not os.path.exists(results_dir):

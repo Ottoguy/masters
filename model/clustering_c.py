@@ -84,6 +84,15 @@ for i, eps in enumerate(eps_values):
     ax.set_xlim(-2.5, 2.75)
     ax.set_ylim(-1.75, 1.5)
 
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings with annotations
+print("Loadings:")
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
 
 mplcursors.cursor(hover=True)  # Enable mplcursors for hover text
 
