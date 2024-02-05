@@ -37,14 +37,14 @@ data_scaled = scaler.fit_transform(data_numeric)
 pca = PCA(n_components=2)
 data_pca = pca.fit_transform(data_scaled)
 
-# Iterate over 10 plausible values for n_components
-for n_components in range(2, 12):
+# Create a single figure with subplots for each value of n_components
+fig, axs = plt.subplots(2, 5, figsize=(20, 8))
+fig.suptitle('Gaussian Mixture Model Clustering', fontsize=16)
+
+for n_components, ax in zip(range(2, 12), axs.flatten()):
     # Use Gaussian Mixture Model for clustering
     gmm = GaussianMixture(n_components=n_components, random_state=42)
     clusters = gmm.fit_predict(data_pca)
-
-    # Create subplots
-    fig, ax = plt.subplots(figsize=(8, 6))
 
     for cluster_num in set(clusters):
         cluster_data = data_pca[clusters == cluster_num]
@@ -59,27 +59,28 @@ for n_components in range(2, 12):
         "add", lambda sel: sel.annotation.set_text(data['ID'].iloc[sel.target.index])
     )
 
-    # Add labels and title to the scatter plot
     ax.set_xlabel('PCA Component 1')
     ax.set_ylabel('PCA Component 2')
-    ax.set_title(f'Gaussian Mixture Model Clustering (n_components={n_components})')
+    ax.set_title(f'n_components={n_components}')
 
-    # Add legend to the scatter plot
     legend_labels = [f'Cluster {i}' for i in range(n_components)]
     ax.legend(legend_labels, loc='upper right')
 
-    # Add means and covariances information to the scatter plot
-    means = gmm.means_
-    covariances = gmm.covariances_
-    for i, (mean, covariance) in enumerate(zip(means, covariances)):
-        info_text = f"Cluster {i}:\nMean: {mean}\nCovariance: {covariance}"
-        ax.text(0.05, 0.9 - i * 0.1, info_text, transform=ax.transAxes, fontsize=8, verticalalignment='top')
+# Print means and covariances for each cluster
+for n_components in range(2, 12):
+    gmm = GaussianMixture(n_components=n_components, random_state=42)
+    clusters = gmm.fit_predict(data_pca)
+    
+    print(f"\nFor n_components={n_components}:")
+    for i, (mean, covariance) in enumerate(zip(gmm.means_, gmm.covariances_)):
+        print(f"Cluster {i} - Mean: {mean}, Covariance: {covariance}")
 
-    # Save the figure with the current date and time in the filename
-    results_dir = "plots/clustering/gmm/"
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+# Adjust layout and save the figure
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+results_dir = "plots/clustering/gmm/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
 
-    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-    plt.savefig(os.path.join(results_dir, f'n_components_{n_components}_{current_datetime}.png'))
-    plt.show()
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+plt.savefig(os.path.join(results_dir, f"all_n_components_{current_datetime}.png"))
+plt.show()
