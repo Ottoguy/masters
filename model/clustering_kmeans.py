@@ -62,4 +62,22 @@ fig.tight_layout(rect=[0, 0, 1, 0.96])
 # Add a legend (you may need to adjust this based on your specific data)
 legend_labels = [f'Cluster {cluster_num}' for cluster_num in range(n_clusters)]
 fig.legend(handles=scatter.legend_elements()[0], labels=legend_labels, loc='lower center', bbox_to_anchor=(0.5, 0))
+
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings with annotations
+print("Loadings:")
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
+
+# Save the figure with the current date and time in the filename
+results_dir = "plots/clustering/kmeans/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
 plt.show()

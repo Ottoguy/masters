@@ -100,7 +100,7 @@ mplcursors.cursor(hover=True)  # Enable mplcursors for hover text
 plt.tight_layout()
 
 # Save the figure with the current date and time in the filename
-results_dir = "plots/clustering_c/"
+results_dir = "plots/clustering/dbscan/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 

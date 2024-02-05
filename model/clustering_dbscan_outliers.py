@@ -82,7 +82,7 @@ for i, component in enumerate(loadings):
         print(f"  Feature {data_numeric.columns[j]}: {loading}")
 
 # Save the figure with the current date and time in the filename
-results_dir = "plots/clustering_b/"
+results_dir = "plots/clustering/dbscan_outliers/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 

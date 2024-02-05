@@ -3,7 +3,7 @@ import glob
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
+from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -36,24 +36,16 @@ data_scaled = scaler.fit_transform(data_numeric)
 pca = PCA(n_components=2)
 data_pca = pca.fit_transform(data_scaled)
 
-# Use Ward's hierarchical clustering
-linkage_matrix = linkage(data_pca, method='ward')
-
-# Set the threshold for cutting the tree to get clusters
-threshold = 10  # Adjust as needed
-clusters = fcluster(linkage_matrix, threshold, criterion='distance')
+# Use Gaussian Mixture Model for clustering
+n_components = 3  # Adjust as needed
+gmm = GaussianMixture(n_components=n_components, random_state=42)
+clusters = gmm.fit_predict(data_pca)
 
 # Create a subplot with two columns
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
-# Visualize the hierarchical clustering tree
-dendrogram(linkage_matrix, labels=data.index, leaf_rotation=90, leaf_font_size=8, ax=ax1)
-ax1.set_title('Ward\'s Hierarchical Clustering Dendrogram')
-ax1.set_xlabel('Sample Index')
-ax1.set_ylabel('Distance')
-
 # Visualize the clusters in 2D space
-for cluster_num in set(clusters):
+for cluster_num in range(n_components):
     cluster_data = data_pca[clusters == cluster_num]
     ids = data['ID'][clusters == cluster_num]
     ax2.scatter(
@@ -65,23 +57,23 @@ for cluster_num in set(clusters):
 # Add labels and title to the scatter plot
 ax2.set_xlabel('PCA Component 1')
 ax2.set_ylabel('PCA Component 2')
-ax2.set_title('Ward\'s Hierarchical Clustering')
+ax2.set_title('Gaussian Mixture Model Clustering')
 
 # Add legend to the scatter plot
 ax2.legend()
 
-# Access loadings (components)
-loadings = pca.components_
+# Access means and covariances of the components
+means = gmm.means_
+covariances = gmm.covariances_
 
-# Print loadings with annotations
-print("Loadings:")
-for i, component in enumerate(loadings):
-    print(f"PCA Component {i + 1}:")
-    for j, loading in enumerate(component):
-        print(f"  Feature {data_numeric.columns[j]}: {loading}")
+# Print means and covariances
+print("Means:")
+print(means)
+print("\nCovariances:")
+print(covariances)
 
 # Save the figure with the current date and time in the filename
-results_dir = "plots/clustering/ward/"
+results_dir = "plots/clustering/gmm/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
