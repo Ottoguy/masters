@@ -56,12 +56,12 @@ for n_clusters, ax in zip(range(2, 8), axes):
     ax.set_title(f'Clusters: {n_clusters}')
 
 # Set labels and title for the entire figure
-fig.suptitle('K-Means Clustering with Varying Number of Clusters (2 to 7)', y=1.02)
-fig.tight_layout(rect=[0, 0, 1, 0.96])
+fig.suptitle('K-Means Clustering with Varying Number of Clusters (2 to 7)')
+fig.tight_layout()
 
 # Add a legend (you may need to adjust this based on your specific data)
 legend_labels = [f'Cluster {cluster_num}' for cluster_num in range(n_clusters)]
-fig.legend(handles=scatter.legend_elements()[0], labels=legend_labels, loc='lower center', bbox_to_anchor=(0.5, 0))
+fig.legend(handles=scatter.legend_elements()[0], labels=legend_labels, loc='center right', title='Clusters')
 
 # Access loadings (components)
 loadings = pca.components_
