@@ -64,11 +64,18 @@ for cluster_num in set(clusters):
         label=f'Cluster {cluster_num}'
     )
 
+
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings
+print("Loadings:")
+print(loadings)
+
 # Add labels and title
 ax.set_xlabel('PCA Component 1')
 ax.set_ylabel('PCA Component 2')
 ax.set_title('Ward\'s Hierarchical Clustering')
-
 
 plt.legend()
 

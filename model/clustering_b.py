@@ -69,7 +69,7 @@ mplcursors.cursor(hover=True)  # Enable mplcursors for hover text
 # Add labels and title
 ax.set_xlabel('PCA Component 1')
 ax.set_ylabel('PCA Component 2')
-ax.set_title('DBSCAN Clustering with Hover Text')
+ax.set_title('DBSCAN Outlier Identification')
 
 # Save the figure with the current date and time in the filename
 results_dir = "plots/clustering_b/"
