@@ -28,7 +28,7 @@ latest_file = file_list[0]
 data = pd.read_csv(latest_file)
 
 # Assuming you want to cluster based on certain features, drop non-numeric columns if needed
-data_numeric = data.select_dtypes(include='number')
+data_numeric = data.select_dtypes(include='number').drop(columns=['ID'])
 
 # Standardize the data
 scaler = StandardScaler()
@@ -39,7 +39,7 @@ pca = PCA(n_components=2)
 data_pca = pca.fit_transform(data_scaled)
 
 # Generate 10 plausible eps values between 0.05 and 0.5
-eps_values = np.linspace(0.1, 0.25, 10)
+eps_values = np.linspace(0.1, 0.35, 10)
 
 #Round the eps values to 2 decimal places
 eps_values = np.round(eps_values, 2)
@@ -81,8 +81,8 @@ for i, eps in enumerate(eps_values):
     ax.legend()
     
     # Set the same x and y-axis limits for all subplots
-    ax.set_xlim(-2.5, 2.75)
-    ax.set_ylim(-1.75, 1.5)
+    ax.set_xlim(-3.5, 3)
+    ax.set_ylim(-2.5, 2)
 
 # Access loadings (components)
 loadings = pca.components_

@@ -27,7 +27,7 @@ latest_file = file_list[0]
 data = pd.read_csv(latest_file)
 
 # Assuming you want to cluster based on certain features, drop non-numeric columns if needed
-data_numeric = data.select_dtypes(include='number')
+data_numeric = data.select_dtypes(include='number').drop(columns=['ID'])
 
 # Standardize the data
 scaler = StandardScaler()

@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA
 from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 import matplotlib.pyplot as plt
 from datetime import datetime
+import mplcursors  # Import mplcursors
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -25,8 +26,8 @@ latest_file = file_list[0]
 # Load your data from the latest file
 data = pd.read_csv(latest_file)
 
-# Assuming you want to cluster based on certain features, drop non-numeric columns if needed
-data_numeric = data.select_dtypes(include='number')
+# Exclude the "ID" column from numeric features
+data_numeric = data.select_dtypes(include='number').drop(columns=['ID'])
 
 # Standardize the data
 scaler = StandardScaler()
@@ -52,20 +53,18 @@ ax1.set_title('Ward\'s Hierarchical Clustering Dendrogram')
 ax1.set_xlabel('Sample Index')
 ax1.set_ylabel('Distance')
 
-# Visualize the clusters in 2D space
 for cluster_num in set(clusters):
     cluster_data = data_pca[clusters == cluster_num]
     ids = data['ID'][clusters == cluster_num]
-    ax2.scatter(
+    scatter = ax2.scatter(
         cluster_data[:, 0],
         cluster_data[:, 1],
         label=f'Cluster {cluster_num}'
     )
 
-# Add labels and title to the scatter plot
-ax2.set_xlabel('PCA Component 1')
-ax2.set_ylabel('PCA Component 2')
-ax2.set_title('Ward\'s Hierarchical Clustering')
+mplcursors.cursor(hover=True).connect(
+    "add", lambda sel: sel.annotation.set_text(data['ID'].iloc[sel.target.index])
+)
 
 # Add legend to the scatter plot
 ax2.legend()

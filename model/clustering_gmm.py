@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 from datetime import datetime
+import mplcursors  # Import mplcursors
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -26,7 +27,7 @@ latest_file = file_list[0]
 data = pd.read_csv(latest_file)
 
 # Assuming you want to cluster based on certain features, drop non-numeric columns if needed
-data_numeric = data.select_dtypes(include='number')
+data_numeric = data.select_dtypes(include='number').drop(columns=['ID'])
 
 # Standardize the data
 scaler = StandardScaler()
@@ -41,18 +42,21 @@ n_components = 3  # Adjust as needed
 gmm = GaussianMixture(n_components=n_components, random_state=42)
 clusters = gmm.fit_predict(data_pca)
 
-# Create a subplot with two columns
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+# Create a single subplot
+fig, ax2 = plt.subplots(figsize=(8, 6))
 
-# Visualize the clusters in 2D space
-for cluster_num in range(n_components):
+for cluster_num in set(clusters):
     cluster_data = data_pca[clusters == cluster_num]
     ids = data['ID'][clusters == cluster_num]
-    ax2.scatter(
+    scatter = ax2.scatter(
         cluster_data[:, 0],
         cluster_data[:, 1],
         label=f'Cluster {cluster_num}'
     )
+
+mplcursors.cursor(hover=True).connect(
+    "add", lambda sel: sel.annotation.set_text(data['ID'].iloc[sel.target.index])
+)
 
 # Add labels and title to the scatter plot
 ax2.set_xlabel('PCA Component 1')
@@ -60,17 +64,15 @@ ax2.set_ylabel('PCA Component 2')
 ax2.set_title('Gaussian Mixture Model Clustering')
 
 # Add legend to the scatter plot
-ax2.legend()
+legend_labels = [f'Cluster {i}' for i in range(n_components)]
+ax2.legend(legend_labels, loc='upper right')
 
-# Access means and covariances of the components
+# Add means and covariances information to the scatter plot
 means = gmm.means_
 covariances = gmm.covariances_
-
-# Print means and covariances
-print("Means:")
-print(means)
-print("\nCovariances:")
-print(covariances)
+for i, (mean, covariance) in enumerate(zip(means, covariances)):
+    info_text = f"Cluster {i}:\nMean: {mean}\nCovariance: {covariance}"
+    ax2.text(0.05, 0.9 - i * 0.1, info_text, transform=ax2.transAxes, fontsize=8, verticalalignment='top')
 
 # Save the figure with the current date and time in the filename
 results_dir = "plots/clustering/gmm/"
