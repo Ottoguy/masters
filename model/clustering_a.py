@@ -5,7 +5,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
+from mplcursors import cursor
+from datetime import datetime
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -55,21 +56,27 @@ optimal_clusters = 4  # Adjust this based on the plot
 kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
 clusters = kmeans.fit_predict(data_scaled)
 
-# Create a scatter plot using plotly.graph_objects with hover text for IDs
-fig = go.Figure()
+# Create a scatter plot using Matplotlib with mplcursors for hover text
+fig, ax = plt.subplots()
+scatter = ax.scatter(data_pca[:, 0], data_pca[:, 1], c=clusters)
 
-for cluster_num in range(optimal_clusters):
-    cluster_data = data_pca[clusters == cluster_num]
-    ids = data['ID'][clusters == cluster_num]
+# Add hover text for IDs using mplcursors
+cursor(hover=True).connect("add", lambda sel: sel.annotation.set_text(f"ID: {data['ID'][sel.target.index]}"))
 
-    fig.add_trace(go.Scatter(
-        x=cluster_data[:, 0],
-        y=cluster_data[:, 1],
-        mode='markers',
-        hovertext=ids,
-        marker=dict(color=cluster_num),
-        name=f'Cluster {cluster_num}'
-    ))
+# Set labels and title
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('K-Means Clustering with Hover Text')
 
-fig.update_layout(title='K-Means Clustering with Hover Text')
-fig.show()
+# Add a legend
+legend_labels = [f'Cluster {cluster_num}' for cluster_num in range(optimal_clusters)]
+plt.legend(handles=scatter.legend_elements()[0], labels=legend_labels)
+
+# Save the figure with the current date and time in the filename
+results_dir = "plots/clustering_a/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+plt.savefig(os.path.join(results_dir, current_datetime + '_mplcursors.png'))
+plt.show()
