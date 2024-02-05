@@ -79,4 +79,10 @@ for i, threshold in enumerate(threshold_values):
 
 # Adjust layout and show the plots
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+results_dir = "plots/clustering/gmm/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+plt.savefig(os.path.join(results_dir, f"all_n_components_{current_datetime}.png"))
 plt.show()
