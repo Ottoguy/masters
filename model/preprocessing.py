@@ -2,6 +2,7 @@ from load_dans import all_data as data
 import pandas as pd
 import os
 from datetime import datetime
+import numpy as np
 
 def export_csv_for_id(df, id_to_export, parent_folder="prints"):
     # If the desired ID is "all", export all rows
@@ -203,11 +204,20 @@ meta_df['Weekend'] = meta_df['Weekend'].astype(bool)
 # Drop in df
 df.drop(columns=['Half_Minutes', 'Value10', "Current_Type"], inplace=True)
 
+# Encode hours and minutes as a combined cyclical feature
+def encode_cyclical_features(df, column_name):
+    df[column_name + '_combined_sin'] = np.sin(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
+    df[column_name + '_combined_cos'] = np.cos(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
+
+# Apply the encoding to 'TimeConnected' and 'TimeDisconnected'
+encode_cyclical_features(meta_df, 'TimeConnected')
+encode_cyclical_features(meta_df, 'TimeDisconnected')
+
 # Sort by ID
 meta_df = meta_df.sort_values(by=['ID'])
 # Reset index
 meta_df = meta_df.reset_index(drop=True)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "56533679"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
