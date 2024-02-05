@@ -64,13 +64,15 @@ for cluster_num in set(clusters):
         label=f'Cluster {cluster_num}'
     )
 
-
 # Access loadings (components)
 loadings = pca.components_
 
-# Print loadings
+# Print loadings with annotations
 print("Loadings:")
-print(loadings)
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
 
 # Add labels and title
 ax.set_xlabel('PCA Component 1')
