@@ -74,6 +74,10 @@ for i, threshold in enumerate(threshold_values):
             label=f'Cluster {cluster_num}'
         )
 
+    mplcursors.cursor(hover=True).connect(
+        "add", lambda sel: sel.annotation.set_text(data['ID'].iloc[sel.target.index])
+    )
+
     ax_scatter.set_title(f'Scatter Plot (Threshold: {threshold})')
     ax_scatter.legend(loc='upper left')
 
