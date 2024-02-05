@@ -37,53 +37,46 @@ data_scaled = scaler.fit_transform(data_numeric)
 pca = PCA(n_components=2)
 data_pca = pca.fit_transform(data_scaled)
 
-# Use Ward's hierarchical clustering
-linkage_matrix = linkage(data_pca, method='ward')
+# Set up five plausible threshold values
+threshold_values = [6, 8, 10, 12, 14]
 
-# Set the threshold for cutting the tree to get clusters
-threshold = 10  # Adjust as needed
-clusters = fcluster(linkage_matrix, threshold, criterion='distance')
+# Create a subplot grid for the six plots
+fig, axs = plt.subplots(2, 3, figsize=(18, 12))
+fig.suptitle('Hierarchical Clustering Results for Different Thresholds')
 
-# Create a subplot with two columns
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+# Use Ward's hierarchical clustering for dendrogram
+linkage_matrix_dendrogram = linkage(data_pca, method='ward')
+clusters_dendrogram = fcluster(linkage_matrix_dendrogram, 20, criterion='distance')
 
-# Visualize the hierarchical clustering tree
-dendrogram(linkage_matrix, labels=data.index, leaf_rotation=90, leaf_font_size=8, ax=ax1)
-ax1.set_title('Ward\'s Hierarchical Clustering Dendrogram')
-ax1.set_xlabel('Sample Index')
-ax1.set_ylabel('Distance')
+# Plot dendrogram in the first subplot
+ax_dendrogram = axs[-1, -1]
+dendrogram(linkage_matrix_dendrogram, labels=data.index, leaf_rotation=90, leaf_font_size=8, ax=ax_dendrogram, above_threshold_color='y', color_threshold=20)
+ax_dendrogram.set_title('Dendrogram')
+ax_dendrogram.set_xlabel('Sample Index')
+ax_dendrogram.set_ylabel('Distance')
 
-for cluster_num in set(clusters):
-    cluster_data = data_pca[clusters == cluster_num]
-    ids = data['ID'][clusters == cluster_num]
-    scatter = ax2.scatter(
-        cluster_data[:, 0],
-        cluster_data[:, 1],
-        label=f'Cluster {cluster_num}'
-    )
+# Iterate over five threshold values and plot scatter plots
+for i, threshold in enumerate(threshold_values):
+    # Use Ward's hierarchical clustering
+    linkage_matrix = linkage(data_pca, method='ward')
+    clusters = fcluster(linkage_matrix, threshold, criterion='distance')
 
-mplcursors.cursor(hover=True).connect(
-    "add", lambda sel: sel.annotation.set_text(data['ID'].iloc[sel.target.index])
-)
+    # Create a subplot for scatter plot
+    ax_scatter = axs[i // 3, i % 3]
 
-# Add legend to the scatter plot
-ax2.legend()
+    # Plot scatter plot for each cluster
+    for cluster_num in set(clusters):
+        cluster_data = data_pca[clusters == cluster_num]
+        ids = data['ID'][clusters == cluster_num]
+        scatter = ax_scatter.scatter(
+            cluster_data[:, 0],
+            cluster_data[:, 1],
+            label=f'Cluster {cluster_num}'
+        )
 
-# Access loadings (components)
-loadings = pca.components_
+    ax_scatter.set_title(f'Scatter Plot (Threshold: {threshold})')
+    ax_scatter.legend(loc='upper left')
 
-# Print loadings with annotations
-print("Loadings:")
-for i, component in enumerate(loadings):
-    print(f"PCA Component {i + 1}:")
-    for j, loading in enumerate(component):
-        print(f"  Feature {data_numeric.columns[j]}: {loading}")
-
-# Save the figure with the current date and time in the filename
-results_dir = "plots/clustering/ward/"
-if not os.path.exists(results_dir):
-    os.makedirs(results_dir)
-
-current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
+# Adjust layout and show the plots
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
