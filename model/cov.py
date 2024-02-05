@@ -4,6 +4,7 @@ import glob
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime
 
 # Specify the directory where your files are located
 folder_path = 'prints/meta/'
@@ -23,23 +24,8 @@ latest_file = file_list[0]
 # Load your data from the latest file
 data = pd.read_csv(latest_file)
 
-# Convert 'TimeConnected' and 'TimeDisconnected' to datetime objects
-data['TimeConnected'] = pd.to_datetime(data['TimeConnected'])
-data['TimeDisconnected'] = pd.to_datetime(data['TimeDisconnected'])
-
-# Extract hours and minutes
-data['TimeConnected'] = data['TimeConnected'].dt.hour * 60 + data['TimeConnected'].dt.minute
-data['TimeDisconnected'] = data['TimeDisconnected'].dt.hour * 60 + data['TimeDisconnected'].dt.minute
-
-# Convert 'TimeConnected' and 'TimeDisconnected' to sine and cosine values
-data['TimeConnected_sin'] = np.sin(2 * np.pi * data['TimeConnected'] / (24 * 60))
-data['TimeConnected_cos'] = np.cos(2 * np.pi * data['TimeConnected'] / (24 * 60))
-
-data['TimeDisconnected_sin'] = np.sin(2 * np.pi * data['TimeDisconnected'] / (24 * 60))
-data['TimeDisconnected_cos'] = np.cos(2 * np.pi * data['TimeDisconnected'] / (24 * 60))
-
 # Exclude the 'ID' field and original time columns
-numeric_columns = data.drop(columns=['ID', 'TimeConnected', 'TimeDisconnected']).select_dtypes(include=['float64', 'int64'])
+numeric_columns = data.drop(columns=['ID']).select_dtypes(include=['float64', 'int64'])
 
 # Create covariance matrix
 covariance_matrix = numeric_columns.cov()
@@ -52,4 +38,12 @@ sns.heatmap(covariance_matrix, cmap='coolwarm', annot=True, fmt=".2f")
 
 # Display the plot
 plt.title('Covariance Matrix Heatmap')
+
+# Save the figure with the current date and time in the filename
+results_dir = "plots/cov"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
 plt.show()
