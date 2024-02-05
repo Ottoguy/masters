@@ -61,11 +61,6 @@ df = df.sort_values(by=['ID', 'Timestamp'])
 # Reset index
 df = df.reset_index(drop=True)
 
-# Filter DataFrame based on the desired ID
-# desired_id = "59449840"
-# desired_rows = df[df['ID'] == desired_id]
-# print(desired_rows)
-
 print("Creating meta dataframe...")
 # Create a new DataFrame with one row for each unique ID and a 'Half_Minutes' column
 meta_df = df.groupby('ID').size().reset_index(name='Half_Minutes')
@@ -204,14 +199,31 @@ meta_df['Weekend'] = meta_df['Weekend'].astype(bool)
 # Drop in df
 df.drop(columns=['Half_Minutes', 'Value10', "Current_Type"], inplace=True)
 
+# Convert temporary columns to datetime format for encoding cyclical features
+meta_df['TimeConnected_temp'] = pd.to_datetime(meta_df['TimeConnected'], format='%Y-%m-%d-%H:%M:%S.%f')
+meta_df['TimeDisconnected_temp'] = pd.to_datetime(meta_df['TimeDisconnected'], format='%Y-%m-%d-%H:%M:%S.%f')
+
+# Shuffling names
+meta_df.rename(columns={'TimeConnected': 'TimeConnected_true'}, inplace=True)
+meta_df.rename(columns={'TimeDisconnected': 'TimeDisconnected_true'}, inplace=True)
+meta_df.rename(columns={'TimeConnected_temp': 'TimeConnected'}, inplace=True)
+meta_df.rename(columns={'TimeDisconnected_temp': 'TimeDisconnected'}, inplace=True)
+
 # Encode hours and minutes as a combined cyclical feature
 def encode_cyclical_features(df, column_name):
-    df[column_name + '_combined_sin'] = np.sin(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
-    df[column_name + '_combined_cos'] = np.cos(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
+    df[column_name + '_sin'] = np.sin(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
+    df[column_name + '_cos'] = np.cos(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
 
-# Apply the encoding to 'TimeConnected' and 'TimeDisconnected'
+# Apply the encoding to 'TimeConnected_temp' and 'TimeDisconnected_temp'
 encode_cyclical_features(meta_df, 'TimeConnected')
 encode_cyclical_features(meta_df, 'TimeDisconnected')
+
+# Drop the temporary columns
+meta_df.drop(columns=['TimeConnected', 'TimeDisconnected'], inplace=True)
+
+#Give back the original names
+meta_df.rename(columns={'TimeConnected_true': 'TimeConnected'}, inplace=True)
+meta_df.rename(columns={'TimeDisconnected_true': 'TimeDisconnected'}, inplace=True)
 
 # Sort by ID
 meta_df = meta_df.sort_values(by=['ID'])
