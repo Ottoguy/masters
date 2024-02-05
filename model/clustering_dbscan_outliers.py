@@ -60,7 +60,7 @@ for cluster_num in set(clusters):
         ax.scatter(
             cluster_data[:, 0],
             cluster_data[:, 1],
-            c=[cluster_num] * len(cluster_data),
+            c="blue",  # Set a specific color for non-outliers
             label=f'Cluster {cluster_num}'
         )
 
@@ -70,6 +70,9 @@ mplcursors.cursor(hover=True)  # Enable mplcursors for hover text
 ax.set_xlabel('PCA Component 1')
 ax.set_ylabel('PCA Component 2')
 ax.set_title('DBSCAN Outlier Identification')
+
+# Add legend
+plt.legend()
 
 # Access loadings (components)
 loadings = pca.components_
