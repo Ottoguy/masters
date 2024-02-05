@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 
 def export_csv_for_id(df, id_to_export, parent_folder="prints"):
+    id_prints = parent_folder + "/id"
     # If the desired ID is "all", export all rows
     if id_to_export.lower() == "all":
         desired_rows = df.copy()
@@ -16,7 +17,7 @@ def export_csv_for_id(df, id_to_export, parent_folder="prints"):
     else:
         # Filter DataFrame based on the desired ID
         desired_rows = df[df['ID'] == id_to_export]
-        output_folder = os.path.join(parent_folder, str(id_to_export))
+        output_folder = os.path.join(id_prints, str(id_to_export))
 
     # Create a folder named "prints" if it doesn't exist
     if not os.path.exists(parent_folder):
@@ -231,5 +232,5 @@ meta_df = meta_df.sort_values(by=['ID'])
 meta_df = meta_df.reset_index(drop=True)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "55634398"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)
