@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import numpy as np
+from functions import encode_cyclical_features
 
 def export_csv_for_id(df, id_to_export, parent_folder="prints"):
     id_prints = parent_folder + "/id"
@@ -90,7 +91,6 @@ last_status = df.groupby('ID')['ChargingStatus'].last().reset_index(name='LastSt
 
 # Get the last contiguous streak size for each ID
 last_streak_size = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='LastStreakSize')
-print(last_streak_size)
 
 # Merge the last status and last streak size into the meta_df
 meta_df = pd.merge(meta_df, last_status, on='ID', how='left')
@@ -210,14 +210,16 @@ meta_df.rename(columns={'TimeDisconnected': 'TimeDisconnected_true'}, inplace=Tr
 meta_df.rename(columns={'TimeConnected_temp': 'TimeConnected'}, inplace=True)
 meta_df.rename(columns={'TimeDisconnected_temp': 'TimeDisconnected'}, inplace=True)
 
-# Encode hours and minutes as a combined cyclical feature
-def encode_cyclical_features(df, column_name):
-    df[column_name + '_sin'] = np.sin(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
-    df[column_name + '_cos'] = np.cos(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
-
 # Apply the encoding to 'TimeConnected_temp' and 'TimeDisconnected_temp'
 encode_cyclical_features(meta_df, 'TimeConnected')
 encode_cyclical_features(meta_df, 'TimeDisconnected')
+
+#Same, for df
+df["Timestamp_temp"] = df["Timestamp"]
+df['Timestamp'] = pd.to_datetime(df['Timestamp'], format='%Y-%m-%d-%H:%M:%S.%f')
+encode_cyclical_features(df, 'Timestamp')
+df['Timestamp'] = df["Timestamp_temp"]
+df.drop(columns=['Timestamp_temp'], inplace=True)
 
 # Drop the temporary columns
 meta_df.drop(columns=['TimeConnected', 'TimeDisconnected'], inplace=True)
