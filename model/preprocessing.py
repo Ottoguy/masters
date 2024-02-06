@@ -231,6 +231,8 @@ meta_df = meta_df.sort_values(by=['ID'])
 # Reset index
 meta_df = meta_df.reset_index(drop=True)
 
+df.drop(columns=['Value7'], inplace=True)
+
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
 export_csv_for_id(df, desired_id_to_export)

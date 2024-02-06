@@ -81,6 +81,16 @@ for i, threshold in enumerate(threshold_values):
     ax_scatter.set_title(f'Scatter Plot (Threshold: {threshold})')
     ax_scatter.legend(loc='upper left')
 
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings with annotations
+print("Loadings:")
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
+
 # Adjust layout and show the plots
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 results_dir = "plots/clustering/gmm/"

@@ -75,6 +75,16 @@ for n_components in range(2, 12):
     for i, (mean, covariance) in enumerate(zip(gmm.means_, gmm.covariances_)):
         print(f"Cluster {i} - Mean: {mean}, Covariance: {covariance}")
 
+# Access loadings (components)
+loadings = pca.components_
+
+# Print loadings with annotations
+print("Loadings:")
+for i, component in enumerate(loadings):
+    print(f"PCA Component {i + 1}:")
+    for j, loading in enumerate(component):
+        print(f"  Feature {data_numeric.columns[j]}: {loading}")
+
 # Adjust layout and save the figure
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 results_dir = "plots/clustering/gmm/"
@@ -82,5 +92,5 @@ if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
 current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-plt.savefig(os.path.join(results_dir, f"all_n_components_{current_datetime}.png"))
+plt.savefig(os.path.join(results_dir, f"{current_datetime}.png"))
 plt.show()
