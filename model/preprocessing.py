@@ -4,45 +4,7 @@ import os
 from datetime import datetime
 import numpy as np
 from functions import encode_cyclical_features
-
-def export_csv_for_id(df, id_to_export, parent_folder="prints"):
-    id_prints = parent_folder + "/id"
-    # If the desired ID is "all", export all rows
-    if id_to_export.lower() == "all":
-        desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "all")
-    # If the desired ID is "meta", export the meta_df
-    elif id_to_export.lower() == "meta":
-        desired_rows = meta_df.copy()
-        output_folder = os.path.join(parent_folder, "meta")
-    else:
-        # Filter DataFrame based on the desired ID
-        desired_rows = df[df['ID'] == id_to_export]
-        output_folder = os.path.join(id_prints, str(id_to_export))
-
-    # Create a folder named "prints" if it doesn't exist
-    if not os.path.exists(parent_folder):
-        os.makedirs(parent_folder)
-
-    # Create a subfolder with the ID or "all" as its name
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    # Get the current date and time
-    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    # Create the file name
-    output_file = f"{output_folder}/{current_datetime}.csv"
-
-    # Print desired_rows to a CSV file
-    desired_rows.to_csv(output_file, index=False)
-
-    if id_to_export.lower() == "meta":
-        print(f"Meta exported to: {output_file}")
-    elif id_to_export.lower() == "all":
-        print(f"All rows exported to: {output_file}")
-    else:
-        print(f"Exported rows for ID {id_to_export} to: {output_file}")
+from functions import export_csv_for_id
 
 print("Merging data...")
 merged_data = []
@@ -220,6 +182,7 @@ df['Timestamp'] = pd.to_datetime(df['Timestamp'], format='%Y-%m-%d-%H:%M:%S.%f')
 encode_cyclical_features(df, 'Timestamp')
 df['Timestamp'] = df["Timestamp_temp"]
 df.drop(columns=['Timestamp_temp'], inplace=True)
+df.drop(columns=['Status'], inplace=True)
 
 # Drop the temporary columns
 meta_df.drop(columns=['TimeConnected', 'TimeDisconnected'], inplace=True)
@@ -234,7 +197,12 @@ meta_df = meta_df.sort_values(by=['ID'])
 meta_df = meta_df.reset_index(drop=True)
 
 df.drop(columns=['Value7'], inplace=True)
+# Drop rows with ID 0
+df = df[df['ID'] != 0]
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
-export_csv_for_id(df, desired_id_to_export)
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+if desired_id_to_export.lower() == "meta":
+    export_csv_for_id(meta_df, desired_id_to_export)
+else:
+    export_csv_for_id(df, desired_id_to_export)
