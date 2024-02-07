@@ -4,6 +4,17 @@ import glob
 from prince import FAMD
 import matplotlib.pyplot as plt
 import warnings
+import os
+import sys
+import inspect
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+
+import functions
+from functions import export_csv_for_id
+
 
 warnings.filterwarnings("ignore")
 
@@ -95,15 +106,11 @@ print("Principal components:")
 # Get the principal components
 principal_components = famd.transform(merged_data[numerical_cols + categorical_cols])
 
+export_csv_for_id(principal_components, "famd")
+
 # Scatter plot of principal components
 plt.scatter(principal_components.iloc[:, 0], principal_components.iloc[:, 1])
 plt.title('Scatter Plot of Principal Components')
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
-plt.show()
-
-plt.plot(range(1, len(famd.explained_inertia_) + 1), famd.explained_inertia_, marker='o')
-plt.title('Scree Plot')
-plt.xlabel('Component Number')
-plt.ylabel('Explained Inertia')
 plt.show()

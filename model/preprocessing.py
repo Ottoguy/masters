@@ -1,8 +1,6 @@
 from load_dans import all_data as data
 import pandas as pd
-import os
 from datetime import datetime
-import numpy as np
 from functions import encode_cyclical_features
 from functions import export_csv_for_id
 
