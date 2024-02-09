@@ -81,6 +81,7 @@ filename_substrings = df.groupby('ID')['Filename'].first(
 
 # Merge the new column into meta_df
 meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
+df = pd.merge(df, filename_substrings, on='ID', how='left')
 
 # Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
 df[['Phase1Current', 'Phase2Current', 'Phase3Current']] = df[['Phase1Current',
@@ -199,8 +200,11 @@ df.drop(columns=['Value7'], inplace=True)
 df = df[df['ID'] != 0]
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
-if desired_id_to_export.lower() == "meta":
+desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
+
+
+
+if desired_id_to_export.lower() == "meta_df":
     export_csv_for_id(meta_df, desired_id_to_export)
 else:
     export_csv_for_id(df, desired_id_to_export)

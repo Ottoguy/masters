@@ -39,28 +39,15 @@ latest_meta_file = meta_file_list[0]
 # Load data from the latest data file
 data = pd.read_csv(latest_data_file)
 
-# Load meta data from the latest meta file
-meta_data = pd.read_csv(latest_meta_file)
-
-# Merge data and meta data on the common ID column
-merged_data = pd.merge(data, meta_data, on='ID')
-
-# Drop columns that are not needed
-merged_data = merged_data.drop(columns=['Timestamp', 'Filename'], axis=1)
-
 # Group by 'ID' and aggregate numerical and categorical data as lists
-grouped_data = merged_data.groupby('ID').agg(lambda x: x.tolist())
+grouped_data = data.groupby('ID').agg(lambda x: x.tolist())
 
 # Separate numerical and categorical columns
 numerical_cols = ['Timestamp_sin', 'Timestamp_cos', 'Phase1Current', 'Phase2Current', 'Phase3Current',
                   'Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']
-categorical_cols = ['ChargingStatus']
+categorical_cols = ['ChargingStatus', "ChargingPoint"]
 
-# Extract required numerical and categorical features from the meta data
-numerical_meta_cols = ['Half_Minutes', 'Charging_Half_Minutes', 'TimeConnected_sin', 'TimeConnected_cos', 
-                       'TimeDisconnected_sin', 'TimeDisconnected_cos', 'Energy_Uptake']
-categorical_meta_cols = ['FullyCharged', 'ChargingPoint', 'Current_Type', 'Weekend']
-print(grouped_data[categorical_cols])
+print(grouped_data[numerical_cols])
 # Apply FAMD on grouped data
 famd = FAMD(
     n_components=2,
@@ -72,7 +59,7 @@ famd = FAMD(
     handle_unknown="error"
 )
 print("Fitting FAMD...")
-famd.fit(grouped_data[numerical_cols + categorical_cols + numerical_meta_cols + categorical_meta_cols])
+famd.fit(grouped_data)
 
 # Print FAMD results
 print("FAMD Results:")
