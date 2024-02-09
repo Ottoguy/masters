@@ -51,30 +51,41 @@ numerical_data = data[numerical_cols]
 # Standardize the numerical data
 numerical_data_standardized = (numerical_data - numerical_data.mean()) / numerical_data.std()
 
-# Specify the number of components for PCA
-num_components = 2  # Set the desired number of components
-pca = PCA(n_components=num_components)
-principal_components = pca.fit_transform(numerical_data_standardized)
+# Specify the range of components for PCA
+num_components_range = range(2, 7)
 
-# Create a DataFrame with the principal components
-columns = [f'PC{i}' for i in range(1, num_components + 1)]
-principal_df = pd.DataFrame(data=principal_components, columns=columns)
+# Create a subplot with 2 rows and 3 columns
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-# Plot the explained variance ratio
-plt.figure()
-plt.plot(range(1, num_components + 1), pca.explained_variance_ratio_.cumsum(), marker='o', linestyle='--')
-plt.xlabel('Number of Principal Components')
-plt.ylabel('Cumulative Explained Variance Ratio')
-plt.show()
+print('Creating PCA plots...')
+# Initialize PCA for the explained variance ratio subplot
+pca_variance = PCA()
+pca_variance.fit_transform(numerical_data_standardized)
 
-# Plot points in PCA space
-plt.figure()
-plt.scatter(principal_df['PC1'], principal_df['PC2'], c='b', marker='o', alpha=0.5)
-plt.title(f'PCA - PC1 vs PC2')
-plt.xlabel('Principal Component 1')
-plt.ylabel('Principal Component 2')
+# Plot the explained variance ratio in the first subplot
+axes[-1, -1].plot(range(1, len(numerical_cols) + 1), pca_variance.explained_variance_ratio_.cumsum(), marker='o', linestyle='--')
+axes[-1, -1].set_title('Explained Variance Ratio')
+axes[-1, -1].set_xlabel('Number of Components')
+axes[-1, -1].set_ylabel('Cumulative Explained Variance Ratio')
 
-# Save the figure with the current date and time in the filename
+# Loop through the number of components and create scatter plots in the other subplots
+for i, num_components in enumerate(num_components_range):
+    print(f'Creating PCA for {num_components} components...')
+    pca = PCA(n_components=num_components)
+    principal_components = pca.fit_transform(numerical_data_standardized)
+    columns = [f'PC{i}' for i in range(1, num_components + 1)]
+    principal_df = pd.DataFrame(data=principal_components, columns=columns)
+
+    # Plot points in PCA space
+    row = i // 3
+    col = i % 3
+    axes[row, col].scatter(principal_df['PC1'], principal_df['PC2'], c='b', marker='o', alpha=0.5)
+    axes[row, col].set_title(f'PCA - PC1 vs PC2 ({num_components} components)')
+    axes[row, col].set_xlabel('Principal Component 1')
+    axes[row, col].set_ylabel('Principal Component 2')
+
+# Adjust layout and save the figure with the current date and time in the filename
+plt.tight_layout()
 results_dir = "plots/pre_clustering/pca/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
