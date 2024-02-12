@@ -46,4 +46,3 @@ if not os.path.exists(results_dir):
 
 current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
 plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
-plt.show()
