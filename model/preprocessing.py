@@ -206,6 +206,21 @@ def calculate_average_voltage_difference(df, meta_df, placeholder_value=0.0):
 
     return meta_df
 
+def calculate_average_current_difference(df, meta_df, placeholder_value=0.0):
+    # Filter rows where at least one current value is nonzero
+    filtered_df = df[(df['Phase1Current'] != 0) | (df['Phase2Current'] != 0) | (df['Phase3Current'] != 0)]
+
+    # Group by ID and calculate the total difference for each group
+    grouped_df = filtered_df.groupby('ID').apply(lambda group: group[['Phase1Current', 'Phase2Current', 'Phase3Current']].diff().abs().sum(axis=1).sum())
+
+    # Calculate the average for each group normalized by the number of rows
+    average_current_difference = grouped_df.groupby('ID').mean() / filtered_df.groupby('ID').size()
+
+    # Add the result as a new column to meta_df with placeholder value for IDs with no rows
+    meta_df['AverageCurrentDifference'] = meta_df['ID'].map(average_current_difference).fillna(placeholder_value)
+
+    return meta_df
+
 # Load the data
 df = load_data(data)
 # Create the meta dataframe
@@ -228,6 +243,8 @@ meta_df = weekend(meta_df)
 df, meta_df = cyclical_time(df, meta_df)
 # Calculate the average voltage difference and add it as a new column to meta_df
 meta_df = calculate_average_voltage_difference(df, meta_df)
+# Calculate the average current difference and add it as a new column to meta_df
+meta_df = calculate_average_current_difference(df, meta_df)
 
 # Example: Export CSV for a specific ID or all rows
 desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
