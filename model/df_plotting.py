@@ -59,13 +59,13 @@ def create_plot(id_value, data):
                 days.append(day)
                 day_count += 1
             timestamps.append(str(day_count) + "-" + str(timestamp))
-            phase1_current.append(float(row[3]))
-            phase2_current.append(float(row[4]))
-            phase3_current.append(float(row[5]))
-            phase1_voltage.append(float(row[6]))
-            phase2_voltage.append(float(row[7]))
-            phase3_voltage.append(float(row[8]))
-            status.append(row[-5])
+            phase1_current.append(float(row[2]))
+            phase2_current.append(float(row[3]))
+            phase3_current.append(float(row[4]))
+            phase1_voltage.append(float(row[5]))
+            phase2_voltage.append(float(row[6]))
+            phase3_voltage.append(float(row[7]))
+            status.append(row[8])
         print("Creating figure " + plot_name, end='\r')
 
         # Create subplots using gridspec
@@ -185,7 +185,7 @@ def create_plot(id_value, data):
         plt.close()
 
 # Identify the column index for the "ID" field (adjust as needed)
-id_column_index = 11
+id_column_index = 9
 
 # Iterate over the data and create plots for each unique ID
 current_id = None
