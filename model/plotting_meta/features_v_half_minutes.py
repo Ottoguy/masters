@@ -89,6 +89,11 @@ for i, x_column in enumerate(x_columns):
     axes[i].set_title(f'Scatter Plot: Half_Minutes vs {x_column}')
     axes[i].set_xlabel(x_column)
     axes[i].set_ylabel('Half_Minutes')
+    
+    # Check if the current column is in the list of columns where you want a logarithmic x-axis
+    if x_column in ['MaxVoltage', 'MaxCurrent', 'AverageVoltageDifference', "AverageCurrentDifference"]:  # Replace with the actual column names
+        axes[i].set_xscale('log')  # Set x-axis to logarithmic scale
+    
     axes[i].set_yscale('log')  # Set y-axis to logarithmic scale
 
     # Enable hover over points to display ID
