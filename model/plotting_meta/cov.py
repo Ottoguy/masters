@@ -24,11 +24,14 @@ latest_file = file_list[0]
 # Load your data from the latest file
 data = pd.read_csv(latest_file)
 
-# Exclude the 'ID' field and original time columns
-numeric_columns = data.drop(columns=['ID']).select_dtypes(include=['float64', 'int64'])
+# Exclude fields
+numeric_columns = data.drop(columns=['ID', "Charging_Half_Minutes"]).select_dtypes(include=['float64', 'int64'])
 
 # Create covariance matrix
 covariance_matrix = numeric_columns.cov()
+
+# Remove diagonal elements
+np.fill_diagonal(covariance_matrix.values, np.nan)
 
 # Set up the matplotlib figure
 plt.figure(figsize=(14, 12))
