@@ -311,7 +311,7 @@ meta_df = max_current(df, meta_df)
 meta_df = filter_zero_values(meta_df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
