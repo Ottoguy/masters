@@ -4,6 +4,7 @@ import glob
 from prince import FAMD
 import matplotlib.pyplot as plt
 import warnings
+from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore")
 
@@ -29,46 +30,39 @@ data = pd.read_csv(latest_file)
 columns_to_drop = ['ID', 'TimeConnected', 'TimeDisconnected']
 data = data.drop(columns=columns_to_drop)
 
-cumulative_variance_list = []
-# Iterate over different values of n_components
-for n_components in range(2, 15):
-    explained_variance = None
-    cumulative_variance = None
-    # Perform Factor Analysis of Mixed Data (FAMD)
-    famd = FAMD(
-        n_components=n_components,
-        n_iter=3,
-        copy=True,
-        check_input=True,
-        random_state=42,
-        engine="sklearn",
-        handle_unknown="error"
-    )
-    famd = famd.fit(data)
+# Standardize numerical columns
+numerical_columns = data.select_dtypes(include=['float64']).columns
+data[numerical_columns] = StandardScaler().fit_transform(data[numerical_columns])
 
-    # Calculate explained variance manually
-    explained_variance = famd.eigenvalues_ / famd.eigenvalues_.sum()
-    cumulative_variance = explained_variance.cumsum()
-    cumulative_variance_list.append(cumulative_variance[-2])
+explained_variance = None
+cumulative_variance = None
+# Perform Factor Analysis of Mixed Data (FAMD)
+famd = FAMD(
+    n_components=5,
+    n_iter=3,
+    copy=True,
+    check_input=True,
+    random_state=42,
+    engine="sklearn",
+    handle_unknown="error"
+)
+famd = famd.fit(data)
 
-print(cumulative_variance_list)
-# Plot cumulative variance explained
-plt.plot(range(1, len(cumulative_variance_list) + 1), cumulative_variance_list, label=f'n_components = {n_components}')
+# Calculate explained variance manually
+explained_variance = famd.eigenvalues_ / famd.eigenvalues_.sum()
+cumulative_variance = explained_variance.cumsum()
 
-# Add labels and title
-plt.xlabel('Number of Principal Components')
-plt.ylabel('Cumulative Variance Explained')
-plt.title('Cumulative Variance Explained for Different n_components')
-
-# Add a legend
-plt.legend()
-
-# Show the plot
-plt.show()
-
+print(explained_variance)
 # Display the principal coordinates
-print("Principal Coordinates:\n", famd.row_coordinates(data))
-print(famd.eigenvalues_summary)
-print(famd.column_coordinates_)
-print(famd.row_contributions_.sort_values(0, ascending=False).head(5).style.format('{:.3%}'))
-print(famd.column_contributions_.style.format('{:.0%}'))
+#print("Principal Coordinates:\n", famd.row_coordinates(data))
+#print(famd.eigenvalues_summary)
+#print(famd.column_coordinates_)
+#print(famd.row_contributions_.sort_values(0, ascending=False).head(5).style.format('{:.3%}'))
+#print(famd.column_contributions_.style.format('{:.0%}'))
+
+# Plot the cumulative explained variance
+plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o')
+plt.title('Cumulative Explained Variance')
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.show()
