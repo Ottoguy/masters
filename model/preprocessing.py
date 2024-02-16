@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from functions import encode_cyclical_features
 from functions import export_csv_for_id
+import numpy as np
 
 def load_data(data):
     print("Merging data...")
@@ -276,6 +277,20 @@ def filter_zero_values(meta_df):
 
     return filtered_df
 
+def voltage_diff(df):
+    # Add 'VoltageDiff' column
+    print("Adding VoltageDiff column...")
+    voltage_columns = ['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']
+    df['VoltageDiff'] = df[voltage_columns].apply(lambda row: np.max(row) - np.min(row), axis=1)
+    return df
+
+def current_diff(df):
+    # Add 'CurrentDiff' column
+    print("Adding CurrentDiff column...")
+    current_columns = ['Phase1Current', 'Phase2Current', 'Phase3Current']
+    df['CurrentDiff'] = df[current_columns].apply(lambda row: np.max(row) - np.min(row), axis=1)
+    return df
+
 
 # Load the data
 df = load_data(data)
@@ -309,9 +324,13 @@ meta_df = max_voltage(df, meta_df)
 meta_df = max_current(df, meta_df)
 # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
 meta_df = filter_zero_values(meta_df)
+# Add new column 'VoltageDiff' to df
+df = voltage_diff(df)
+# Add new column 'CurrentDiff' to df
+df = current_diff(df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "meta"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
