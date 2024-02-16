@@ -6,6 +6,8 @@ from tslearn.clustering import TimeSeriesKMeans, silhouette_score
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from tslearn.utils import to_time_series
 import matplotlib.pyplot as plt
+from tslearn.clustering import TimeSeriesKMeans
+from tslearn.utils import to_time_series_dataset
 
 # Specify the directory where your files are located
 folder_path = 'prints/all/'
@@ -32,17 +34,25 @@ print(time_series_data.head())
 
 # Handle missing values if any and create a copy
 time_series_data = time_series_data.dropna().copy()
+print("Converted time series data to a dataset")
+time_series_data = to_time_series_dataset(time_series_data)
+print(time_series_data)
 
 # Extract the time series data for clustering
-time_series_voltage = time_series_data.pivot(index='ID', columns='VoltageDiff', values='VoltageDiff').values
-time_series_current = time_series_data.pivot(index='ID', columns='CurrentDiff', values='CurrentDiff').values
+print("Extracting time series data for clustering...")
+#time_series_voltage = time_series_data.pivot(index='ID', columns='VoltageDiff', values='VoltageDiff').values
+#time_series_current = time_series_data.pivot(index='ID', columns='CurrentDiff', values='CurrentDiff').values
+time_series_voltage = time_series_data[:, :, 0]
+time_series_current = time_series_data[:, :, 1]
+print(time_series_voltage)
 
 # Convert the data to time series format
+print("Converting time series data to a suitable format for clustering...")
 X_voltage = to_time_series(time_series_voltage)
 X_current = to_time_series(time_series_current)
 
 # Check if scaled data file exists for VoltageDiff
-scaled_data_voltage_file_path = 'scaled_data_voltage.npy'
+scaled_data_voltage_file_path = 'prints/scaled_data_voltage.npy'
 if os.path.exists(scaled_data_voltage_file_path):
     # Ask the user if they want to use the existing scaled data
     user_input = input("Scaled data for VoltageDiff already exists. Do you want to use it? (y/n): ").lower()
@@ -65,7 +75,7 @@ else:
     np.save(scaled_data_voltage_file_path, scaled_data_voltage)
 
 # Check if scaled data file exists for CurrentDiff
-scaled_data_current_file_path = 'scaled_data_current.npy'
+scaled_data_current_file_path = 'prints/scaled_data_current.npy'
 if os.path.exists(scaled_data_current_file_path):
     # Ask the user if they want to use the existing scaled data
     user_input = input("Scaled data for CurrentDiff already exists. Do you want to use it? (y/n): ").lower()
@@ -95,15 +105,15 @@ print("Clustering time series data for VoltageDiff...")
 kmeans_voltage = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
 labels_voltage = kmeans_voltage.fit_predict(scaled_data_voltage)
 
-# Apply TimeSeriesKMeans clustering with DTW as the metric for CurrentDiff
-print("Clustering time series data for CurrentDiff...")
-kmeans_current = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
-labels_current = kmeans_current.fit_predict(scaled_data_current)
-
 # Save the clustered data to a file for VoltageDiff
 clustered_data_voltage_file_path = 'clustered_data_voltage.csv'
 clustered_data_voltage = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels_voltage})
 clustered_data_voltage.to_csv(clustered_data_voltage_file_path, index=False)
+
+# Apply TimeSeriesKMeans clustering with DTW as the metric for CurrentDiff
+print("Clustering time series data for CurrentDiff...")
+kmeans_current = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
+labels_current = kmeans_current.fit_predict(scaled_data_current)
 
 # Save the clustered data to a file for CurrentDiff
 clustered_data_current_file_path = 'clustered_data_current.csv'
