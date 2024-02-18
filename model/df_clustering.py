@@ -28,118 +28,65 @@ latest_file = file_list[0]
 df = pd.read_csv(latest_file)
 
 # Extract relevant columns
-time_series_data = df[['ID', 'VoltageDiff', 'CurrentDiff']]
+time_series_data = df[['ID', 'VoltageDiff', 'CurrentDiff']].copy()
 
-print(time_series_data.head())
+# Reshape the DataFrame with variable length time series
+time_series_list = []
 
-# Handle missing values if any and create a copy
-time_series_data = time_series_data.dropna().copy()
-print("Converted time series data to a dataset")
-time_series_data = to_time_series_dataset(time_series_data)
-print(time_series_data)
+for id_value, group in time_series_data.groupby('ID'):
+    features = group[['VoltageDiff', 'CurrentDiff']].values
+    time_series_list.append(features)
 
-# Extract the time series data for clustering
-print("Extracting time series data for clustering...")
-#time_series_voltage = time_series_data.pivot(index='ID', columns='VoltageDiff', values='VoltageDiff').values
-#time_series_current = time_series_data.pivot(index='ID', columns='CurrentDiff', values='CurrentDiff').values
-time_series_voltage = time_series_data[:, :, 0]
-time_series_current = time_series_data[:, :, 1]
-print(time_series_voltage)
+# Convert to time series dataset if needed
+time_series_dataset = to_time_series_dataset(time_series_list)
 
-# Convert the data to time series format
-print("Converting time series data to a suitable format for clustering...")
-X_voltage = to_time_series(time_series_voltage)
-X_current = to_time_series(time_series_current)
+# Print the shape of the reshaped data
+print("Reshaped Data Shape:", time_series_dataset.shape)
 
 # Check if scaled data file exists for VoltageDiff
-scaled_data_voltage_file_path = 'prints/scaled_data_voltage.npy'
-if os.path.exists(scaled_data_voltage_file_path):
+scaled_data_file_path = 'prints/scaled_data.npy'
+if os.path.exists(scaled_data_file_path):
     # Ask the user if they want to use the existing scaled data
-    user_input = input("Scaled data for VoltageDiff already exists. Do you want to use it? (y/n): ").lower()
+    user_input = input("Scaled data already exists. Do you want to use it? (y/n): ").lower()
     if user_input == 'y':
         # Load the existing scaled data
-        scaled_data_voltage = np.load(scaled_data_voltage_file_path)
+        scaled_data = np.load(scaled_data_file_path)
     else:
         # Scale the time series data
-        print("Scaling time series data for VoltageDiff...")
+        print("Scaling time series data...")
         scaler = TimeSeriesScalerMeanVariance()
-        scaled_data_voltage = scaler.fit_transform(X_voltage)
+        scaled_data = scaler.fit_transform(time_series_dataset)
         # Save the scaled data to a file
-        np.save(scaled_data_voltage_file_path, scaled_data_voltage)
+        np.save(scaled_data_file_path, scaled_data)
 else:
     # Scale the time series data
-    print("Scaling time series data for VoltageDiff...")
+    print("Scaling time series data...")
     scaler = TimeSeriesScalerMeanVariance()
-    scaled_data_voltage = scaler.fit_transform(X_voltage)
+    scaled_data = scaler.fit_transform(time_series_dataset)
     # Save the scaled data to a file
-    np.save(scaled_data_voltage_file_path, scaled_data_voltage)
-
-# Check if scaled data file exists for CurrentDiff
-scaled_data_current_file_path = 'prints/scaled_data_current.npy'
-if os.path.exists(scaled_data_current_file_path):
-    # Ask the user if they want to use the existing scaled data
-    user_input = input("Scaled data for CurrentDiff already exists. Do you want to use it? (y/n): ").lower()
-    if user_input == 'y':
-        # Load the existing scaled data
-        scaled_data_current = np.load(scaled_data_current_file_path)
-    else:
-        # Scale the time series data
-        print("Scaling time series data for CurrentDiff...")
-        scaler = TimeSeriesScalerMeanVariance()
-        scaled_data_current = scaler.fit_transform(X_current)
-        # Save the scaled data to a file
-        np.save(scaled_data_current_file_path, scaled_data_current)
-else:
-    # Scale the time series data
-    print("Scaling time series data for CurrentDiff...")
-    scaler = TimeSeriesScalerMeanVariance()
-    scaled_data_current = scaler.fit_transform(X_current)
-    # Save the scaled data to a file
-    np.save(scaled_data_current_file_path, scaled_data_current)
+    np.save(scaled_data_file_path, scaled_data)
 
 # Choose the number of clusters (you may need to experiment with this)
 num_clusters = 3
 
-# Apply TimeSeriesKMeans clustering with DTW as the metric for VoltageDiff
-print("Clustering time series data for VoltageDiff...")
-kmeans_voltage = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
-labels_voltage = kmeans_voltage.fit_predict(scaled_data_voltage)
+# Apply TimeSeriesKMeans clustering with DTW as the metric
+print("Clustering time series data...")
+kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
+labels = kmeans.fit_predict(scaled_data)
 
-# Save the clustered data to a file for VoltageDiff
-clustered_data_voltage_file_path = 'clustered_data_voltage.csv'
-clustered_data_voltage = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels_voltage})
-clustered_data_voltage.to_csv(clustered_data_voltage_file_path, index=False)
+# Save the clustered data to a file
+clustered_data_file_path = 'clustered_data.csv'
+clustered_data = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels})
+clustered_data.to_csv(clustered_data_file_path, index=False)
 
-# Apply TimeSeriesKMeans clustering with DTW as the metric for CurrentDiff
-print("Clustering time series data for CurrentDiff...")
-kmeans_current = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=True)
-labels_current = kmeans_current.fit_predict(scaled_data_current)
-
-# Save the clustered data to a file for CurrentDiff
-clustered_data_current_file_path = 'clustered_data_current.csv'
-clustered_data_current = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels_current})
-clustered_data_current.to_csv(clustered_data_current_file_path, index=False)
-
-# Visualize the clusters for VoltageDiff
-print("Visualizing clusters for VoltageDiff...")
+# Visualize the clusters
+print("Visualizing clusters...")
 for cluster_id in range(num_clusters):
-    cluster_subset = clustered_data_voltage[clustered_data_voltage['Cluster'] == cluster_id]
+    cluster_subset = clustered_data[clustered_data['Cluster'] == cluster_id]
     plt.scatter(cluster_subset['ID'], [cluster_id] * len(cluster_subset), label=f'Cluster {cluster_id}')
 
 plt.xlabel('ID')
 plt.ylabel('Cluster')
-plt.title('Time Series Clustering with DTW for VoltageDiff')
-plt.legend()
-plt.show()
-
-# Visualize the clusters for CurrentDiff
-print("Visualizing clusters for CurrentDiff...")
-for cluster_id in range(num_clusters):
-    cluster_subset = clustered_data_current[clustered_data_current['Cluster'] == cluster_id]
-    plt.scatter(cluster_subset['ID'], [cluster_id] * len(cluster_subset), label=f'Cluster {cluster_id}')
-
-plt.xlabel('ID')
-plt.ylabel('Cluster')
-plt.title('Time Series Clustering with DTW for CurrentDiff')
+plt.title('Time Series Clustering with DTW')
 plt.legend()
 plt.show()
