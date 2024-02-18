@@ -26,6 +26,9 @@ def export_csv_for_id(df, id_to_export, parent_folder="prints"):
     elif id_to_export.lower() == "pca_list":
         desired_rows = df.copy()
         output_folder = os.path.join(parent_folder, "pca_list")
+    elif id_to_export.lower() == "dtw":
+        desired_rows = df.copy()
+        output_folder = os.path.join(parent_folder, "dtw")
     else:
         # Filter DataFrame based on the desired ID
         desired_rows = df[df['ID'] == id_to_export]
