@@ -11,7 +11,7 @@ latest_ts_file = max(ts_files, key=os.path.getmtime)
 df_ts = pd.read_csv(latest_ts_file)
 
 # Specify the directory where your ID-cluster mapping files are located
-id_cluster_folder_path = 'prints/ts_clustering/10_clusters/'
+id_cluster_folder_path = 'prints/ts_clustering/20_clusters/'
 
 # Get a list of all files in the specified format within the chosen subfolder
 id_cluster_files = glob.glob(os.path.join(id_cluster_folder_path, '*.csv'))
@@ -75,7 +75,7 @@ for cluster_id in range(0, num_clusters):
     axes[cluster_id, 1].grid(True)
 
 # Add overall titles, labels, etc. for the entire figure
-plt.suptitle('Current and Voltage Time Series for Each Cluster')
+plt.suptitle(f'Current and Voltage Time Series for {num_clusters} clusters')
 plt.xlabel('Time')
 plt.tight_layout()
 

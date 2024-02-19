@@ -61,7 +61,7 @@ print("Reshaped Data Shape:", time_series_dataset.shape)
 scaled_data=time_series_dataset
 
 # Specify the range of clusters to iterate over
-num_clusters_range = range(2, 21)
+num_clusters_range = range(20, 21)
 
 # Iterate over different numbers of clusters
 best_s_score = float('-inf')
