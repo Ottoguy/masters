@@ -17,12 +17,12 @@ def load_data(data):
 
     print("Creating dataframe...")
     df = pd.DataFrame(merged_data, columns=columns)
-    # Drop rows with ID 0
-    df = df[df['ID'] != 0]
     # Sort by ID and Timestamp
     df = df.sort_values(by=['ID', 'Timestamp'])
     # Reset index
     df = df.reset_index(drop=True)
+    # Drop rows with ID 0
+    df = df[df['ID'] != 0]
     df.drop(columns=['Value7', 'Value10'], inplace=True)
 
     return df
@@ -277,6 +277,13 @@ def filter_zero_values(meta_df):
 
     return filtered_df
 
+#Function for sorting away all rows with IDs that are not in meta_df
+def filter_df(df, meta_df):
+    print("Filtering df based on meta_df...")
+    filtered_df = df[df['ID'].isin(meta_df['ID'])]
+    print(f"Filtered {len(df) - len(filtered_df)} rows based on meta_df.")
+    return filtered_df
+
 def voltage_diff(df):
     # Add 'VoltageDiff' column
     print("Adding VoltageDiff column...")
@@ -290,6 +297,23 @@ def current_diff(df):
     current_columns = ['Phase1Current', 'Phase2Current', 'Phase3Current']
     df['CurrentDiff'] = df[current_columns].apply(lambda row: np.max(row) - np.min(row), axis=1)
     return df
+
+#Filter away df strictly
+def charge60(df, meta_df):
+    #Filter away all IDs where none of the first 60 rows are charging
+    print("Strictly filtering df based on meta_df...")
+    initial_row_count = len(df)
+    ids_to_filter = meta_df[meta_df['Charging_Half_Minutes'] == 0]['ID']
+    filtered_df = df[~df['ID'].isin(ids_to_filter)]
+    print(f"Filtered {initial_row_count - len(filtered_df)} rows based on meta_df.")
+    #Also remove the IDs from meta_df
+    filtered_meta_df = meta_df[meta_df['ID'].isin(filtered_df['ID'])]
+    return filtered_df, filtered_meta_df
+
+def extract60(df, meta_df):
+    # Extract 60 timestamps for each ID
+    extracted_df = df.groupby('ID').head(60)
+    return extracted_df
 
 
 # Load the data
@@ -324,15 +348,23 @@ meta_df = max_voltage(df, meta_df)
 meta_df = max_current(df, meta_df)
 # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
 meta_df = filter_zero_values(meta_df)
+# Filter df based on meta_df
+df = filter_df(df, meta_df)
 # Add new column 'VoltageDiff' to df
 df = voltage_diff(df)
 # Add new column 'CurrentDiff' to df
 df = current_diff(df)
+# Filter df based on first 60 rows
+df, meta_df = charge60(df, meta_df)
+#Make new dataframe with 60 extracted timestamps from each ID
+extracted_df = extract60(df, meta_df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "extracted"  # Or "all" for all rows, or "meta" for meta_df
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
+elif desired_id_to_export.lower() == "extracted":
+    export_csv_for_id(extracted_df, desired_id_to_export)
 else:
     export_csv_for_id(df, desired_id_to_export)

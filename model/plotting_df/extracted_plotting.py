@@ -8,13 +8,10 @@ import glob
 import csv
 from matplotlib.lines import Line2D
 
-# Choose preprocessing type
-preprocessing_type = "none"
-
 # Get the list of CSV files in the directory
 csv_files = glob.glob('prints/all/*.csv')
 
-results_dir = "plots/df/"
+results_dir = "plots/extracted_df/"
 
 # Sort the files based on modification time and get the latest file
 latest_csv_file = max(csv_files, key=os.path.getmtime)
@@ -95,34 +92,8 @@ def create_plot(id_value, data):
         ax2.grid(alpha=0.3, linestyle='--')
 
         # Only display as many timestamps as are needed for the plot
-        timeStep = " Default"
-        if (len(timestamps) > 10000):
-            timeStep = " (960 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::960])
-        elif (len(timestamps) > 5000):
-            timeStep = " (480 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::480])
-        elif (len(timestamps) > 2000):
-            timeStep = " (240 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::240])
-        elif (len(timestamps) > 800):
-            timeStep = " (120 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::120])
-        elif (len(timestamps) > 400):
-            timeStep = " (60 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::60])
-        elif (len(timestamps) > 250):
-            timeStep = " (40 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::40])
-        elif (len(timestamps) > 100):
-            timeStep = " (20 step, # of data rows: " + str(len(timestamps)) + ")"
-            plt.xticks(timestamps[::20])
-        elif (len(timestamps) > 50):
-            timeStep = " (10 step), timestamplength: " + str(len(timestamps))
-            plt.xticks(timestamps[::10])
-        else:
-            timeStep = " (5 step), timestamplength: " + str(len(timestamps))
-            plt.xticks(timestamps[::5])
+        timeStep = " (10 step), timestamplength: " + str(len(timestamps))
+        plt.xticks(timestamps[::10])
 
         # Create a separate subplot for the horizontal bar
         ax3 = plt.subplot(gs[2], sharex=ax1)
