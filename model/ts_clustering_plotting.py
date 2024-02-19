@@ -3,6 +3,7 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 from functions import export_csv_for_id
+from datetime import datetime
 
 # Load the data from the latest CSV file containing time series data
 ts_files = glob.glob('prints/extracted/*.csv')
@@ -10,7 +11,7 @@ latest_ts_file = max(ts_files, key=os.path.getmtime)
 df_ts = pd.read_csv(latest_ts_file)
 
 # Specify the directory where your ID-cluster mapping files are located
-id_cluster_folder_path = 'prints/ts_clustering/5_clusters/'
+id_cluster_folder_path = 'prints/ts_clustering/10_clusters/'
 
 # Get a list of all files in the specified format within the chosen subfolder
 id_cluster_files = glob.glob(os.path.join(id_cluster_folder_path, '*.csv'))
@@ -38,7 +39,7 @@ current_column = 'Phase1Current'
 voltage_column = 'Phase1Voltage'
 
 # Create subplots with two columns (current and voltage)
-fig, axes = plt.subplots(num_clusters, 2, figsize=(12, 4*num_clusters), sharex=True)
+fig, axes = plt.subplots(num_clusters, 2, figsize=(12, 4*num_clusters), sharex=True, sharey='col')
 
 # Iterate through each cluster
 for cluster_id in range(0, num_clusters):
@@ -76,4 +77,14 @@ for cluster_id in range(0, num_clusters):
 # Add overall titles, labels, etc. for the entire figure
 plt.suptitle('Current and Voltage Time Series for Each Cluster')
 plt.xlabel('Time')
-plt.show()
+plt.tight_layout()
+
+results_dir = "plots/ts_clustering/"
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
+# Save the figure with the current date and time in the filename
+current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+print(f"Saving figure {current_datetime}", end='\r')
+plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
+plt.close()
