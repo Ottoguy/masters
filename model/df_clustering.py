@@ -61,28 +61,53 @@ print("Reshaped Data Shape:", time_series_dataset.shape)
 
 scaled_data=time_series_dataset
 
-# Choose the number of clusters (you may need to experiment with this)
-num_clusters = 6
+# Specify the range of clusters to iterate over
+num_clusters_range = range(2, 21)
 
-# Apply TimeSeriesKMeans clustering with DTW as the metric
-print("Clustering time series data...")
-kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", n_jobs=num_cores, verbose=True)
-labels = kmeans.fit_predict(scaled_data)
+# Iterate over different numbers of clusters
+best_s_score = float('-inf')
+best_num_clusters = None
 
-#Calculate silhouette score
-s_score = silhouette_score(scaled_data, labels, metric="dtw", n_jobs=num_cores)
-
-print("Saving clustered data to a file...")
 # Save the figure with the current date and time in the filename
 results_dir = "prints/ts_clustering/"
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-# Save the clustered data to a file
-clustered_data_file_path = 'clustered_data_'
-clustered_data = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters})
-clustered_data.to_csv(results_dir + clustered_data_file_path + current_datetime + ".csv", index=False)
+# Iterate over different numbers of clusters
+for num_clusters in num_clusters_range:
+    print(f"Clustering time series data with {num_clusters} clusters...")
+
+    # Apply TimeSeriesKMeans clustering with DTW as the metric
+    kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", n_jobs=num_cores, verbose=True)
+    labels = kmeans.fit_predict(scaled_data)
+
+    # Calculate silhouette score
+    s_score = silhouette_score(scaled_data, labels, metric="dtw", n_jobs=num_cores)
+
+    # Print silhouette score for the current number of clusters
+    print(f"Silhouette Score for {num_clusters} clusters: {s_score}")
+
+    # Create a subfolder for the current number of clusters
+    subfolder_path = os.path.join(results_dir, f"{num_clusters}_clusters")
+    if not os.path.exists(subfolder_path):
+        os.makedirs(subfolder_path)
+
+    # Save the clustered data to a file within the subfolder
+    clustered_data_file_path = 'clustered_data_'
+    clustered_data = pd.DataFrame(
+        {'ID': time_series_data['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters})
+    clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + ".csv"), index=False)
+
+    # Print stats for each cluster within the subfolder
+    print(f"Printing stats for each cluster in {num_clusters} clusters...")
+    for i in range(num_clusters):
+        cluster_stats = clustered_data[clustered_data['Cluster'] == i].describe()
+        print(f"Cluster {i} stats:\n{cluster_stats}")
+
+# Print the best number of clusters and its corresponding silhouette score
+print(f"\nBest number of clusters: {best_num_clusters}")
+print(f"Silhouette Score for the best number of clusters: {best_s_score}")
 
 #Print stats for each cluster
 print("Printing stats for each cluster...")
