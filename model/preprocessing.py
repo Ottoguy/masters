@@ -56,6 +56,18 @@ def filter_meta(meta_df, df):
 
     return meta_df
 
+def time_connected_disconnected(df, meta_df):
+    # Add new columns for 'Time connected' and 'Time disconnected'
+    first_timestamps = df.groupby(
+        'ID')['Timestamp'].first().reset_index(name='TimeConnected')
+    last_timestamps = df.groupby('ID')['Timestamp'].last(
+    ).reset_index(name='TimeDisconnected')
+    # Merge the new columns into meta_df
+    meta_df = pd.merge(meta_df, first_timestamps, on='ID', how='left')
+    meta_df = pd.merge(meta_df, last_timestamps, on='ID', how='left')
+    
+    return meta_df
+
 def max_voltage(df, meta_df):
     # Group by 'ID' in df and find the maximum value of 'Phase1Voltage', 'Phase2Voltage', and 'Phase3Voltage'
     max_voltages = df.groupby('ID')[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']].max()
@@ -88,6 +100,10 @@ def filter_zero_values(meta_df):
     # Count the rows before filtering
     initial_row_count = len(meta_df)
 
+    #Convert MaxVoltage and MaxCurrent to float
+    meta_df['MaxVoltage'] = meta_df['MaxVoltage'].astype(float)
+    meta_df['MaxCurrent'] = meta_df['MaxCurrent'].astype(float)
+
     # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
     filtered_df = meta_df[(meta_df['MaxVoltage'] != 0) & (meta_df['MaxCurrent'] != 0)]
 
@@ -115,6 +131,12 @@ def charge60(df, meta_df):
     print(f"Filtered {len(df) - len(filtered_df)} rows based on the first 60 rows (if not any charging).")
     return filtered_df, filtered_meta_df
 
+#Filter away ids in meta_df that are not in df
+def filter_meta_df(df, meta_df):
+    filtered_meta_df = meta_df[meta_df['ID'].isin(df['ID'])]
+    print(f"Filtered {len(meta_df) - len(filtered_meta_df)} ids in meta_df whose ids have already been filtered from df.")
+    return filtered_meta_df
+
 def fully_charged(df, meta_df, streak_percentage):
     # Add new column 'FullyCharged', considering the last contiguous streak of "Charging" values
     last_status = df.groupby('ID')['ChargingStatus'].last().reset_index(name='LastStatus')
@@ -130,18 +152,6 @@ def fully_charged(df, meta_df, streak_percentage):
     # Drop unnecessary columns
     meta_df.drop(columns=['LastStatus', 'LastStreakSize', 'StreakPercentage'], inplace=True)
 
-    return meta_df
-
-def time_connected_disconnected(df, meta_df):
-    # Add new columns for 'Time connected' and 'Time disconnected'
-    first_timestamps = df.groupby(
-        'ID')['Timestamp'].first().reset_index(name='TimeConnected')
-    last_timestamps = df.groupby('ID')['Timestamp'].last(
-    ).reset_index(name='TimeDisconnected')
-    # Merge the new columns into meta_df
-    meta_df = pd.merge(meta_df, first_timestamps, on='ID', how='left')
-    meta_df = pd.merge(meta_df, last_timestamps, on='ID', how='left')
-    
     return meta_df
 
 def charging_point(df, meta_df):
@@ -306,17 +316,29 @@ def current_diff(df):
     df['CurrentDiff'] = df[current_columns].apply(lambda row: np.max(row) - np.min(row), axis=1)
     return df
 
+#Edit the original dataframe to only include rows that are not in meta_df
+def discarded_df(original, meta_df):
+    filtered_df = original[~original['ID'].isin(meta_df['ID'])]
+    print(f"Separated {len(original) - len(filtered_df)} rows in original df to discarded folder whose ids have already been filtered from meta_df.")
+    return filtered_df
+
 def extract60(df, meta_df):
     # Extract 60 timestamps for each ID
     extracted_df = df.groupby('ID').head(60)
+    #Remove the ids where the last row is not charging
+    extracted_df = extracted_df[extracted_df['ChargingStatus'] == 'Charging']
     return extracted_df
 
 # Load the data
 df = load_data(data)
+# Save Original df
+original = df.copy()
 # Create the meta dataframe
 meta_df = create_meta(df)
 # Filter the meta dataframe
 meta_df = filter_meta(meta_df, df)
+# Add columns for 'Time connected' and 'Time disconnected' to meta_df
+meta_df = time_connected_disconnected(df, meta_df)
 # Add new column 'MaxVoltage' to meta_df
 meta_df = max_voltage(df, meta_df)
 # Add new column 'MaxCurrent' to meta_df
@@ -327,10 +349,10 @@ meta_df = filter_zero_values(meta_df)
 df = filter_df(df, meta_df)
 # Filter df based on first 60 rows
 df, meta_df = charge60(df, meta_df)
+# Filter meta_df based on df
+meta_df = filter_meta_df(df, meta_df)
 # Determine if the car is fully charged, streak_percentage is how many percent of the last contiguous streak of "Charging" (as a part of all "Charging"-values) for the car to be considered fully charged
 meta_df = fully_charged(df, meta_df, streak_percentage=0.2)
-# Add columns for 'Time connected' and 'Time disconnected' to meta_df
-meta_df = time_connected_disconnected(df, meta_df)
 # Add new column 'ChargingPoint' to df and meta_df
 df, meta_df = charging_point(df, meta_df)
 # Add new column 'Effect' to df, and cleanup Voltage and Current values
@@ -348,18 +370,22 @@ meta_df = calculate_average_voltage_difference(df, meta_df)
 # Calculate the average current difference and add it as a new column to meta_df
 meta_df = calculate_average_current_difference(df, meta_df)
 # Add new column 'VoltageDiff' to df
-df = voltage_diff(df)
+#df = voltage_diff(df)
 # Add new column 'CurrentDiff' to df
-df = current_diff(df)
+#df = current_diff(df)
+# Filtered df
+filtered_df = discarded_df(original, df)
 #Make new dataframe with 60 extracted timestamps from each ID
 extracted_df = extract60(df, meta_df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "extracted"  # Or "all" for all rows, "meta" for meta_df, "extracted" for extracted_df, "filtered" for filtered_df, or a specific ID
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
 elif desired_id_to_export.lower() == "extracted":
     export_csv_for_id(extracted_df, desired_id_to_export)
+elif desired_id_to_export.lower() == "filtered":
+    export_csv_for_id(filtered_df, desired_id_to_export)
 else:
     export_csv_for_id(df, desired_id_to_export)
