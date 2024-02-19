@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.utils import to_time_series_dataset
 from functions import export_csv_for_id
+from sklearn.preprocessing import StandardScaler
 
 # Use joblib for parallel processing
 num_cores = -1  # Set to -1 to use all available cores
@@ -33,11 +34,17 @@ df = pd.read_csv(latest_file)
 # Extract relevant columns
 time_series_data = df[['ID', 'VoltageDiff', 'CurrentDiff']].copy()
 
-# Manually z-normalize the features "VoltageDiff" and "CurrentDiff" separately
-#time_series_data[['VoltageDiff', 'CurrentDiff']] = time_series_data.groupby('ID')[['VoltageDiff', 'CurrentDiff']].transform(lambda x: zscore(x, nan_policy='omit'))
+print("Scaling time series data...")
+# Separate standard scaling for 'VoltageDiff' and 'CurrentDiff'
+scaler_voltage = StandardScaler()
+scaler_current = StandardScaler()
 
-# Manually z-normalize the features "VoltageDiff" and "CurrentDiff" for the entire dataset
-time_series_data[['VoltageDiff', 'CurrentDiff']] = time_series_data[['VoltageDiff', 'CurrentDiff']].apply(lambda x: zscore(x, nan_policy='omit'))
+# Fit and transform each feature
+time_series_data['VoltageDiff'] = scaler_voltage.fit_transform(time_series_data[['VoltageDiff']].dropna())
+time_series_data['CurrentDiff'] = scaler_current.fit_transform(time_series_data[['CurrentDiff']].dropna())
+
+# Round the values to 4 decimals
+time_series_data = time_series_data.round({'VoltageDiff': 4, 'CurrentDiff': 4})
 
 # Reshape the DataFrame with variable length time series
 time_series_list = []
@@ -52,22 +59,21 @@ time_series_dataset = to_time_series_dataset(time_series_list)
 # Print the shape of the reshaped data
 print("Reshaped Data Shape:", time_series_dataset.shape)
 
-#Save the reshaped data to a file
-#df1 = pd.DataFrame(data=time_series_dataset[:,:,0])
-#df2 = pd.DataFrame(data=time_series_dataset[:,:,1])
-#export_csv_for_id(df1, "dtw")
-#export_csv_for_id(df2, "dtw")
+#save the data to a npy file
+reshaped_data_file_path = 'prints/reshaped_data.npy'
+np.save(reshaped_data_file_path, time_series_dataset)
 
 scaled_data=time_series_dataset
 
 # Choose the number of clusters (you may need to experiment with this)
-num_clusters = 3
+num_clusters = 12
 
 # Apply TimeSeriesKMeans clustering with DTW as the metric
 print("Clustering time series data...")
 kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", n_jobs=num_cores, verbose=True)
 labels = kmeans.fit_predict(scaled_data)
 
+print("Saving clustered data to a file...")
 # Save the clustered data to a file
 clustered_data_file_path = 'clustered_data.csv'
 clustered_data = pd.DataFrame({'ID': time_series_data['ID'].unique(), 'Cluster': labels})
