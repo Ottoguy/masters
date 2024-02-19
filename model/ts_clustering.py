@@ -3,7 +3,6 @@ import glob
 import pandas as pd
 import numpy as np
 from tslearn.clustering import TimeSeriesKMeans, silhouette_score
-import matplotlib.pyplot as plt
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.utils import to_time_series_dataset
 from functions import export_csv_for_id
