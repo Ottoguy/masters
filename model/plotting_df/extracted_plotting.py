@@ -9,7 +9,7 @@ import csv
 from matplotlib.lines import Line2D
 
 # Get the list of CSV files in the directory
-csv_files = glob.glob('prints/all/*.csv')
+csv_files = glob.glob('prints/extracted/*.csv')
 
 results_dir = "plots/extracted_df/"
 

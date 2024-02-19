@@ -52,10 +52,68 @@ def filter_meta(meta_df, df):
     initial_count = len(meta_df)
     meta_df = meta_df[meta_df['Half_Minutes'] >= 60]
     filtered_half_minutes = initial_count - len(meta_df)
-    print(f"Filtered {filtered_half_minutes} IDs with Half_Minutes below 60.")
+    print(f"Filtered {filtered_half_minutes} IDs from meta_df with Half_Minutes below 60.")
 
     return meta_df
 
+def max_voltage(df, meta_df):
+    # Group by 'ID' in df and find the maximum value of 'Phase1Voltage', 'Phase2Voltage', and 'Phase3Voltage'
+    max_voltages = df.groupby('ID')[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']].max()
+
+    # Merge the result back to meta_df based on 'ID'
+    meta_df = pd.merge(meta_df, max_voltages, on='ID', how='left')
+
+    # Calculate the overall maximum voltage and create a new column 'MaxVoltage'
+    meta_df['MaxVoltage'] = meta_df[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']].max(axis=1)
+
+    # Drop the unnecessary columns from meta_df
+    meta_df.drop(['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage'], axis=1, inplace=True)
+    return meta_df
+
+def max_current(df, meta_df):
+    # Group by 'ID' in df and find the maximum value of 'Phase1Current', 'Phase2Current', and 'Phase3Current'
+    max_currents = df.groupby('ID')[['Phase1Current', 'Phase2Current', 'Phase3Current']].max()
+
+    # Merge the result back to meta_df based on 'ID'
+    meta_df = pd.merge(meta_df, max_currents, on='ID', how='left')
+
+    # Calculate the overall maximum current and create a new column 'MaxCurrent'
+    meta_df['MaxCurrent'] = meta_df[['Phase1Current', 'Phase2Current', 'Phase3Current']].max(axis=1)
+
+    # Drop the unnecessary columns from meta_df
+    meta_df.drop(['Phase1Current', 'Phase2Current', 'Phase3Current'], axis=1, inplace=True)
+    return meta_df
+
+def filter_zero_values(meta_df):
+    # Count the rows before filtering
+    initial_row_count = len(meta_df)
+
+    # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
+    filtered_df = meta_df[(meta_df['MaxVoltage'] != 0) & (meta_df['MaxCurrent'] != 0)]
+
+    # Count the rows after filtering
+    final_row_count = len(filtered_df)
+
+    # Print the count of filtered rows
+    print(f"Filtered {initial_row_count - final_row_count} ids in meta_df with either MaxVoltage or MaxCurrent equal to 0.")
+
+    return filtered_df
+
+#Function for sorting away all rows with IDs that are not in meta_df
+def filter_df(df, meta_df):
+    filtered_df = df[df['ID'].isin(meta_df['ID'])]
+    print(f"Filtered {len(df) - len(filtered_df)} rows in df whose ids have already been filtered from meta_df.")
+    return filtered_df
+
+#Filter away df strictly
+def charge60(df, meta_df):
+    #Filter away all IDs where none of the first 60 rows in df are charging
+    ids_to_filter = df[df['ChargingStatus'] == 'Charging'].groupby('ID').size().reset_index(name='Charging_Half_Minutes')
+    ids_to_filter = ids_to_filter[ids_to_filter['Charging_Half_Minutes'] < 60]
+    filtered_df = df[~df['ID'].isin(ids_to_filter['ID'])]
+    filtered_meta_df = meta_df[~meta_df['ID'].isin(ids_to_filter['ID'])]
+    print(f"Filtered {len(df) - len(filtered_df)} rows based on the first 60 rows (if not any charging).")
+    return filtered_df, filtered_meta_df
 
 def fully_charged(df, meta_df, streak_percentage):
     # Add new column 'FullyCharged', considering the last contiguous streak of "Charging" values
@@ -234,56 +292,6 @@ def calculate_average_current_difference(df, meta_df, placeholder_value=0.0):
 
     return meta_df
 
-def max_voltage(df, meta_df):
-    # Group by 'ID' in df and find the maximum value of 'Phase1Voltage', 'Phase2Voltage', and 'Phase3Voltage'
-    max_voltages = df.groupby('ID')[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']].max()
-
-    # Merge the result back to meta_df based on 'ID'
-    meta_df = pd.merge(meta_df, max_voltages, on='ID', how='left')
-
-    # Calculate the overall maximum voltage and create a new column 'MaxVoltage'
-    meta_df['MaxVoltage'] = meta_df[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']].max(axis=1)
-
-    # Drop the unnecessary columns from meta_df
-    meta_df.drop(['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage'], axis=1, inplace=True)
-    return meta_df
-
-def max_current(df, meta_df):
-    # Group by 'ID' in df and find the maximum value of 'Phase1Current', 'Phase2Current', and 'Phase3Current'
-    max_currents = df.groupby('ID')[['Phase1Current', 'Phase2Current', 'Phase3Current']].max()
-
-    # Merge the result back to meta_df based on 'ID'
-    meta_df = pd.merge(meta_df, max_currents, on='ID', how='left')
-
-    # Calculate the overall maximum current and create a new column 'MaxCurrent'
-    meta_df['MaxCurrent'] = meta_df[['Phase1Current', 'Phase2Current', 'Phase3Current']].max(axis=1)
-
-    # Drop the unnecessary columns from meta_df
-    meta_df.drop(['Phase1Current', 'Phase2Current', 'Phase3Current'], axis=1, inplace=True)
-    return meta_df
-
-def filter_zero_values(meta_df):
-    # Count the rows before filtering
-    initial_row_count = len(meta_df)
-
-    # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
-    filtered_df = meta_df[(meta_df['MaxVoltage'] != 0) & (meta_df['MaxCurrent'] != 0)]
-
-    # Count the rows after filtering
-    final_row_count = len(filtered_df)
-
-    # Print the count of filtered rows
-    print(f"Filtered {initial_row_count - final_row_count} rows with either MaxVoltage or MaxCurrent equal to 0.")
-
-    return filtered_df
-
-#Function for sorting away all rows with IDs that are not in meta_df
-def filter_df(df, meta_df):
-    print("Filtering df based on meta_df...")
-    filtered_df = df[df['ID'].isin(meta_df['ID'])]
-    print(f"Filtered {len(df) - len(filtered_df)} rows based on meta_df.")
-    return filtered_df
-
 def voltage_diff(df):
     # Add 'VoltageDiff' column
     print("Adding VoltageDiff column...")
@@ -298,23 +306,10 @@ def current_diff(df):
     df['CurrentDiff'] = df[current_columns].apply(lambda row: np.max(row) - np.min(row), axis=1)
     return df
 
-#Filter away df strictly
-def charge60(df, meta_df):
-    #Filter away all IDs where none of the first 60 rows are charging
-    print("Strictly filtering df based on meta_df...")
-    initial_row_count = len(df)
-    ids_to_filter = meta_df[meta_df['Charging_Half_Minutes'] == 0]['ID']
-    filtered_df = df[~df['ID'].isin(ids_to_filter)]
-    print(f"Filtered {initial_row_count - len(filtered_df)} rows based on meta_df.")
-    #Also remove the IDs from meta_df
-    filtered_meta_df = meta_df[meta_df['ID'].isin(filtered_df['ID'])]
-    return filtered_df, filtered_meta_df
-
 def extract60(df, meta_df):
     # Extract 60 timestamps for each ID
     extracted_df = df.groupby('ID').head(60)
     return extracted_df
-
 
 # Load the data
 df = load_data(data)
@@ -322,6 +317,16 @@ df = load_data(data)
 meta_df = create_meta(df)
 # Filter the meta dataframe
 meta_df = filter_meta(meta_df, df)
+# Add new column 'MaxVoltage' to meta_df
+meta_df = max_voltage(df, meta_df)
+# Add new column 'MaxCurrent' to meta_df
+meta_df = max_current(df, meta_df)
+# Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
+meta_df = filter_zero_values(meta_df)
+# Filter df based on meta_df
+df = filter_df(df, meta_df)
+# Filter df based on first 60 rows
+df, meta_df = charge60(df, meta_df)
 # Determine if the car is fully charged, streak_percentage is how many percent of the last contiguous streak of "Charging" (as a part of all "Charging"-values) for the car to be considered fully charged
 meta_df = fully_charged(df, meta_df, streak_percentage=0.2)
 # Add columns for 'Time connected' and 'Time disconnected' to meta_df
@@ -342,25 +347,15 @@ df, meta_df = cyclical_time(df, meta_df)
 meta_df = calculate_average_voltage_difference(df, meta_df)
 # Calculate the average current difference and add it as a new column to meta_df
 meta_df = calculate_average_current_difference(df, meta_df)
-# Add new column 'MaxVoltage' to meta_df
-meta_df = max_voltage(df, meta_df)
-# Add new column 'MaxCurrent' to meta_df
-meta_df = max_current(df, meta_df)
-# Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
-meta_df = filter_zero_values(meta_df)
-# Filter df based on meta_df
-df = filter_df(df, meta_df)
 # Add new column 'VoltageDiff' to df
 df = voltage_diff(df)
 # Add new column 'CurrentDiff' to df
 df = current_diff(df)
-# Filter df based on first 60 rows
-df, meta_df = charge60(df, meta_df)
 #Make new dataframe with 60 extracted timestamps from each ID
 extracted_df = extract60(df, meta_df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "extracted"  # Or "all" for all rows, or "meta" for meta_df
+desired_id_to_export = "all"  # Or "all" for all rows, or "meta" for meta_df
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
