@@ -390,7 +390,7 @@ filtered_df = discarded_df(original, df)
 extracted_df = extract60(df, meta_df)
 
 # Example: Export CSV for a specific ID or all rows
-desired_id_to_export = "extracted"  # Or "all" for all rows, "meta" for meta_df, "extracted" for extracted_df, "filtered" for filtered_df, or a specific ID
+desired_id_to_export = "meta"  # Or "all" for all rows, "meta" for meta_df, "extracted" for extracted_df, "filtered" for filtered_df, or a specific ID
 
 if desired_id_to_export.lower() == "meta":
     export_csv_for_id(meta_df, desired_id_to_export)
