@@ -115,15 +115,6 @@ def filter_zero_values(meta_df):
 
     return filtered_df
 
-#Exclude all rows with chargingpoint=1911001328A_2 or 1911001328A_1
-def filter_chargingpoint(df, meta_df):
-    filtered_df = df[~df['ID'].str.contains('1911001328A_1|1911001328A_2')]
-    print(f"Filtered {len(df) - len(filtered_df)} rows in df with chargingpoint 1911001328A_1 or 1911001328A_2.")
-    filtered_meta_df = meta_df[~meta_df['ID'].str.contains('1911001328A_1|1911001328A_2')]
-    print(f"Filtered {len(meta_df) - len(filtered_meta_df)} ids in meta_df with chargingpoint 1911001328A_1 or 1911001328A_2.")
-    return filtered_df, filtered_meta_df
-
-
 #Function for sorting away all rows with IDs that are not in meta_df
 def filter_df(df, meta_df):
     filtered_df = df[df['ID'].isin(meta_df['ID'])]
@@ -171,6 +162,14 @@ def charging_point(df, meta_df):
     df = pd.merge(df, filename_substrings, on='ID', how='left')
 
     return df, meta_df
+
+#Exclude all rows with chargingpoint=1911001328A_2 or 1911001328A_1
+def filter_chargingpoint(df, meta_df):
+    filtered_df = df[~df['ChargingPoint'].str.contains('1911001328A_1|1911001328A_2')]
+    print(f"Filtered {len(df) - len(filtered_df)} rows in df with ChargingPoint 1911001328A_1 or 1911001328A_2.")
+    filtered_meta_df = meta_df[~meta_df['ChargingPoint'].str.contains('1911001328A_1|1911001328A_2')]
+    print(f"Filtered {len(meta_df) - len(filtered_meta_df)} ids in meta_df with ChargingPoint 1911001328A_1 or 1911001328A_2.")
+    return filtered_df, filtered_meta_df
 
 def effect(df):
     # Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
@@ -355,8 +354,6 @@ meta_df = max_voltage(df, meta_df)
 meta_df = max_current(df, meta_df)
 # Filter away rows where either 'MaxVoltage' or 'MaxCurrent' is equal to 0
 meta_df = filter_zero_values(meta_df)
-# Filter df based on ChargingPoint
-df, meta_df = filter_chargingpoint(df, meta_df)
 # Filter df based on meta_df
 df = filter_df(df, meta_df)
 # Filter df based on first 60 rows
@@ -367,6 +364,8 @@ meta_df = filter_meta_df(df, meta_df)
 meta_df = fully_charged(df, meta_df, streak_percentage=0.2)
 # Add new column 'ChargingPoint' to df and meta_df
 df, meta_df = charging_point(df, meta_df)
+# Filter df based on ChargingPoint
+df, meta_df = filter_chargingpoint(df, meta_df)
 # Add new column 'Effect' to df, and cleanup Voltage and Current values
 df = effect(df)
 # Add new column 'Energy_Uptake' to meta_df
@@ -382,9 +381,9 @@ meta_df = calculate_average_voltage_difference(df, meta_df)
 # Calculate the average current difference and add it as a new column to meta_df
 meta_df = calculate_average_current_difference(df, meta_df)
 # Add new column 'VoltageDiff' to df
-df = voltage_diff(df)
+#df = voltage_diff(df)
 # Add new column 'CurrentDiff' to df
-df = current_diff(df)
+#df = current_diff(df)
 # Filtered df
 filtered_df = discarded_df(original, df)
 #Make new dataframe with 60 extracted timestamps from each ID
