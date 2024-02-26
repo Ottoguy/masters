@@ -12,8 +12,8 @@ from datetime import datetime
 num_cores = -1  # Set to -1 to use all available cores
 
 # Specify the range of clusters to iterate over
-num_clusters_1_phase_range = range(2, 21)
-num_clusters_3_phase_range = range(2, 21)
+num_clusters_1_phase_range = range(21, 31)
+num_clusters_3_phase_range = range(21, 31)
 
 # Specify the directory where your files are located
 folder_path = 'prints/extracted/'
