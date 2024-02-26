@@ -38,6 +38,9 @@ def export_csv_for_id(df, id_to_export, parent_folder="prints"):
     elif id_to_export.lower() == "ts_clustering_plot":
         desired_rows = df.copy()
         output_folder = os.path.join(parent_folder, "ts_clustering_plot")
+    elif id_to_export.lower() == "ts_eval":
+        desired_rows = df.copy()
+        output_folder = os.path.join(parent_folder, "ts_eval")
     else:
         # Filter DataFrame based on the desired ID
         desired_rows = df[df['ID'] == id_to_export]
