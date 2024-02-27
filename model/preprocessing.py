@@ -1,4 +1,3 @@
-from load_dans import all_data as data
 import pandas as pd
 from datetime import datetime
 from functions import encode_cyclical_features
@@ -419,4 +418,3 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
 #export_specific_id = whether to export the original dataframe to a csv file with a specific ID
 #id_to_export = the specific ID to export
 #strict_charge_extract = whether to remove all rows with IDs whose last row is not Charging from the extracted dataframe
-preprocessing(data, ts_samples=30, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2, should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False, export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True)
