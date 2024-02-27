@@ -6,7 +6,7 @@ from functions import export_csv_for_id
 import numpy as np
 
 # Preprocessing function
-def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_percentage, should_filter_1911001328A_2_and_1911001328A_1, export_meta, export_extracted, export_filtered, export_all, export_specific_id, id_to_export):
+def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_percentage, should_filter_1911001328A_2_and_1911001328A_1, export_meta, export_extracted, export_filtered, export_all, export_specific_id, id_to_export, strict_charge_extract):
 
     def load_data(data):
         print("Merging data...")
@@ -335,12 +335,13 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
         print(f"Separated {len(original) - len(filtered_df)} rows in original df to discarded folder whose ids have already been filtered from meta_df.")
         return filtered_df
 
-    def extract(df, meta_df, ts_samples):
+    def extract(df, ts_samples, strict_charge_extract):
         # Extract ts_samples timestamps for each ID
         extracted_df = df.groupby('ID').head(ts_samples)
-        #Remove all rows with IDs whose last row is not Charging
-        ids_to_remove = extracted_df[extracted_df['ChargingStatus'] != 'Charging']['ID']
-        extracted_df = extracted_df[~extracted_df['ID'].isin(ids_to_remove)]
+        if strict_charge_extract:
+            #Remove all rows with IDs whose last row is not Charging
+            ids_to_remove = extracted_df[extracted_df['ChargingStatus'] != 'Charging']['ID']
+            extracted_df = extracted_df[~extracted_df['ID'].isin(ids_to_remove)]
         return extracted_df
 
     # Load the data
@@ -392,7 +393,7 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
     # Filtered df
     filtered_df = discarded_df(original, df)
     #Make new dataframe with ts_samples extracted timestamps from each ID
-    extracted_df = extract(df, meta_df, ts_samples)
+    extracted_df = extract(df, ts_samples, strict_charge_extract)
 
     if export_meta:
         export_csv_for_id(meta_df, "meta")
@@ -411,4 +412,11 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
 #empty_charge = the number of half minutes in the beginning of a time series for an ID to be considered as an empty charge and discarded
 #streak_percentage = the percentage of the last contiguous streak of "Charging" values for the car to be considered fully charged
 #should_filter_1911001328A_2_and_1911001328A_1 = whether to filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1
-preprocessing(data, ts_samples=30, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2, should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=True, export_all=True, export_specific_id=False, id_to_export="1911001328A_2")
+#export_meta = whether to export the meta dataframe to a csv file
+#export_extracted = whether to export the extracted dataframe to a csv file
+#export_filtered = whether to export the filtered dataframe to a csv file (data that has been ifltered away from the main dataframe)
+#export_all = whether to export the original dataframe to a csv file
+#export_specific_id = whether to export the original dataframe to a csv file with a specific ID
+#id_to_export = the specific ID to export
+#strict_charge_extract = whether to remove all rows with IDs whose last row is not Charging from the extracted dataframe
+preprocessing(data, ts_samples=30, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2, should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False, export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True)
