@@ -10,7 +10,7 @@ ts_files = glob.glob('prints/extracted/*.csv')
 latest_ts_file = max(ts_files, key=os.path.getmtime)
 df_ts = pd.read_csv(latest_ts_file)
 
-origin = "3-Phase_12_clusters"
+origin = "3-Phase_24_clusters"
 # Specify the directory where your ID-cluster mapping files are located
 id_cluster_folder_path = 'prints/ts_clustering/' + origin + '/'
 

@@ -41,12 +41,8 @@ time_series_data_3_phase = df[['ID', 'Phase1Voltage', 'Phase2Voltage', 'Phase3Vo
 
 print("Scaling time series data...")
 # Separate standard scaling for 'Phase1Voltage' and 'Phase1Current'
-#scaler_voltage = StandardScaler()
-#scaler_current = StandardScaler()
-
-#Time series scaling
-scaler_voltage = TimeSeriesScalerMeanVariance(mu=0.0, std=1.0)
-scaler_current = TimeSeriesScalerMeanVariance(mu=0.0, std=1.0)
+scaler_voltage = StandardScaler()
+scaler_current = StandardScaler()
 
 # Fit and transform each feature
 time_series_data_1_phase['Phase1Voltage'] = scaler_voltage.fit_transform(time_series_data_1_phase[['Phase1Voltage']].dropna())
@@ -85,12 +81,6 @@ time_series_3_phase_dataset = to_time_series_dataset(time_series_3_phase_list)
 # Print the shape of the reshaped data
 print("Reshaped 1-Phase Data Shape:", time_series_1_phase_dataset.shape)
 print("Reshaped 3-Phase Data Shape:", time_series_3_phase_dataset.shape)
-
-# Iterate over different numbers of clusters
-best_1_phase_s_score = float('-inf')
-best_3_phase_s_score = float('-inf')
-best_1_phase_num_clusters = None
-best_3_phase_num_clusters = None
 
 # Save the figure with the current date and time in the filename
 results_dir = "prints/ts_clustering/"
@@ -158,9 +148,3 @@ for num_clusters in num_clusters_3_phase_range:
     for i in range(num_clusters):
         cluster_stats = clustered_data[clustered_data['Cluster'] == i].describe()
         print(f"Cluster {i} stats:\n{cluster_stats}")
-
-# Print the best number of clusters and its corresponding silhouette score
-print(f"\nBest number of 1-Phase clusters: {best_1_phase_num_clusters}")
-print(f"Silhouette Score for the best number of 1-Phaseclusters: {best_1_phase_s_score}")
-print(f"\nBest number of 3-Phase clusters: {best_3_phase_num_clusters}")
-print(f"Silhouette Score for the best number of 3-Phase clusters: {best_3_phase_s_score}")
