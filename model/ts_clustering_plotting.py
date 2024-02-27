@@ -10,6 +10,8 @@ ts_files = glob.glob('prints/extracted/*.csv')
 latest_ts_file = max(ts_files, key=os.path.getmtime)
 df_ts = pd.read_csv(latest_ts_file)
 
+number_of_ticks = 30
+
 origin = "3-Phase_24_clusters"
 # Specify the directory where your ID-cluster mapping files are located
 id_cluster_folder_path = 'prints/ts_clustering/' + origin + '/'
@@ -50,14 +52,14 @@ for cluster_id in range(0, num_clusters):
     # Iterate through each ID in the cluster
     for i, (_, id_data) in enumerate(cluster_data.groupby('ID')):
         # Select the relevant columns for the plot
-        x_values = range(1, 61)  # 60 ticks as mentioned
+        x_values = range(1, number_of_ticks+1)
 
         # Plot all three phases of current in the left column
         for phase_idx, current_column in enumerate(current_columns):
             current_values = id_data[current_column].values
 
-            if len(current_values) != 60:
-                print(f"ID {id_data['ID'].iloc[0]} does not have 60 ticks")
+            if len(current_values) != number_of_ticks:
+                print(f"ID {id_data['ID'].iloc[0]} does not have {number_of_ticks} ticks")
                 continue
 
             axes[cluster_id, 0].plot(x_values, current_values, label=f'{current_column} - ID {id_data["ID"].iloc[0]}')
@@ -66,8 +68,8 @@ for cluster_id in range(0, num_clusters):
         for phase_idx, voltage_column in enumerate(voltage_columns):
             voltage_values = id_data[voltage_column].values
 
-            if len(voltage_values) != 60:
-                print(f"ID {id_data['ID'].iloc[0]} does not have 60 ticks")
+            if len(voltage_values) != number_of_ticks:
+                print(f"ID {id_data['ID'].iloc[0]} does not have {number_of_ticks} ticks")
                 continue
 
             axes[cluster_id, 1].plot(x_values, voltage_values, label=f'{voltage_column} - ID {id_data["ID"].iloc[0]}')

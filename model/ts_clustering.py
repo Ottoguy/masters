@@ -3,7 +3,6 @@ import glob
 import pandas as pd
 import numpy as np
 from tslearn.clustering import TimeSeriesKMeans, silhouette_score
-from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from tslearn.utils import to_time_series_dataset
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime
