@@ -5,7 +5,21 @@ from functions import export_csv_for_id
 import numpy as np
 
 # Preprocessing function
-def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_percentage, should_filter_1911001328A_2_and_1911001328A_1, export_meta, export_extracted, export_filtered, export_all, export_specific_id, id_to_export, strict_charge_extract):
+#data = DansMästaren data
+#ts_samples = number of timestamps to extract for each ID for Time Series Clustering
+#meta_lower_bound = the lower bound for the number of half minutes for an ID to be included in the meta dataframe
+#empty_charge = the number of half minutes in the beginning of a time series for an ID to be considered as an empty charge and discarded
+#streak_percentage = the percentage of the last contiguous streak of "Charging" values for the car to be considered fully charged
+#should_filter_1911001328A_2_and_1911001328A_1 = whether to filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1
+#export_meta = whether to export the meta dataframe to a csv file
+#export_extracted = whether to export the extracted dataframe to a csv file
+#export_filtered = whether to export the filtered dataframe to a csv file (data that has been ifltered away from the main dataframe)
+#export_all = whether to export the original dataframe to a csv file
+#export_specific_id = whether to export the original dataframe to a csv file with a specific ID
+#id_to_export = the specific ID to export
+#strict_charge_extract = whether to remove all rows with IDs whose last row is not Charging from the extracted dataframe
+#diffs = whether to add columns for VoltageDiff and CurrentDiff to the original dataframe (time consuming)
+def Preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_percentage, should_filter_1911001328A_2_and_1911001328A_1, export_meta, export_extracted, export_filtered, export_all, export_specific_id, id_to_export, strict_charge_extract, diffs):
 
     def load_data(data):
         print("Merging data...")
@@ -385,10 +399,11 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
     meta_df = calculate_average_voltage_difference(df, meta_df)
     # Calculate the average current difference and add it as a new column to meta_df
     meta_df = calculate_average_current_difference(df, meta_df)
-    # Add new column 'VoltageDiff' to df
-    df = voltage_diff(df)
-    # Add new column 'CurrentDiff' to df
-    df = current_diff(df)
+    if diffs:
+        # Add new column 'VoltageDiff' to df
+        df = voltage_diff(df)
+        # Add new column 'CurrentDiff' to df
+        df = current_diff(df)
     # Filtered df
     filtered_df = discarded_df(original, df)
     #Make new dataframe with ts_samples extracted timestamps from each ID
@@ -404,17 +419,3 @@ def preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
         export_csv_for_id(df, "all")
     if export_specific_id:
         export_csv_for_id(df, id_to_export)
-
-#data = DansMästaren data
-#ts_samples = number of timestamps to extract for each ID for Time Series Clustering
-#meta_lower_bound = the lower bound for the number of half minutes for an ID to be included in the meta dataframe
-#empty_charge = the number of half minutes in the beginning of a time series for an ID to be considered as an empty charge and discarded
-#streak_percentage = the percentage of the last contiguous streak of "Charging" values for the car to be considered fully charged
-#should_filter_1911001328A_2_and_1911001328A_1 = whether to filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1
-#export_meta = whether to export the meta dataframe to a csv file
-#export_extracted = whether to export the extracted dataframe to a csv file
-#export_filtered = whether to export the filtered dataframe to a csv file (data that has been ifltered away from the main dataframe)
-#export_all = whether to export the original dataframe to a csv file
-#export_specific_id = whether to export the original dataframe to a csv file with a specific ID
-#id_to_export = the specific ID to export
-#strict_charge_extract = whether to remove all rows with IDs whose last row is not Charging from the extracted dataframe
