@@ -412,7 +412,7 @@ def Preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
     if export_meta:
         export_csv_for_id(meta_df, "meta")
     if export_extracted:
-        export_csv_for_id(extracted_df, "extracted")
+        export_csv_for_id(extracted_df, "extracted", ts_samples)
     if export_filtered:
         export_csv_for_id(filtered_df, "filtered")
     if export_all:

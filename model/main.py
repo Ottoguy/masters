@@ -10,7 +10,7 @@ def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting
     if preprocessing:
         from load_dans import all_data as data
         print("Preprocessing data")
-        Preprocessing(data, ts_samples=2, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
+        Preprocessing(data, ts_samples=10, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
                     should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
                     export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True, diffs=False)
 
@@ -34,8 +34,8 @@ def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting
 
     if ts_clustering:
         print("Clustering time series")
-        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 31), num_clusters_3_phase_range=range(2, 31), use_all_3_phase_data=True,
-                     distance_metric='dtw')
+        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 3), num_clusters_3_phase_range=range(2, 3), use_all_3_phase_data=True,
+                     distance_metric='dtw', ts_samples=10)
 
     print("Main function finished")
     

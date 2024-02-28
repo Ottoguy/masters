@@ -11,9 +11,9 @@ from datetime import datetime
 # num_clusters_1_phase_range: Range of numbers of clusters to try for 1-Phase data
 # num_clusters_3_phase_range: Range of numbers of clusters to try for 3-Phase data
 # use_all_3_phase_data: Set to True to use all 3 phases for 3-Phase data, set to False to use only Phase1Voltage and Phase1Current
-def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_range, use_all_3_phase_data, distance_metric):
+def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_range, use_all_3_phase_data, distance_metric, ts_samples):
     # Specify the directory where your files are located
-    folder_path = 'prints/extracted/'
+    folder_path = 'prints/extracted/' + str(ts_samples) + '/'
     meta_path = 'prints/meta/'
 
     # Create a pattern to match files in the specified format
@@ -90,7 +90,7 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
     print("Reshaped 3-Phase Data Shape:", time_series_3_phase_dataset.shape)
 
     # Save the figure with the current date and time in the filename
-    results_dir = "prints/ts_clustering/"
+    results_dir = "prints/ts_clustering/" + str(ts_samples) + "/"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")

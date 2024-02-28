@@ -7,7 +7,8 @@ def encode_cyclical_features(df, column_name):
     df[column_name + '_sin'] = np.sin(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
     df[column_name + '_cos'] = np.cos(2 * np.pi * (df[column_name].dt.hour * 60 + df[column_name].dt.minute) / (24 * 60))
 
-def export_csv_for_id(df, id_to_export, parent_folder="prints"):
+def export_csv_for_id(df, id_to_export, ts_samples=0):
+    parent_folder="prints"
     id_prints = parent_folder + "/id"
     # If the desired ID is "all", export all rows
     if id_to_export.lower() == "all":
@@ -31,7 +32,7 @@ def export_csv_for_id(df, id_to_export, parent_folder="prints"):
         output_folder = os.path.join(parent_folder, "dtw")
     elif id_to_export.lower() == "extracted":
         desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "extracted")
+        output_folder = os.path.join(parent_folder, "extracted", str(ts_samples))
     elif id_to_export.lower() == "filtered":
         desired_rows = df.copy()
         output_folder = os.path.join(parent_folder, "filtered")
