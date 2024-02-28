@@ -1,14 +1,14 @@
-from load_dans import all_data as data
 from preprocessing import Preprocessing
 from plotting_meta.meta_plotting import MetaPlotting
 from plotting_df.df_plotting import DfPlotting
 from plotting_df.extracted_plotting import ExtractedPlotting
 from plotting_df.filtered_plotting import FilteredPlotting
+from ts_clustering import TsClustering
 
-def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting_filtered):
+def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering):
     print("Main function called")
-
     if preprocessing:
+        from load_dans import all_data as data
         print("Preprocessing data")
         Preprocessing(data, ts_samples=2, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
                     should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
@@ -31,6 +31,13 @@ def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting
     if plotting_filtered:
         print("Plotting filtered data")
         FilteredPlotting()
+
+    if ts_clustering:
+        print("Clustering time series")
+        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 31), num_clusters_3_phase_range=range(2, 31), use_all_3_phase_data=True,
+                     distance_metric='dtw')
+
+    print("Main function finished")
     
-Main(preprocessing=True, plotting_meta=True, plotting_df=True, plotting_extracted=True, plotting_filtered=True)
+Main(preprocessing=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, ts_clustering=True)
     
