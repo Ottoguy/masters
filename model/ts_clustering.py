@@ -1,7 +1,6 @@
 import os
 import glob
 import pandas as pd
-import numpy as np
 from tslearn.clustering import TimeSeriesKMeans, silhouette_score
 from tslearn.utils import to_time_series_dataset
 from sklearn.preprocessing import StandardScaler
@@ -118,7 +117,8 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
         clustered_data_file_path = 'clustered_data_'
         clustered_data = pd.DataFrame(
             {'ID': time_series_data_1_phase['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters})
-        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + ".csv"), index=False)
+        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + "ts_samples" + str(ts_samples) +
+                                           "distance_metric" + distance_metric + "num_clusters" + str(num_clusters) + ").csv"), index=False)
 
         # Print stats for each cluster within the subfolder
         print(f"Printing stats for each cluster in {num_clusters} clusters...")
@@ -148,7 +148,9 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
         clustered_data_file_path = 'clustered_data_'
         clustered_data = pd.DataFrame(
             {'ID': time_series_data_3_phase['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters})
-        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + ".csv"), index=False)
+        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + " (use_all_3_phases"
+                                           + str(use_all_3_phase_data) + "ts_samples" + str(ts_samples) + "distance_metric" + distance_metric +
+                                           "num_clusters" + str(num_clusters) + ").csv"), index=False)
 
         # Print stats for each cluster within the subfolder
         print(f"Printing stats for each cluster in {num_clusters} clusters...")
