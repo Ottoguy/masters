@@ -92,8 +92,7 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
     plt.xlabel('Time')
     plt.tight_layout()
 
-    #results_dir = "plots/ts_clustering/"
-    results_dir = "prints/ts_clustering/" + str(ts_samples) + "/"
+    results_dir = "plots/ts_clustering/" + str(ts_samples) + "/"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
@@ -102,3 +101,5 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
     print(f"Saving figure {current_datetime}", end='\r')
     plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
     plt.close()
+    print(f"Figure saved as {current_datetime}.png in {results_dir}")
+    print("TsClusteringPlotting function finished")
