@@ -168,26 +168,95 @@ def Preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
         meta_df.drop(columns=['LastStatus', 'LastStreakSize', 'StreakPercentage'], inplace=True)
 
         return meta_df
+    
+    def find_charger_nr(cp_id, cp_nr):
+        # CP_ID - Charging point ID, for example: '1911001324A'
+        # CP_NR - Charging point nr, 1 or 2
+        # CH_NR - Nr of charger, 1 - 60
+
+        # Dictionary mapping CP_ID to CH_NR
+        charger_mapping = {
+            '1911001324A': 1,
+            '1911001314A': 3,
+            '1912001344A': 5,
+            '1911001332A': 7,
+            '1911001328A': 9,
+            '1911001316A': 11,
+            '1911001340A': 13,
+            '1911001222A': 15,
+            '1911001233A': 17,
+            '1911001231A': 19,
+            '1911001223A': 21,
+            '1911001235A': 23,
+            '1911001227A': 25,
+            '1911001238A': 27,
+            '1911001220A': 29,
+            '1911001224A': 31,
+            '1911001219A': 33,
+            '1911001218A': 35,
+            '1911001236A': 37,
+            '1911001225A': 39,
+            '1911001217A': 41,
+            '1912001352A': 43,
+            '1911001336A': 45,
+            '1911001157A': 47,
+            '2101003688A': 49,
+            '1911001331A': 51,
+            '1911001318A': 53,
+            '1911001284A': 55,
+            '1912001406A': 57,
+            '1912001381A': 59
+        }
+
+        # Default value if CP_ID is not found
+        ch_nr = -1
+        # Check if CP_ID is in the mapping
+        if cp_id in charger_mapping:
+            ch_nr = charger_mapping[cp_id]
+        # Calculate the final CH_NR by adding CP_NR - 1
+        ch_nr += (cp_nr - 1)
+        return ch_nr
 
     def charging_point(df, meta_df):
         # Add new column 'FilenameSubstring'
         filename_substrings = df.groupby('ID')['Filename'].first().str[11:-4].reset_index(name='ChargingPoint')
+        #Convert ChargingPoint to number of charger (1-60)
+        filename_substrings['ChargingPoint'] = filename_substrings['ChargingPoint'].apply(lambda x: find_charger_nr(x[:-2], int(x[-1])))
         # Merge the new column into meta_df
         meta_df = pd.merge(meta_df, filename_substrings, on='ID', how='left')
         df = pd.merge(df, filename_substrings, on='ID', how='left')
 
         return df, meta_df
 
-    #Exclude all rows with chargingpoint=1911001328A_2 or 1911001328A_1
-    def filter_chargingpoint(df, meta_df, should_filter_1911001328A_2_and_1911001328A_1):
+    #Exclude all rows with chargingpoint=1911001328A_2 or 1911001328A_1 (byt their charger number)
+    def filter_1911001328A_2_and_1911001328A_1(df, meta_df, should_filter_1911001328A_2_and_1911001328A_1):
         if should_filter_1911001328A_2_and_1911001328A_1:
-            filtered_df = df[~df['ChargingPoint'].str.contains('1911001328A_1|1911001328A_2')]
-            print(f"Filtered {len(df) - len(filtered_df)} rows in df with ChargingPoint 1911001328A_1 or 1911001328A_2.")
-            filtered_meta_df = meta_df[~meta_df['ChargingPoint'].str.contains('1911001328A_1|1911001328A_2')]
-            print(f"Filtered {len(meta_df) - len(filtered_meta_df)} ids in meta_df with ChargingPoint 1911001328A_1 or 1911001328A_2.")
-            return filtered_df, filtered_meta_df
+            #Filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1
+            df = df[(df['ChargingPoint'] != 8) & (df['ChargingPoint'] != 9)]
+            meta_df = meta_df[(meta_df['ChargingPoint'] != 8) & (meta_df['ChargingPoint'] != 9)]
+        return df, meta_df
+    
+    #Function to retrieve floor from charging point number
+    def get_floor(charging_point):
+        if charging_point <= 14:
+            return 1
+        elif charging_point <= 28:
+            return 2
+        elif charging_point <= 42:
+            return 3
+        elif charging_point <= 52:
+            return 4
+        elif charging_point <= 60:
+            return 5
         else:
-            return df, meta_df
+            print(f"Error: Charging point number {charging_point} is not in any floor.")
+            return -1
+        
+    #Function to add floor to df and meta_df
+    def add_floor(df, meta_df):
+        df['Floor'] = df['ChargingPoint'].apply(get_floor)
+        meta_df['Floor'] = meta_df['ChargingPoint'].apply(get_floor)
+        return df, meta_df
 
     def effect(df):
         # Convert 'Phase1Current', 'Phase2Current', 'Phase3Current' to numeric
@@ -384,7 +453,9 @@ def Preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
     # Add new column 'ChargingPoint' to df and meta_df
     df, meta_df = charging_point(df, meta_df)
     # Filter df based on ChargingPoint
-    df, meta_df = filter_chargingpoint(df, meta_df, should_filter_1911001328A_2_and_1911001328A_1)
+    df, meta_df = filter_1911001328A_2_and_1911001328A_1(df, meta_df, should_filter_1911001328A_2_and_1911001328A_1)
+    # Add new column 'Floor' to df and meta_df
+    df, meta_df = add_floor(df, meta_df)
     # Add new column 'Effect' to df, and cleanup Voltage and Current values
     df = effect(df)
     # Add new column 'Energy_Uptake' to meta_df

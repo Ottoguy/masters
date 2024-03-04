@@ -42,12 +42,12 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if ts_clustering:
         print("Clustering time series")
-        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(9, 10), num_clusters_3_phase_range=range(9, 10), use_all_3_phase_data=True,
+        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(15, 16), num_clusters_3_phase_range=range(15, 16), use_all_3_phase_data=True,
                      distance_metric='dtw', split_phases=True, ts_samples=ts_sample_value)
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
-        TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=9)
+        TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=15)
 
     if ts_eval:
         print("Evaluating time series clustering")
@@ -55,5 +55,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=False, preproc_split=True, plotting_meta=True, plotting_df=True, plotting_extracted=True, plotting_filtered=True, ts_clustering=True, 
-     ts_clustering_plotting=True, ts_eval=True, ts_sample_value=10)
+Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+     ts_clustering=False, ts_clustering_plotting=False, ts_eval=False, ts_sample_value=60)

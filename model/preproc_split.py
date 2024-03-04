@@ -24,9 +24,10 @@ def PreprocSplit(get_immediate_features, get_intermediate_features, get_final_fe
     latest_meta = meta_list[0]
     meta_df = pd.read_csv(latest_meta)
 
+    #Gets features from meta_df and split them depending on when they can be retrieved, or changed (plus ID for identification)
     if get_immediate_features:
         # Add immediate features from meta_df (ID,TimeConnected,ChargingPoint,Current_Type,Weekend,TimeConnected_sin,TimeConnected_cos) to a new dataframe
-        meta_df_immediate_features = meta_df[['ID', 'TimeConnected', 'ChargingPoint', 'Weekend', 'TimeConnected_sin',
+        meta_df_immediate_features = meta_df[['ID', 'TimeConnected', 'ChargingPoint', 'Floor', 'Weekend', 'TimeConnected_sin',
                                         'TimeConnected_cos']].copy()
         export_csv_for_id(meta_df_immediate_features, "preproc_immediate")
 
