@@ -125,9 +125,8 @@ def TsEval(ts_samples):
     df['Average Silhouette Score 1-Phase'] = [ts_clustering_1_phase_dfs[i]['Silhouette Score'].mean() for i in range(len(ts_clustering_1_phase_dfs))]
     df['Average Silhouette Score 3-Phase'] = [ts_clustering_3_phase_dfs[i]['Silhouette Score'].mean() for i in range(len(ts_clustering_3_phase_dfs))]
 
-
     # Save the figure with the current date and time in the filename
-    results_dir = "prints/ts_clustering/" + str(ts_samples) + "/"
+    results_dir = "prints/ts_eval/" + str(ts_samples) + "/"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")

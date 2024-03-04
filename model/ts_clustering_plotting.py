@@ -12,7 +12,6 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
 
     number_of_ticks = ts_samples
 
-    #origin = "3-Phase_24_clusters"
     origin = phase + "_" + str(tot_clusters) + "_clusters"
 
     # Specify the directory where your ID-cluster mapping files are located
