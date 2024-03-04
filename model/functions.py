@@ -18,30 +18,20 @@ def export_csv_for_id(df, id_to_export, ts_samples=0):
     elif id_to_export.lower() == "meta":
         desired_rows = df.copy()
         output_folder = os.path.join(parent_folder, "meta")
-    elif id_to_export.lower() == "famd":
-        desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "famd")
-    elif id_to_export.lower() == "pca":
-        desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "pca")
-    elif id_to_export.lower() == "pca_list":
-        desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "pca_list")
-    elif id_to_export.lower() == "dtw":
-        desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "dtw")
     elif id_to_export.lower() == "extracted":
         desired_rows = df.copy()
         output_folder = os.path.join(parent_folder, "extracted", str(ts_samples))
     elif id_to_export.lower() == "filtered":
         desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "filtered")
-    elif id_to_export.lower() == "ts_clustering_plot":
+    elif id_to_export.lower() == "preproc_immediate":
         desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "ts_clustering_plot")
-    elif id_to_export.lower() == "ts_eval":
+        output_folder = os.path.join(parent_folder, "preproc_immediate")
+    elif id_to_export.lower() == "preproc_intermediate":
         desired_rows = df.copy()
-        output_folder = os.path.join(parent_folder, "ts_eval")
+        output_folder = os.path.join(parent_folder, "preproc_intermediate")
+    elif id_to_export.lower() == "preproc_final":
+        desired_rows = df.copy()
+        output_folder = os.path.join(parent_folder, "preproc_final")
     else:
         # Filter DataFrame based on the desired ID
         desired_rows = df[df['ID'] == id_to_export]

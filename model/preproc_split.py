@@ -1,8 +1,7 @@
 import os
 import glob
 import pandas as pd
-import numpy as np
-from datetime import datetime
+from functions import export_csv_for_id
 
 def PreprocSplit(get_immediate_features, get_intermediate_features, get_final_features):
     # Specify the directory where your files are located
@@ -27,16 +26,21 @@ def PreprocSplit(get_immediate_features, get_intermediate_features, get_final_fe
 
     if get_immediate_features:
         # Add immediate features from meta_df (ID,TimeConnected,ChargingPoint,Current_Type,Weekend,TimeConnected_sin,TimeConnected_cos) to a new dataframe
-        meta_df_immediate_features = meta_df[['ID', 'TimeConnected', 'ChargingPoint', 'Current_Type', 'Weekend', 'TimeConnected_sin',
+        meta_df_immediate_features = meta_df[['ID', 'TimeConnected', 'ChargingPoint', 'Weekend', 'TimeConnected_sin',
                                         'TimeConnected_cos']].copy()
+        export_csv_for_id(meta_df_immediate_features, "preproc_immediate")
 
     if get_intermediate_features:
         # Add intermediate features from meta_df (ID, MaxVoltage, MaxCurrent, FullyCharged, Energy_Uptake, AverageVoltageDifference, AverageCurrentDifference, TS_Cluster) to a new dataframe
-        meta_df_intermediate_features = meta_df[['ID', 'MaxVoltage', 'MaxCurrent', 'FullyCharged', 'Energy_Uptake', 'AverageVoltageDifference',
+        meta_df_intermediate_features = meta_df[['ID', 'MaxVoltage', 'MaxCurrent', 'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference',
                                             'AverageCurrentDifference']].copy()
+        export_csv_for_id(meta_df_intermediate_features, "preproc_intermediate")
 
     if get_final_features:
         #Add final deatures from meta_df (ID, Half_Minutes,Charging_Half_Minutes,TimeDisconnected,MaxVoltage,MaxCurrent,FullyCharged,Energy_Uptake,sin,TimeDisconnected_sin,TimeDisconnected_cos,AverageVoltageDifference,AverageCurrentDifference) to a new dataframe
         meta_df_final_features = meta_df[['ID', 'Half_Minutes', 'Charging_Half_Minutes', 'TimeDisconnected', 'MaxVoltage', 'MaxCurrent',
                                     'FullyCharged', 'Energy_Uptake', 'TimeDisconnected_sin', 'TimeDisconnected_cos', 'AverageVoltageDifference',
                                     'AverageCurrentDifference']].copy()
+        export_csv_for_id(meta_df_final_features, "preproc_final")
+
+    print("PreprocSplit function finished")
