@@ -120,12 +120,6 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
         clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + "ts_samples" + str(ts_samples) +
                                            "distance_metric" + distance_metric + "num_clusters" + str(num_clusters) + ").csv"), index=False)
 
-        # Print stats for each cluster within the subfolder
-        print(f"Printing stats for each cluster in {num_clusters} clusters...")
-        for i in range(num_clusters):
-            cluster_stats = clustered_data[clustered_data['Cluster'] == i].describe()
-            print(f"Cluster {i} stats:\n{cluster_stats}")
-
     for num_clusters in num_clusters_3_phase_range:
         print(f"Clustering time series data with {num_clusters} clusters...")
 
@@ -151,9 +145,3 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
         clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + " (use_all_3_phases"
                                            + str(use_all_3_phase_data) + "ts_samples" + str(ts_samples) + "distance_metric" + distance_metric +
                                            "num_clusters" + str(num_clusters) + ").csv"), index=False)
-
-        # Print stats for each cluster within the subfolder
-        print(f"Printing stats for each cluster in {num_clusters} clusters...")
-        for i in range(num_clusters):
-            cluster_stats = clustered_data[clustered_data['Cluster'] == i].describe()
-            print(f"Cluster {i} stats:\n{cluster_stats}")

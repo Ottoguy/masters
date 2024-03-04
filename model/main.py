@@ -5,13 +5,15 @@ from plotting_df.extracted_plotting import ExtractedPlotting
 from plotting_df.filtered_plotting import FilteredPlotting
 from ts_clustering import TsClustering
 from ts_clustering_plotting import TsClusteringPlotting
+from ts_eval import TsEval
 
-def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_plotting):
+def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_plotting,
+         ts_eval, ts_sample_value):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
         print("Preprocessing data")
-        Preprocessing(data, ts_samples=60, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
+        Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
                     should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
                     export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True, diffs=False)
 
@@ -35,14 +37,18 @@ def Main(preprocessing, plotting_meta, plotting_df, plotting_extracted, plotting
 
     if ts_clustering:
         print("Clustering time series")
-        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(8, 9), num_clusters_3_phase_range=range(8, 9), use_all_3_phase_data=True,
-                     distance_metric='dtw', ts_samples=60)
+        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(9, 10), num_clusters_3_phase_range=range(9, 10), use_all_3_phase_data=True,
+                     distance_metric='dtw', ts_samples=ts_sample_value)
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
-        TsClusteringPlotting(phase="1-Phase", ts_samples=60, tot_clusters=8)
+        TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=8)
+
+    if ts_eval:
+        print("Evaluating time series clustering")
+        TsEval(ts_samples=ts_sample_value)
 
     print("Main function finished")
     
-Main(preprocessing=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, ts_clustering=False, 
-     ts_clustering_plotting=True)
+Main(preprocessing=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, ts_clustering=True, 
+     ts_clustering_plotting=True, ts_eval=True, ts_sample_value=50)
