@@ -8,11 +8,11 @@ import glob
 import csv
 from matplotlib.lines import Line2D
 
-def ExtractedPlotting():
+def ExtractedPlotting(ts_samples):
     # Get the list of CSV files in the directory
-    csv_files = glob.glob('prints/extracted/*.csv')
+    csv_files = glob.glob('prints/extracted/' + str(ts_samples) + '/*.csv')
 
-    results_dir = "plots/extracted_df/"
+    results_dir = "plots/extracted_df/" + str(ts_samples) + '/'
 
     # Sort the files based on modification time and get the latest file
     latest_csv_file = max(csv_files, key=os.path.getmtime)

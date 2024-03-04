@@ -34,7 +34,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if plotting_extracted:
         print("Plotting extracted data")
-        ExtractedPlotting()
+        ExtractedPlotting(ts_samples=ts_sample_value)
 
     if plotting_filtered:
         print("Plotting filtered data")
@@ -56,4 +56,4 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=True, plotting_meta=True, plotting_df=True, plotting_extracted=True, plotting_filtered=True, ts_clustering=True, 
-     ts_clustering_plotting=True, ts_eval=True, ts_sample_value=40)
+     ts_clustering_plotting=True, ts_eval=True, ts_sample_value=10)
