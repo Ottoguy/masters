@@ -6,6 +6,22 @@ from tslearn.utils import to_time_series_dataset
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime
 
+# Function to reshape a dataframe into a time series dataset
+def reshape_to_time_series(df, use_all_3_phase_data=False):
+    if use_all_3_phase_data:
+        time_series_columns = ['Phase1Voltage', 'Phase1Current', 'Phase2Voltage', 'Phase3Voltage', 'Phase2Current', 'Phase3Current']
+    else:
+        time_series_columns = ['Phase1Voltage', 'Phase1Current']
+
+    time_series_list = []
+
+    for _, group in df.groupby('ID'):
+        features = group[time_series_columns].values
+        time_series_list.append(features)
+
+    time_series_dataset = to_time_series_dataset(time_series_list)
+    return time_series_dataset
+
 # num_cores: Use joblib for parallel processing, set to -1 to use all available cores
 def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_samples, use_current_type, use_all_3_phase_data,
                  Use_time, use_charging_point, use_floor, use_weekend, use_maxvoltage, use_maxcurrent, use_energy_uptake,
@@ -34,14 +50,15 @@ def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_sample
     data = df[['ID', 'Phase1Voltage', 'Phase1Current']].copy()
     categorical_features = []
     # Columns to ignore during iteration
-    ignore_columns = ['ID', 'Phase1Voltage', 'Phase1Current']
+    ignore_columns = []
+    #ignore_columns = ['ID', 'Phase1Voltage', 'Phase1Current']
 
     if use_current_type:
         data = data.join(meta_df['Current_Type'])
         categorical_features.append('Current_Type')
     if use_all_3_phase_data:
         data = data.join(df[['Phase2Voltage', 'Phase3Voltage', 'Phase2Current', 'Phase3Current']])
-        ignore_columns.extend(['Phase2Voltage', 'Phase3Voltage', 'Phase2Current', 'Phase3Current'])
+        #ignore_columns.extend(['Phase2Voltage', 'Phase3Voltage', 'Phase2Current', 'Phase3Current'])
     if Use_time:
         data = data.join(meta_df['TimeConnected'])
         categorical_features.append('TimeConnected')
@@ -97,10 +114,7 @@ def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_sample
     unique_combinations = data.groupby(categorical_features, as_index=False)[relevant_columns]
 
     for name, group in unique_combinations:
-        # Drop the columns specified in ignore_columns from the group
-        #group = group.drop(columns=ignore_columns)
-        
-        # Rename the dataframe based on the feature values
+         # Rename the dataframe based on the feature values
         df_name = '_'.join([f"{feature}_{value}" for feature, value in zip(categorical_features, name)])
         
         # Save the dataframe with a unique name
@@ -115,36 +129,13 @@ def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_sample
         if isinstance(globals()[var], pd.DataFrame):
             print(var)
 
-    stop
-
-    
-
-    #Divide the time series data into one dataframe for Current_Type in meta_df = "1-Phase" and = "3-Phase"
-    time_series_data_1_phase = time_series_data_1_phase[time_series_data_1_phase['ID'].isin(meta_df[meta_df['Current_Type'] == "1-Phase"]['ID'])]
-    time_series_data_3_phase = time_series_data_3_phase[time_series_data_3_phase['ID'].isin(meta_df[meta_df['Current_Type'] == "3-Phase"]['ID'])]
-
-    # Reshape the DataFrame with variable length time series
-    time_series_1_phase_list = []
-    time_series_3_phase_list = []
-
-    for id_value, group in time_series_data_1_phase.groupby('ID'):
-        features = group[['Phase1Voltage', 'Phase1Current']].values
-        time_series_1_phase_list.append(features)
-
-    for id_value, group in time_series_data_3_phase.groupby('ID'):
-        if use_all_3_phase_data:
-            features = group[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage', 'Phase1Current', 'Phase2Current', 'Phase3Current']].values
-        else:
-            features = group[['Phase1Voltage', 'Phase1Current']].values
-        time_series_3_phase_list.append(features)
-
-    # Convert to time series dataset if needed
-    time_series_1_phase_dataset = to_time_series_dataset(time_series_1_phase_list)
-    time_series_3_phase_dataset = to_time_series_dataset(time_series_3_phase_list)
-
-    # Print the shape of the reshaped data
-    print("Reshaped 1-Phase Data Shape:", time_series_1_phase_dataset.shape)
-    print("Reshaped 3-Phase Data Shape:", time_series_3_phase_dataset.shape)
+   # Reshape each dataframe into a time series dataset
+    for var in globals():
+        if isinstance(globals()[var], pd.DataFrame):
+            print(f"Reshaping {var} into a time series dataset...")
+            print(f"Shape of {var}: {globals()[var].shape}")
+            print(f"{var}:\n{globals()[var]}")
+            time_series_dataset = reshape_to_time_series(globals()[var], use_all_3_phase_data)
 
     # Save the figure with the current date and time in the filename
     results_dir = "prints/ts_clustering/" + str(ts_samples) + "/"
