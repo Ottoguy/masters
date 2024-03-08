@@ -111,7 +111,23 @@ def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_sample
     relevant_columns = [col for col in data.columns if col not in ignore_columns]
 
     # Iterate through unique combinations of all features
-    unique_combinations = data.groupby(categorical_features, as_index=False)[relevant_columns]
+    #unique_combinations = data.groupby(categorical_features, as_index=False)[relevant_columns]
+    unique_combinations = data.groupby(categorical_features, as_index=False)
+    dataframes_dict = {}
+
+    for name, group in unique_combinations:
+        # Combine categorical features and ID into a new dataframe
+        unique_df = group[categorical_features].drop_duplicates().assign(ID=group['ID'].unique())
+        # Append relevant columns
+        unique_df = pd.concat([unique_df, group[relevant_columns]], axis=1)
+        # Save the dataframe with a unique name
+        df_name = '_'.join([f"{feature}_{value}" for feature, value in zip(categorical_features, name)])
+        dataframes_dict[df_name] = unique_df
+
+    # Access the dataframes using keys in dataframes_dict
+    for key, df in dataframes_dict.items():
+        print(f"{key}:\n{df}")
+        print(f"IDs in {key}:\n{df['ID'].unique()}")
 
     for name, group in unique_combinations:
          # Rename the dataframe based on the feature values
@@ -132,9 +148,12 @@ def TsClusteringExperimental(num_cores, num_clusters, distance_metric, ts_sample
    # Reshape each dataframe into a time series dataset
     for var in globals():
         if isinstance(globals()[var], pd.DataFrame):
-            print(f"Reshaping {var} into a time series dataset...")
-            print(f"Shape of {var}: {globals()[var].shape}")
-            print(f"{var}:\n{globals()[var]}")
+            #print(f"Reshaping {var} into a time series dataset...")
+            #print(f"Shape of {var}: {globals()[var].shape}")
+            #print(f"{var}:\n{globals()[var]}")
+            #print all ids in each dataframe
+            print(f"IDs in {var}:\n{globals()[var]['ID'].unique()}")
+
             time_series_dataset = reshape_to_time_series(globals()[var], use_all_3_phase_data)
 
     # Save the figure with the current date and time in the filename
