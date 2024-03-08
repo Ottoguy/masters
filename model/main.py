@@ -5,11 +5,12 @@ from plotting_df.df_plotting import DfPlotting
 from plotting_df.extracted_plotting import ExtractedPlotting
 from plotting_df.filtered_plotting import FilteredPlotting
 from ts_clustering import TsClustering
+from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
 
-def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_plotting,
-         ts_eval, ts_sample_value):
+def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
+         ts_clustering_experimental, ts_clustering_plotting, ts_eval, ts_sample_value):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -45,6 +46,13 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         TsClustering(num_cores=-1, num_clusters_1_phase_range=range(15, 16), num_clusters_3_phase_range=range(15, 16), use_all_3_phase_data=True,
                      distance_metric='dtw', split_phases=True, ts_samples=ts_sample_value)
         
+    if ts_clustering_experimental:
+        print("Clustering time series experimental")
+        TsClusteringExperimental(num_cores=-1, num_clusters=3, distance_metric='dtw', ts_samples=20, use_current_type=True,
+                                 use_all_3_phase_data=True, Use_time=False, use_charging_point=False, use_floor=True, use_weekend=True,
+                                 use_maxvoltage=False, use_maxcurrent=False, use_energy_uptake=False, use_average_voltage=False,
+                                 use_average_current=False)
+        
     if ts_clustering_plotting:
         print("Plotting time series clustering")
         TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=15)
@@ -55,5 +63,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_plotting=False, ts_eval=False, ts_sample_value=60)
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False, ts_sample_value=60)
