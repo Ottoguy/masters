@@ -70,10 +70,20 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
         latest_id_cluster_file = id_cluster_files[0]
         # Load your ID-cluster mapping data from the latest file
         df_clusters = pd.read_csv(latest_id_cluster_file)
+        #Replace NaN values with -1 (some ID's have not been clustered?)
+        df_clusters['Cluster'] = df_clusters['Cluster'].fillna(-1)
 
         #save name of cluster file to string
         cluster_file_name = latest_id_cluster_file.split("/")[-1]
         cluster_file_name = cluster_file_name.split(".")[0]
+
+        #Remove all rows from the other dataframes with ids that are not in the cluster dataframe
+        df_immediate = df_immediate[df_immediate['ID'].isin(df_clusters['ID'])]
+        df_intermediate = df_intermediate[df_intermediate['ID'].isin(df_clusters['ID'])]
+        df_final = df_final[df_final['ID'].isin(df_clusters['ID'])]
+        
+        #Print how many rows were removed
+        print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing)")
 
     # List of features to normalize
     features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference']
@@ -84,11 +94,11 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
     #Make new dataframe merging immediateintermediate and cluster dataframes on ID
     df_immediateintermediate_clusters = pd.merge(df_immediateintermediate, df_clusters, on='ID')
 
-    #Make a dataframe with only Half_Minutes, Half_Charging_Minutes, and ID from the final dataframe and merge with cluster from df_clusters
-    df_pred = df_final[['ID', 'Half_Minutes', 'Half_Charging_Minutes']].copy
-    df_barebones = pd.merge(df_pred, df_clusters, on='ID')
-    #Drop the Silhouette Score and Num Clusters columns
-    df_barebones = df_barebones.drop(['Silhouette Score', 'Num Clusters'], axis=1)
+    # Make a dataframe with only Half_Minutes, Charging_Half_Minutes, and ID from the final dataframe
+    df_pred = df_final[['ID', 'Half_Minutes', 'Charging_Half_Minutes']].copy()
+
+    # Merge with the 'cluster' column from df_clusters
+    df_barebones = df_pred.merge(df_clusters[['ID', 'Cluster']], on='ID', how='left')
 
     print("Normalizing features")
     # Create MinMaxScaler instance
@@ -96,13 +106,20 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
     # Normalize features for the merged dataframes
     df_immediateintermediate[features_to_normalize] = scaler.fit_transform(df_immediateintermediate[features_to_normalize])
     df_immediateintermediate_clusters[features_to_normalize] = scaler.fit_transform(df_immediateintermediate_clusters[features_to_normalize])
-    df_barebones[features_to_normalize] = scaler.fit_transform(df_barebones[features_to_normalize])
 
     # Define the features (X) and the target variable (y) for each dataframe
     X_immediate = df_immediate.drop(['ID', 'TimeConnected'], axis=1)
     X_intermediate = df_immediateintermediate.drop(['ID', 'TimeConnected'], axis=1)
     X_clusters = df_immediateintermediate_clusters.drop(['ID', 'TimeConnected'], axis=1)
     X_barebones = df_barebones.drop(['ID', 'Charging_Half_Minutes'], axis=1)
+
+    #print sizes of dataframes
+    print("Size of immediate dataframe: ", X_immediate.shape)
+    print("Size of intermediate dataframe: ", X_intermediate.shape)
+    print("Size of immediateintermediate dataframe: ", df_immediateintermediate.shape)
+    print("Size of immediateintermediate_clusters dataframe: ", X_clusters.shape)
+    print("Size of clusters dataframe: ", X_clusters.shape)
+    print("Size of barebones dataframe: ", X_barebones.shape)
 
     #Feature to predict
     y = df_pred['Half_Minutes']
