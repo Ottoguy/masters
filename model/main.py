@@ -8,9 +8,10 @@ from ts_clustering import TsClustering
 from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
+from regression import Regression
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
-         ts_clustering_experimental, ts_clustering_plotting, ts_eval, ts_sample_value):
+         ts_clustering_experimental, ts_clustering_plotting, ts_eval, regression, ts_sample_value):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -43,7 +44,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if ts_clustering:
         print("Clustering time series")
-        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(15, 16), num_clusters_3_phase_range=range(15, 16), use_all_3_phase_data=True,
+        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
                      distance_metric='dtw', split_phases=True, ts_samples=ts_sample_value)
         
     if ts_clustering_experimental:
@@ -55,13 +56,18 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
-        TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=15)
+        TsClusteringPlotting(phase="1-Phase", ts_samples=ts_sample_value, tot_clusters=10)
 
     if ts_eval:
         print("Evaluating time series clustering")
         TsEval(ts_samples=ts_sample_value)
 
+    if regression:
+        print("Performing regression")
+        Regression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase", clusters=10,
+                   test_size=0.2, random_state=42, n_estimators=100)
+
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False, ts_sample_value=60)
+     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False, regression=True, ts_sample_value=60)
