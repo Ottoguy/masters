@@ -83,7 +83,7 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
         df_final = df_final[df_final['ID'].isin(df_clusters['ID'])]
         
         #Print how many rows were removed
-        print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing)")
+        print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing or because of phase?)")
 
     # List of features to normalize
     features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference']
@@ -111,7 +111,7 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
     X_immediate = df_immediate.drop(['ID', 'TimeConnected'], axis=1)
     X_intermediate = df_immediateintermediate.drop(['ID', 'TimeConnected'], axis=1)
     X_clusters = df_immediateintermediate_clusters.drop(['ID', 'TimeConnected'], axis=1)
-    X_barebones = df_barebones.drop(['ID', 'Charging_Half_Minutes'], axis=1)
+    X_barebones = df_barebones.drop(['ID', 'Half_Minutes', 'Charging_Half_Minutes'], axis=1)
 
     #print sizes of dataframes
     print("Size of immediate dataframe: ", X_immediate.shape)
@@ -168,35 +168,12 @@ def Regression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test
     print(f'MSE for Clusters: {mse_clusters}')
     print(f'MSE for Barebones: {mse_barebones}')
 
-    # Create subplots
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 10))
+    # Create a DataFrame to store the predicted values and actual values
+    df_results = pd.DataFrame({'Actual': y_test, 'Immediate': y_pred_immediate, 'Intermediate': y_pred_intermediate,
+                                'Clusters': y_pred_clusters, 'Barebones': y_pred_barebones})
 
-    # Regression plot for Immediate
-    sns.regplot(x=y_test, y=y_pred_immediate, scatter_kws={'s': 10}, ax=axes[0, 0])
-    axes[0, 0].set_title('Regression Plot for Immediate')
-    axes[0, 0].set_xlabel('Actual Values')
-    axes[0, 0].set_ylabel('Predicted Values')
+    # Save the DataFrame to a CSV file
+    results_file_name = 'predictions_vs_actuals.csv'
+    df_results.to_csv(results_file_name, index=False)
 
-    # Regression plot for Intermediate
-    sns.regplot(x=y_test, y=y_pred_intermediate, scatter_kws={'s': 10}, ax=axes[0, 1])
-    axes[0, 1].set_title('Regression Plot for Intermediate')
-    axes[0, 1].set_xlabel('Actual Values')
-    axes[0, 1].set_ylabel('Predicted Values')
-
-    # Regression plot for Clusters
-    sns.regplot(x=y_test, y=y_pred_clusters, scatter_kws={'s': 10}, ax=axes[1, 0])
-    axes[1, 0].set_title('Regression Plot for Clusters')
-    axes[1, 0].set_xlabel('Actual Values')
-    axes[1, 0].set_ylabel('Predicted Values')
-
-    # Regression plot for Barebones
-    sns.regplot(x=y_test, y=y_pred_barebones, scatter_kws={'s': 10}, ax=axes[1, 1])
-    axes[1, 1].set_title('Regression Plot for Barebones')
-    axes[1, 1].set_xlabel('Actual Values')
-    axes[1, 1].set_ylabel('Predicted Values')
-
-    # Adjust layout
-    plt.tight_layout()
-
-    # Show the plots
-    plt.show()
+    return mse_clusters

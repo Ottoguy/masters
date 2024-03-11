@@ -9,9 +9,11 @@ from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
 from regression import Regression
+from deep_regression import DeepLearningRegression
+import pandas as pd
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
-         ts_clustering_experimental, ts_clustering_plotting, ts_eval, regression, ts_sample_value):
+         ts_clustering_experimental, ts_clustering_plotting, ts_eval, regression, deep_regression, ts_sample_value):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -64,10 +66,51 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if regression:
         print("Performing regression")
-        Regression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase", clusters=10,
-                   test_size=0.2, random_state=42, n_estimators=100)
+        #Regression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase", clusters=15,
+                   #test_size=0.3, random_state=42, n_estimators=200)
+        # Set the ranges of values for clusters, test_size, and n_estimators
+        cluster_values = [3, 5, 8, 10, 12, 15]  # Update with your desired values
+        test_size_values = [0.2, 0.4, 0.6]  # Update with your desired values
+        n_estimators_values = [100, 200, 300]  # Update with your desired values
+
+        # Create an empty DataFrame to store the results
+        results_df = pd.DataFrame(columns=['Clusters', 'Test_Size', 'N_Estimators', 'MSE_Clusters'])
+
+        # Iterate over values
+        for clusters in cluster_values:
+            for test_size in test_size_values:
+                for n_estimators in n_estimators_values:
+                    # Call the Regression function
+                    mse_clusters = Regression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                            phase="3-Phase", clusters=clusters, test_size=test_size,
+                                            random_state=42, n_estimators=n_estimators)
+
+                    # Record the results in the DataFrame
+                    results_df = pd.concat([results_df, pd.DataFrame({
+                        'Clusters': [clusters],
+                        'Test_Size': [test_size],
+                        'N_Estimators': [n_estimators],
+                        'MSE_Clusters': [mse_clusters]
+                    })], ignore_index=True)
+
+        # Sort the DataFrame by 'MSE_Clusters' column
+        results_df = results_df.sort_values(by='MSE_Clusters')
+
+        # Save the sorted DataFrame to a CSV file
+        csv_filename = 'regression_results_sorted.csv'
+        results_df.to_csv(csv_filename, index=False)
+
+        print(f"Results saved to {csv_filename}")
+    
+    if deep_regression:
+        print("Performing deep regression")
+        # Call the deep learning regression function
+        mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase",
+                                                 clusters=15, test_size=0.3, random_state=42, epochs=50)
+        print(f"MSE for Clusters: {mse_clusters_dl}")
 
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False, regression=True, ts_sample_value=60)
+     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False, regression=False,
+     deep_regression=True, ts_sample_value=60)

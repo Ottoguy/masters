@@ -2,17 +2,19 @@ import os
 import glob
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
 import seaborn as sns
 import matplotlib.pyplot as plt
-#from tensorflow.keras.models import Sequential
-#from tensorflow.keras.layers import Dense
-from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.models import Sequential
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
+import tensorflow as tf
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras import Sequential
+from tensorflow.keras.activations import sigmoid
 
-def DeepRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state, epochs=50, batch_size=32):
+def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state, epochs):
+    print("Loading data for regression")
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
     folder_intermediate_path = 'prints/preproc_intermediate/'
@@ -43,6 +45,9 @@ def DeepRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, 
     # Load your data from the latest file
     df_intermediate = pd.read_csv(latest_file)
 
+    #One-hot encode the 'Current_Type' column
+    df_intermediate = pd.get_dummies(df_intermediate, columns=['Current_Type'])
+
     # Get a list of all files matching the pattern
     file_list = glob.glob(os.path.join(folder_final_path, file_pattern))
     # Sort the files based on modification time (latest first)
@@ -61,10 +66,23 @@ def DeepRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, 
         latest_id_cluster_file = id_cluster_files[0]
         # Load your ID-cluster mapping data from the latest file
         df_clusters = pd.read_csv(latest_id_cluster_file)
+        #Replace NaN values with -1 (some ID's have not been clustered?)
+        df_clusters['Cluster'] = df_clusters['Cluster'].fillna(-1)
 
         #save name of cluster file to string
         cluster_file_name = latest_id_cluster_file.split("/")[-1]
         cluster_file_name = cluster_file_name.split(".")[0]
+
+        #Remove all rows from the other dataframes with ids that are not in the cluster dataframe
+        df_immediate = df_immediate[df_immediate['ID'].isin(df_clusters['ID'])]
+        df_intermediate = df_intermediate[df_intermediate['ID'].isin(df_clusters['ID'])]
+        df_final = df_final[df_final['ID'].isin(df_clusters['ID'])]
+        
+        #Print how many rows were removed
+        print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing or because of phase?)")
+
+    # List of features to normalize
+    features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference']
 
     #Make new dataframe merging immediate and intermediate dataframes on ID
     df_immediateintermediate = pd.merge(df_immediate, df_intermediate, on='ID')
@@ -72,69 +90,83 @@ def DeepRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, 
     #Make new dataframe merging immediateintermediate and cluster dataframes on ID
     df_immediateintermediate_clusters = pd.merge(df_immediateintermediate, df_clusters, on='ID')
 
-    #Make a dataframe with only Half_Minutes, Half_Charging_Minutes, and ID from the final dataframe and merge with cluster from df_clusters
-    df_pred = df_final[['ID', 'Half_Minutes', 'Half_Charging_Minutes']].copy
-    df_barebones = pd.merge(df_pred, df_clusters, on='ID')
-    #Drop the Silhouette Score and Num Clusters columns
-    df_barebones = df_barebones.drop(['Silhouette Score', 'Num Clusters'], axis=1)
+    # Make a dataframe with only Half_Minutes, Charging_Half_Minutes, and ID from the final dataframe
+    df_pred = df_final[['ID', 'Half_Minutes', 'Charging_Half_Minutes']].copy()
+
+    # Merge with the 'cluster' column from df_clusters
+    df_barebones = df_pred.merge(df_clusters[['ID', 'Cluster']], on='ID', how='left')
+
+    print("Normalizing features")
+    # Create MinMaxScaler instance
+    scaler = MinMaxScaler()
+    # Normalize features for the merged dataframes
+    df_immediateintermediate[features_to_normalize] = scaler.fit_transform(df_immediateintermediate[features_to_normalize])
+    df_immediateintermediate_clusters[features_to_normalize] = scaler.fit_transform(df_immediateintermediate_clusters[features_to_normalize])
 
     # Define the features (X) and the target variable (y) for each dataframe
     X_immediate = df_immediate.drop(['ID', 'TimeConnected'], axis=1)
     X_intermediate = df_immediateintermediate.drop(['ID', 'TimeConnected'], axis=1)
     X_clusters = df_immediateintermediate_clusters.drop(['ID', 'TimeConnected'], axis=1)
-    X_barebones = df_barebones.drop(['ID', 'Charging_Half_Minutes'], axis=1)
+    X_barebones = df_barebones.drop(['ID', 'Half_Minutes', 'Charging_Half_Minutes'], axis=1)
+
+    #print sizes of dataframes
+    print("Size of immediate dataframe: ", X_immediate.shape)
+    print("Size of intermediate dataframe: ", X_intermediate.shape)
+    print("Size of immediateintermediate dataframe: ", df_immediateintermediate.shape)
+    print("Size of immediateintermediate_clusters dataframe: ", X_clusters.shape)
+    print("Size of clusters dataframe: ", X_clusters.shape)
+    print("Size of barebones dataframe: ", X_barebones.shape)
 
     #Feature to predict
-    y = df_final['Half_Minutes']
+    y = df_pred['Half_Minutes']
 
-    # Normalize the data using StandardScaler
-    scaler = StandardScaler()
-
-    X_immediate_train_scaled = scaler.fit_transform(X_immediate_train)
-    X_intermediate_train_scaled = scaler.fit_transform(X_intermediate_train)
-    X_clusters_train_scaled = scaler.fit_transform(X_clusters_train)
-    X_barebones_train_scaled = scaler.fit_transform(X_barebones_train)
-
-    # Build a neural network model
-    def build_model(input_shape):
+    # Define the neural network model
+    def build_model(input_dim):
         model = Sequential()
-        model.add(Dense(64, activation='relu', input_shape=(input_shape,)))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(1))  # Output layer with one neuron for regression
+        model.add(Dense(128, input_dim=input_dim, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
 
-    # Get the number of features for each dataframe
-    input_shape_immediate = X_immediate_train_scaled.shape[1]
-    input_shape_intermediate = X_intermediate_train_scaled.shape[1]
-    input_shape_clusters = X_clusters_train_scaled.shape[1]
-    input_shape_barebones = X_barebones_train_scaled.shape[1]
+    # Get the input dimensions for the neural network
+    input_dim_immediate = X_immediate.shape[1]
+    input_dim_intermediate = X_intermediate.shape[1]
+    input_dim_clusters = X_clusters.shape[1]
+    input_dim_barebones = X_barebones.shape[1]
 
     # Build models
-    model_immediate = build_model(input_shape_immediate)
-    model_intermediate = build_model(input_shape_intermediate)
-    model_clusters = build_model(input_shape_clusters)
-    model_barebones = build_model(input_shape_barebones)
+    model_immediate = build_model(input_dim_immediate)
+    model_intermediate = build_model(input_dim_intermediate)
+    model_clusters = build_model(input_dim_clusters)
+    model_barebones = build_model(input_dim_barebones)
 
-    # Train models
-    model_immediate.fit(X_immediate_train_scaled, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    model_intermediate.fit(X_intermediate_train_scaled, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    model_clusters.fit(X_clusters_train_scaled, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    model_barebones.fit(X_barebones_train_scaled, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
+    # Split the data into training and testing sets
+    X_immediate_train, X_immediate_test, y_train, y_test = train_test_split(X_immediate, y, test_size=test_size, random_state=random_state)
+    X_intermediate_train, X_intermediate_test, _, _ = train_test_split(X_intermediate, y, test_size=test_size, random_state=random_state)
+    X_clusters_train, X_clusters_test, _, _ = train_test_split(X_clusters, y, test_size=test_size, random_state=random_state)
+    X_barebones_train, X_barebones_test, _, _ = train_test_split(X_barebones, y, test_size=test_size, random_state=random_state)
 
-    # Predictions
-    y_pred_immediate = model_immediate.predict(X_immediate_test)
-    y_pred_intermediate = model_intermediate.predict(X_intermediate_test)
-    y_pred_clusters = model_clusters.predict(X_clusters_test)
-    y_pred_barebones = model_barebones.predict(X_barebones_test)
+    # Train the models
+    print("Training the immediate model")
+    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    y_pred_immediate = model_immediate.predict(X_immediate_test).flatten()
 
-    # Inverse transform predictions to original scale
-    y_pred_immediate = scaler.inverse_transform(y_pred_immediate)
-    y_pred_intermediate = scaler.inverse_transform(y_pred_intermediate)
-    y_pred_clusters = scaler.inverse_transform(y_pred_clusters)
-    y_pred_barebones = scaler.inverse_transform(y_pred_barebones)
+    print("Training the intermediate model")
+    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    y_pred_intermediate = model_intermediate.predict(X_intermediate_test).flatten()
 
-    # Evaluate the model
+    print("Training the clusters model")
+    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    y_pred_clusters = model_clusters.predict(X_clusters_test).flatten()
+
+    print("Training the barebones model")
+    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    y_pred_barebones = model_barebones.predict(X_barebones_test).flatten()
+
+    # Evaluate the models
+    print("Evaluating the models")
     mse_immediate = mean_squared_error(y_test, y_pred_immediate)
     mse_intermediate = mean_squared_error(y_test, y_pred_intermediate)
     mse_clusters = mean_squared_error(y_test, y_pred_clusters)
@@ -146,41 +178,12 @@ def DeepRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, 
     print(f'MSE for Clusters: {mse_clusters}')
     print(f'MSE for Barebones: {mse_barebones}')
 
-    # Regression plot for Immediate
-    sns.regplot(x=y_test, y=y_pred_immediate.flatten(), scatter_kws={'s': 10})
-    plt.title('Regression Plot for Immediate')
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.show()
+    # Create a DataFrame to store the predicted values and actual values
+    df_results = pd.DataFrame({'Actual': y_test, 'Immediate': y_pred_immediate, 'Intermediate': y_pred_intermediate,
+                               'Clusters': y_pred_clusters, 'Barebones': y_pred_barebones})
 
-    # Regression plot for Intermediate
-    sns.regplot(x=y_test, y=y_pred_intermediate.flatten(), scatter_kws={'s': 10})
-    plt.title('Regression Plot for Intermediate')
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.show()
+    # Save the DataFrame to a CSV file
+    results_file_name = 'predictions_vs_actuals_deep_learning.csv'
+    df_results.to_csv(results_file_name, index=False)
 
-    # Regression plot for Clusters
-    sns.regplot(x=y_test, y=y_pred_clusters.flatten(), scatter_kws={'s': 10})
-    plt.title('Regression Plot for Clusters')
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.show()
-
-    # Regression plot for Barebones
-    sns.regplot(x=y_test, y=y_pred_barebones.flatten(), scatter_kws={'s': 10})
-    plt.title('Regression Plot for Barebones')
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.show()
-
-# Example usage
-num_cores = -1
-ts_samples = 100
-include_ts_clusters = True
-phase = "example"
-clusters = 3
-test_size = 0.2
-random_state = 42
-n_estimators = 100
-DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state)
+    return mse_clusters
