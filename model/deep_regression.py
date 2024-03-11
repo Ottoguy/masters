@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-from sklearn.ensemble import RandomForestRegressor
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras import Sequential
 from tensorflow.keras.activations import sigmoid
+from tensorflow.keras.layers import Dropout
 
-def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state, epochs):
+def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state,
+                            epochs, batch_size, layer1_units, layer2_units, dropout_rate):
     print("Loading data for regression")
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
@@ -120,12 +121,12 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     #Feature to predict
     y = df_pred['Half_Minutes']
 
-    # Define the neural network model
+     # Define the neural network model
     def build_model(input_dim):
-        model = Sequential()
-        model.add(Dense(128, input_dim=input_dim, activation='relu'))
-        model.add(Dropout(0.5))
-        model.add(Dense(64, activation='relu'))
+        model = Sequential(n_jobs=num_cores)
+        model.add(Dense(layer1_units, input_dim=input_dim, activation='relu'))
+        model.add(Dropout(dropout_rate))
+        model.add(Dense(layer2_units, activation='relu'))
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
@@ -142,6 +143,12 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     model_clusters = build_model(input_dim_clusters)
     model_barebones = build_model(input_dim_barebones)
 
+    X_immediate = np.asarray(X_immediate).astype('float32')
+    X_intermediate = np.asarray(X_intermediate).astype('float32')
+    X_clusters = np.asarray(X_clusters).astype('float32')
+    X_barebones = np.asarray(X_barebones).astype('float32')
+    y = np.asarray(y).astype('float32')
+
     # Split the data into training and testing sets
     X_immediate_train, X_immediate_test, y_train, y_test = train_test_split(X_immediate, y, test_size=test_size, random_state=random_state)
     X_intermediate_train, X_intermediate_test, _, _ = train_test_split(X_intermediate, y, test_size=test_size, random_state=random_state)
@@ -150,19 +157,19 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
 
     # Train the models
     print("Training the immediate model")
-    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
     y_pred_immediate = model_immediate.predict(X_immediate_test).flatten()
 
     print("Training the intermediate model")
-    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
     y_pred_intermediate = model_intermediate.predict(X_intermediate_test).flatten()
 
     print("Training the clusters model")
-    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
     y_pred_clusters = model_clusters.predict(X_clusters_test).flatten()
 
     print("Training the barebones model")
-    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=32, verbose=1)
+    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
     y_pred_barebones = model_barebones.predict(X_barebones_test).flatten()
 
     # Evaluate the models
@@ -177,13 +184,5 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     print(f'MSE for Intermediate: {mse_intermediate}')
     print(f'MSE for Clusters: {mse_clusters}')
     print(f'MSE for Barebones: {mse_barebones}')
-
-    # Create a DataFrame to store the predicted values and actual values
-    df_results = pd.DataFrame({'Actual': y_test, 'Immediate': y_pred_immediate, 'Intermediate': y_pred_intermediate,
-                               'Clusters': y_pred_clusters, 'Barebones': y_pred_barebones})
-
-    # Save the DataFrame to a CSV file
-    results_file_name = 'predictions_vs_actuals_deep_learning.csv'
-    df_results.to_csv(results_file_name, index=False)
 
     return mse_clusters

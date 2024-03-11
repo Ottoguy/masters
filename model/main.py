@@ -106,7 +106,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
         # Call the deep learning regression function
         mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase",
-                                                 clusters=15, test_size=0.3, random_state=42, epochs=50)
+                                                 clusters=15, test_size=0.3, random_state=42, epochs=50, batch_size=32, layer1_units=64,
+                                                 layer2_units=32, dropout_rate=0.2)
         print(f"MSE for Clusters: {mse_clusters_dl}")
 
     print("Main function finished")
