@@ -123,7 +123,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
 
      # Define the neural network model
     def build_model(input_dim):
-        model = Sequential(n_jobs=num_cores)
+        model = Sequential()
         model.add(Dense(layer1_units, input_dim=input_dim, activation='relu'))
         model.add(Dropout(dropout_rate))
         model.add(Dense(layer2_units, activation='relu'))

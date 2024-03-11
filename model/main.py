@@ -104,11 +104,51 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if deep_regression:
         print("Performing deep regression")
-        # Call the deep learning regression function
-        mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True, phase="3-Phase",
-                                                 clusters=15, test_size=0.3, random_state=42, epochs=50, batch_size=32, layer1_units=64,
-                                                 layer2_units=32, dropout_rate=0.2)
-        print(f"MSE for Clusters: {mse_clusters_dl}")
+
+        # Set the ranges of values for hyperparameters
+        cluster_values = [3, 5, 8, 10, 12, 15]  # Update with your desired values
+        epochs_values = [50, 100, 300]  # Update with your desired values
+        batch_size_values = [32, 64, 128]  # Update with your desired values
+        layer1_units_values = [32, 64, 128]  # Update with your desired values
+        layer2_units_values = [16, 32, 64]  # Update with your desired values
+        dropout_rate_values = [0.2, 0.4, 0.6]  # Update with your desired values
+
+        # Create an empty DataFrame to store the results
+        results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
+
+        # Iterate over hyperparameter values
+        for clusters in cluster_values:
+            for epochs in epochs_values:
+                for batch_size in batch_size_values:
+                    for layer1_units in layer1_units_values:
+                        for layer2_units in layer2_units_values:
+                            for dropout_rate in dropout_rate_values:
+                                # Call the DeepLearningRegression function
+                                mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                                                        phase="3-Phase", clusters=clusters, test_size=0.3,
+                                                                        random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                        layer1_units=layer1_units, layer2_units=layer2_units,
+                                                                        dropout_rate=dropout_rate)
+
+                                # Record the results in the DataFrame
+                                results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                    'Clusters': [clusters],
+                                    'Epochs': [epochs],
+                                    'Batch_Size': [batch_size],
+                                    'Layer1_Units': [layer1_units],
+                                    'Layer2_Units': [layer2_units],
+                                    'Dropout_Rate': [dropout_rate],
+                                    'MSE_Clusters_DL': [mse_clusters_dl]
+                                })], ignore_index=True)
+
+        # Sort the DataFrame by 'MSE_Clusters_DL' column
+        results_df_dl = results_df_dl.sort_values(by='MSE_Clusters_DL')
+
+        # Save the sorted DataFrame to a CSV file
+        csv_filename_dl = 'deep_regression_results_sorted.csv'
+        results_df_dl.to_csv(csv_filename_dl, index=False)
+
+        print(f"Results saved to {csv_filename_dl}")
 
     print("Main function finished")
     
