@@ -3,7 +3,7 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def DeepLearningPlotting():
+def DeepLearningDiffPlotting():
     # Specify the directory where your files are located
     folder_path = 'prints/deep_learning/'
     # Create a pattern to match files in the specified format
@@ -15,26 +15,25 @@ def DeepLearningPlotting():
     # Take the latest file
     latest_file = file_list[0]
     # Load your data from the latest file
-    #df = pd.read_csv(latest_file)
-    df = pd.read_csv('prints/deep_learning/ts_samples_60_clusters_10_test_size_0.3_epochs_400_batch_size_32_layer1_units_128_layer2_units_64_dropout_rate_0.4_20240312_124401.csv')
+    df = pd.read_csv(latest_file)
 
-    #Drop the Barebones and immediate columns
-    df = df.drop(['Barebones', 'Immediate'], axis=1)
+    # Calculate absolute differences between each column and the "Real" column
+    for column in df.columns:
+        if column != 'Real':
+            df[column + '_abs_diff'] = abs(df['Real'] - df[column])
 
     # Plotting
     plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
 
-    # Plot each column as a line
+    # Plot the absolute differences
     for column in df.columns:
-        if column == 'Real':
-            plt.plot(df[column], linewidth=2.5, label=column)
-        else:
+        if '_abs_diff' in column:
             plt.plot(df[column], label=column)
 
     # Add labels and title
     plt.xlabel('Row Number')
-    plt.ylabel('Value')
-    plt.title('Deep Learning Plot')
+    plt.ylabel('Absolute Difference from Real')
+    plt.title('Deep Learning Plot - Absolute Differences from Real')
 
     # Add legend
     plt.legend()
@@ -43,4 +42,4 @@ def DeepLearningPlotting():
     plt.show()
 
 # Call the function
-DeepLearningPlotting()
+DeepLearningDiffPlotting()

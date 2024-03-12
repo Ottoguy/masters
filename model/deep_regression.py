@@ -17,6 +17,9 @@ from datetime import datetime
 def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, dropout_rate):
     print("Loading data for regression")
+
+    settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_dropout_rate_" + str(dropout_rate)
+
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
     folder_intermediate_path = 'prints/preproc_intermediate/'
@@ -228,8 +231,8 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     # Get the current date and time
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
     # Create the file name
-    output_file = f"{output_folder}/{current_datetime}.csv"
+    output_file = f"{output_folder}/{settings}_{current_datetime}.csv"
     # Print desired_rows to a CSV file
     df_results.to_csv(output_file, index=False)
 
-    return mse_clusters
+    return mse_barebones, mse_immediate, mse_intermediate, mse_clusters

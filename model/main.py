@@ -106,7 +106,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [15]  # Update with your desired values
+        cluster_values = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
         epochs_values = [400]  # Update with your desired values
         batch_size_values = [32]  # Update with your desired values
         layer1_units_values = [128]  # Update with your desired values
@@ -124,7 +124,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                         for layer2_units in layer2_units_values:
                             for dropout_rate in dropout_rate_values:
                                 # Call the DeepLearningRegression function
-                                mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
                                                                         clusters=clusters, test_size=0.3,
                                                                         random_state=42, epochs=epochs, batch_size=batch_size,
                                                                         layer1_units=layer1_units, layer2_units=layer2_units,
@@ -138,11 +138,14 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                     'Layer1_Units': [layer1_units],
                                     'Layer2_Units': [layer2_units],
                                     'Dropout_Rate': [dropout_rate],
+                                    'MSE_Barebones_DL': [mse_barebones_dl],
+                                    'MSE_Immediate_DL': [mse_immediate_dl],
+                                    'MSE_Intermediate_DL': [mse_intermediate_dl],
                                     'MSE_Clusters_DL': [mse_clusters_dl]
                                 })], ignore_index=True)
 
-        # Sort the DataFrame by 'MSE_Clusters_DL' column
-        results_df_dl = results_df_dl.sort_values(by='MSE_Clusters_DL')
+        # Sort the DataFrame by 'MSE_intermediate_DL' column
+        results_df_dl = results_df_dl.sort_values(by='MSE_Intermediate_DL')
 
         # Save the sorted DataFrame to a CSV file
         csv_filename_dl = 'deep_regression_results_sorted.csv'
