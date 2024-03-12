@@ -12,18 +12,15 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras import Sequential
 from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout
+from datetime import datetime
 
-def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, clusters, test_size, random_state,
+def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, dropout_rate):
     print("Loading data for regression")
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
     folder_intermediate_path = 'prints/preproc_intermediate/'
     folder_final_path = 'prints/preproc_final/'
-
-    origin = phase + "_" + str(clusters) + "_clusters"
-    ts_cluster_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin + '/'
-    cluster_file_name = ""
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -59,20 +56,34 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     df_final = pd.read_csv(latest_file)
 
     if include_ts_clusters:
-        # Get a list of all files in the specified format within the chosen subfolder
-        id_cluster_files = glob.glob(os.path.join(ts_cluster_folder, '*.csv'))
+        origin_1_phase = "1-Phase_" + str(clusters) + "_clusters"
+        origin_3_phase = "3-Phase_" + str(clusters) + "_clusters"
+        ts_cluster_1_phase_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin_1_phase + '/'
+        ts_cluster_3_phase_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin_3_phase + '/'
+        cluster_file_name = ""
+
+        # Get a list of all files in the specified format within the chosen subfolder for 1-phase
+        id_cluster_1_phase_files = glob.glob(os.path.join(ts_cluster_1_phase_folder, '*.csv'))
         # Sort the files based on modification time (latest first)
-        id_cluster_files.sort(key=os.path.getmtime, reverse=True)
+        id_cluster_1_phase_files.sort(key=os.path.getmtime, reverse=True)
         # Take the latest file from the chosen subfolder
-        latest_id_cluster_file = id_cluster_files[0]
+        latest_id_cluster_1_phase_file = id_cluster_1_phase_files[0]
         # Load your ID-cluster mapping data from the latest file
-        df_clusters = pd.read_csv(latest_id_cluster_file)
+        df_clusters_1_phase = pd.read_csv(latest_id_cluster_1_phase_file)
+
+        # Get a list of all files in the specified format within the chosen subfolder for 3-phase
+        id_cluster_3_phase_files = glob.glob(os.path.join(ts_cluster_3_phase_folder, '*.csv'))
+        # Sort the files based on modification time (latest first)
+        id_cluster_3_phase_files.sort(key=os.path.getmtime, reverse=True)
+        # Take the latest file from the chosen subfolder
+        latest_id_cluster_3_phase_file = id_cluster_3_phase_files[0]
+        #load your ID-cluster mapping data from the latest file
+        df_clusters_3_phase = pd.read_csv(latest_id_cluster_3_phase_file)
+
+        #Merge the two dataframes sorted by ID
+        df_clusters = pd.concat([df_clusters_1_phase, df_clusters_3_phase], ignore_index=True)
         #Replace NaN values with -1 (some ID's have not been clustered?)
         df_clusters['Cluster'] = df_clusters['Cluster'].fillna(-1)
-
-        #save name of cluster file to string
-        cluster_file_name = latest_id_cluster_file.split("/")[-1]
-        cluster_file_name = cluster_file_name.split(".")[0]
 
         #Remove all rows from the other dataframes with ids that are not in the cluster dataframe
         df_immediate = df_immediate[df_immediate['ID'].isin(df_clusters['ID'])]
@@ -103,6 +114,17 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     # Normalize features for the merged dataframes
     df_immediateintermediate[features_to_normalize] = scaler.fit_transform(df_immediateintermediate[features_to_normalize])
     df_immediateintermediate_clusters[features_to_normalize] = scaler.fit_transform(df_immediateintermediate_clusters[features_to_normalize])
+    
+
+    #Sort all dataframes by ID
+    df_immediate = df_immediate.sort_values(by='ID')
+    df_intermediate = df_intermediate.sort_values(by='ID')
+    df_final = df_final.sort_values(by='ID')
+    df_clusters = df_clusters.sort_values(by='ID')
+    df_immediateintermediate = df_immediateintermediate.sort_values(by='ID')
+    df_immediateintermediate_clusters = df_immediateintermediate_clusters.sort_values(by='ID')
+    df_pred = df_pred.sort_values(by='ID')
+    df_barebones = df_barebones.sort_values(by='ID')
 
     # Define the features (X) and the target variable (y) for each dataframe
     X_immediate = df_immediate.drop(['ID', 'TimeConnected'], axis=1)
@@ -119,7 +141,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     print("Size of barebones dataframe: ", X_barebones.shape)
 
     #Feature to predict
-    y = df_pred['Half_Minutes']
+    y = df_pred['Charging_Half_Minutes']
 
      # Define the neural network model
     def build_model(input_dim):
@@ -149,6 +171,20 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     X_barebones = np.asarray(X_barebones).astype('float32')
     y = np.asarray(y).astype('float32')
 
+    #print length of the numpy arrays
+    print("Length of X_immediate: ", len(X_immediate))
+    print("Length of X_intermediate: ", len(X_intermediate))
+    print("Length of X_clusters: ", len(X_clusters))
+    print("Length of X_barebones: ", len(X_barebones))
+    print("Length of y: ", len(y))
+
+    #Print first few rows of the numpy arrays
+    print(X_immediate[0:5])
+    print(X_intermediate[0:5])
+    print(X_intermediate[0:5])
+    print(X_barebones[0:5])
+    print(y[0:5])
+
     # Split the data into training and testing sets
     X_immediate_train, X_immediate_test, y_train, y_test = train_test_split(X_immediate, y, test_size=test_size, random_state=random_state)
     X_intermediate_train, X_intermediate_test, _, _ = train_test_split(X_intermediate, y, test_size=test_size, random_state=random_state)
@@ -157,19 +193,19 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
 
     # Train the models
     print("Training the immediate model")
-    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
     y_pred_immediate = model_immediate.predict(X_immediate_test).flatten()
 
     print("Training the intermediate model")
-    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
     y_pred_intermediate = model_intermediate.predict(X_intermediate_test).flatten()
 
     print("Training the clusters model")
-    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
     y_pred_clusters = model_clusters.predict(X_clusters_test).flatten()
 
     print("Training the barebones model")
-    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
     y_pred_barebones = model_barebones.predict(X_barebones_test).flatten()
 
     # Evaluate the models
@@ -179,10 +215,21 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, phase, cl
     mse_clusters = mean_squared_error(y_test, y_pred_clusters)
     mse_barebones = mean_squared_error(y_test, y_pred_barebones)
 
-    # Print the mean squared error for each dataframe
-    print(f'MSE for Immediate: {mse_immediate}')
-    print(f'MSE for Intermediate: {mse_intermediate}')
-    print(f'MSE for Clusters: {mse_clusters}')
-    print(f'MSE for Barebones: {mse_barebones}')
+    #Write the real values and the predicted valus by all models to a csv file
+    df_results = pd.DataFrame({'Real': y_test, 'Immediate': y_pred_immediate, 'Intermediate': y_pred_intermediate, 'Clusters': y_pred_clusters, 'Barebones': y_pred_barebones})
+
+    #Sort df_result by value of 'Real'
+    df_results = df_results.sort_values(by='Real')
+
+    output_folder = 'prints/deep_learning/'
+    # Create a folder named "prints" if it doesn't exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    # Get the current date and time
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Create the file name
+    output_file = f"{output_folder}/{current_datetime}.csv"
+    # Print desired_rows to a CSV file
+    df_results.to_csv(output_file, index=False)
 
     return mse_clusters

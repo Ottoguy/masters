@@ -106,8 +106,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [10, 12, 15]  # Update with your desired values
-        epochs_values = [200, 400]  # Update with your desired values
+        cluster_values = [15]  # Update with your desired values
+        epochs_values = [400]  # Update with your desired values
         batch_size_values = [32]  # Update with your desired values
         layer1_units_values = [128]  # Update with your desired values
         layer2_units_values = [64]  # Update with your desired values
@@ -125,7 +125,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                             for dropout_rate in dropout_rate_values:
                                 # Call the DeepLearningRegression function
                                 mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
-                                                                        phase="3-Phase", clusters=clusters, test_size=0.3,
+                                                                        clusters=clusters, test_size=0.3,
                                                                         random_state=42, epochs=epochs, batch_size=batch_size,
                                                                         layer1_units=layer1_units, layer2_units=layer2_units,
                                                                         dropout_rate=dropout_rate)
