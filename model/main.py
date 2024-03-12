@@ -106,12 +106,12 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [3, 5, 8, 10, 12, 15]  # Update with your desired values
-        epochs_values = [50, 100, 300]  # Update with your desired values
-        batch_size_values = [32, 64, 128]  # Update with your desired values
-        layer1_units_values = [32, 64, 128]  # Update with your desired values
-        layer2_units_values = [16, 32, 64]  # Update with your desired values
-        dropout_rate_values = [0.2, 0.4, 0.6]  # Update with your desired values
+        cluster_values = [10, 12, 15]  # Update with your desired values
+        epochs_values = [200, 400]  # Update with your desired values
+        batch_size_values = [32]  # Update with your desired values
+        layer1_units_values = [128]  # Update with your desired values
+        layer2_units_values = [64]  # Update with your desired values
+        dropout_rate_values = [0.4]  # Update with your desired values
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
