@@ -106,12 +106,16 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
-        epochs_values = [400]  # Update with your desired values
+        cluster_values = [10]  # Update with your desired values
+        epochs_values = [500]  # Update with your desired values
         batch_size_values = [32]  # Update with your desired values
         layer1_units_values = [128]  # Update with your desired values
         layer2_units_values = [64]  # Update with your desired values
         dropout_rate_values = [0.4]  # Update with your desired values
+
+        # Define the features to exclude one at a time
+        features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+                           'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
@@ -123,26 +127,28 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                     for layer1_units in layer1_units_values:
                         for layer2_units in layer2_units_values:
                             for dropout_rate in dropout_rate_values:
-                                # Call the DeepLearningRegression function
-                                mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
-                                                                        clusters=clusters, test_size=0.3,
-                                                                        random_state=42, epochs=epochs, batch_size=batch_size,
-                                                                        layer1_units=layer1_units, layer2_units=layer2_units,
-                                                                        dropout_rate=dropout_rate)
+                                for feature_to_exclude in features_to_exclude:
+                                    # Call the DeepLearningRegression function
+                                    mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                                                            clusters=clusters, test_size=0.3,
+                                                                            random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                            layer1_units=layer1_units, layer2_units=layer2_units,
+                                                                            dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude)
 
-                                # Record the results in the DataFrame
-                                results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                    'Clusters': [clusters],
-                                    'Epochs': [epochs],
-                                    'Batch_Size': [batch_size],
-                                    'Layer1_Units': [layer1_units],
-                                    'Layer2_Units': [layer2_units],
-                                    'Dropout_Rate': [dropout_rate],
-                                    'MSE_Barebones_DL': [mse_barebones_dl],
-                                    'MSE_Immediate_DL': [mse_immediate_dl],
-                                    'MSE_Intermediate_DL': [mse_intermediate_dl],
-                                    'MSE_Clusters_DL': [mse_clusters_dl]
-                                })], ignore_index=True)
+                                    # Record the results in the DataFrame
+                                    results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                        'Clusters': [clusters],
+                                        'Epochs': [epochs],
+                                        'Batch_Size': [batch_size],
+                                        'Layer1_Units': [layer1_units],
+                                        'Layer2_Units': [layer2_units],
+                                        'Dropout_Rate': [dropout_rate],
+                                        'MSE_Barebones_DL': [mse_barebones_dl],
+                                        'MSE_Immediate_DL': [mse_immediate_dl],
+                                        'MSE_Intermediate_DL': [mse_intermediate_dl],
+                                        'MSE_Clusters_DL': [mse_clusters_dl],
+                                        'ExcludedFeature': [feature_to_exclude]
+                                    })], ignore_index=True)
 
         # Sort the DataFrame by 'MSE_intermediate_DL' column
         results_df_dl = results_df_dl.sort_values(by='MSE_Intermediate_DL')

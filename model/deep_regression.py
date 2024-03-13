@@ -15,7 +15,7 @@ from tensorflow.keras.layers import Dropout
 from datetime import datetime
 
 def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
-                            epochs, batch_size, layer1_units, layer2_units, dropout_rate):
+                            epochs, batch_size, layer1_units, layer2_units, dropout_rate, feature_to_exclude):
     print("Loading data for regression")
 
     settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_dropout_rate_" + str(dropout_rate)
@@ -97,7 +97,8 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing or because of phase?)")
 
     # List of features to normalize
-    features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference']
+    features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference', 'TimeConnected_sin', 'TimeConnected_cos']
+    immediate_features_to_normalize = ['TimeConnected_sin', 'TimeConnected_cos']
 
     #Make new dataframe merging immediate and intermediate dataframes on ID
     df_immediateintermediate = pd.merge(df_immediate, df_intermediate, on='ID')
@@ -115,9 +116,9 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     # Create MinMaxScaler instance
     scaler = MinMaxScaler()
     # Normalize features for the merged dataframes
+    df_immediate[immediate_features_to_normalize] = scaler.fit_transform(df_immediate[immediate_features_to_normalize])
     df_immediateintermediate[features_to_normalize] = scaler.fit_transform(df_immediateintermediate[features_to_normalize])
     df_immediateintermediate_clusters[features_to_normalize] = scaler.fit_transform(df_immediateintermediate_clusters[features_to_normalize])
-    
 
     #Sort all dataframes by ID
     df_immediate = df_immediate.sort_values(by='ID')
@@ -146,7 +147,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     #Feature to predict
     y = df_pred['Charging_Half_Minutes']
 
-     # Define the neural network model
+    # Define the neural network model
     def build_model(input_dim):
         model = Sequential()
         model.add(Dense(layer1_units, input_dim=input_dim, activation='relu'))
@@ -155,18 +156,6 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
-
-    # Get the input dimensions for the neural network
-    input_dim_immediate = X_immediate.shape[1]
-    input_dim_intermediate = X_intermediate.shape[1]
-    input_dim_clusters = X_clusters.shape[1]
-    input_dim_barebones = X_barebones.shape[1]
-
-    # Build models
-    model_immediate = build_model(input_dim_immediate)
-    model_intermediate = build_model(input_dim_intermediate)
-    model_clusters = build_model(input_dim_clusters)
-    model_barebones = build_model(input_dim_barebones)
 
     X_immediate = np.asarray(X_immediate).astype('float32')
     X_intermediate = np.asarray(X_intermediate).astype('float32')
@@ -181,35 +170,77 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     print("Length of X_barebones: ", len(X_barebones))
     print("Length of y: ", len(y))
 
-    #Print first few rows of the numpy arrays
-    print(X_immediate[0:5])
-    print(X_intermediate[0:5])
-    print(X_intermediate[0:5])
-    print(X_barebones[0:5])
-    print(y[0:5])
+    # Exclude one feature at a time if it exists in the dataframe
+    print("Feature to exclude:", feature_to_exclude)
+    if feature_to_exclude in df_immediate.columns:
+        excluded_feature_index_immediate = df_immediate.columns.get_loc(feature_to_exclude)
+        X_immediate_excluded = np.delete(X_immediate, excluded_feature_index_immediate, axis=1)
+    else:
+        X_immediate_excluded = X_immediate.copy()
+
+    if feature_to_exclude in df_immediateintermediate.columns:
+        excluded_feature_index_intermediate = df_immediateintermediate.columns.get_loc(feature_to_exclude)
+        X_intermediate_excluded = np.delete(X_intermediate, excluded_feature_index_intermediate, axis=1)
+    else:
+        X_intermediate_excluded = X_intermediate.copy()
+
+    if feature_to_exclude in df_immediateintermediate_clusters.columns:
+        excluded_feature_index_clusters = df_immediateintermediate_clusters.columns.get_loc(feature_to_exclude)
+        X_clusters_excluded = np.delete(X_clusters, excluded_feature_index_clusters, axis=1)
+    else:
+        X_clusters_excluded = X_clusters.copy()
+
+    if feature_to_exclude in df_barebones.columns:
+        excluded_feature_index_barebones = df_barebones.columns.get_loc(feature_to_exclude)
+        X_barebones_excluded = np.delete(X_barebones, excluded_feature_index_barebones, axis=1)
+    else:
+        X_barebones_excluded = X_barebones.copy()
+
+    # Get the input dimensions for the neural network
+    input_dim_immediate = X_immediate_excluded.shape[1]
+    input_dim_intermediate = X_intermediate_excluded.shape[1]
+    input_dim_clusters = X_clusters_excluded.shape[1]
+    input_dim_barebones = X_barebones_excluded.shape[1]
+
+    # Build models
+    model_immediate = build_model(input_dim_immediate)
+    model_intermediate = build_model(input_dim_intermediate)
+    model_clusters = build_model(input_dim_clusters)
+    model_barebones = build_model(input_dim_barebones)
 
     # Split the data into training and testing sets
-    X_immediate_train, X_immediate_test, y_train, y_test = train_test_split(X_immediate, y, test_size=test_size, random_state=random_state)
-    X_intermediate_train, X_intermediate_test, _, _ = train_test_split(X_intermediate, y, test_size=test_size, random_state=random_state)
-    X_clusters_train, X_clusters_test, _, _ = train_test_split(X_clusters, y, test_size=test_size, random_state=random_state)
-    X_barebones_train, X_barebones_test, _, _ = train_test_split(X_barebones, y, test_size=test_size, random_state=random_state)
+    X_immediate_train_excluded, X_immediate_test_excluded, y_train, y_test = train_test_split(X_immediate_excluded, y, test_size=test_size, random_state=random_state)
+    X_intermediate_train_excluded, X_intermediate_test_excluded, _, _ = train_test_split(X_intermediate_excluded, y, test_size=test_size, random_state=random_state)
+    X_clusters_train_excluded, X_clusters_test_excluded, _, _ = train_test_split(X_clusters_excluded, y, test_size=test_size, random_state=random_state)
+    X_barebones_train_excluded, X_barebones_test_excluded, _, _ = train_test_split(X_barebones_excluded, y, test_size=test_size, random_state=random_state)
+
+    #Print shapes of the training and testing sets
+    print("Shape of X_immediate_train_excluded: ", X_immediate_train_excluded.shape)
+    print("Shape of X_immediate_test_excluded: ", X_immediate_test_excluded.shape)
+    print("Shape of X_intermediate_train_excluded: ", X_intermediate_train_excluded.shape)
+    print("Shape of X_intermediate_test_excluded: ", X_intermediate_test_excluded.shape)
+    print("Shape of X_clusters_train_excluded: ", X_clusters_train_excluded.shape)
+    print("Shape of X_clusters_test_excluded: ", X_clusters_test_excluded.shape)
+    print("Shape of X_barebones_train_excluded: ", X_barebones_train_excluded.shape)
+    print("Shape of X_barebones_test_excluded: ", X_barebones_test_excluded.shape)
+    print("Shape of y_train: ", y_train.shape)
+    print("Shape of y_test: ", y_test.shape)
 
     # Train the models
-    print("Training the immediate model")
-    model_immediate.fit(X_immediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    y_pred_immediate = model_immediate.predict(X_immediate_test).flatten()
+    print(f"Training the immediate model with {feature_to_exclude} excluded")
+    model_immediate.fit(X_immediate_train_excluded, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
+    y_pred_immediate = model_immediate.predict(X_immediate_test_excluded).flatten()
 
-    print("Training the intermediate model")
-    model_intermediate.fit(X_intermediate_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    y_pred_intermediate = model_intermediate.predict(X_intermediate_test).flatten()
+    print(f"Training the intermediate model with {feature_to_exclude} excluded")
+    y_pred_intermediate = model_intermediate.predict(X_intermediate_test_excluded).flatten()
 
-    print("Training the clusters model")
-    model_clusters.fit(X_clusters_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    y_pred_clusters = model_clusters.predict(X_clusters_test).flatten()
+    print(f"Training the clusters model with {feature_to_exclude} excluded")
+    model_clusters.fit(X_clusters_train_excluded, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
+    y_pred_clusters = model_clusters.predict(X_clusters_test_excluded).flatten()
 
-    print("Training the barebones model")
-    model_barebones.fit(X_barebones_train, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
-    y_pred_barebones = model_barebones.predict(X_barebones_test).flatten()
+    print(f"Training the barebones model with {feature_to_exclude} excluded")
+    model_barebones.fit(X_barebones_train_excluded, y_train, epochs=epochs, batch_size=batch_size, verbose=0)
+    y_pred_barebones = model_barebones.predict(X_barebones_test_excluded).flatten()
 
     # Evaluate the models
     print("Evaluating the models")
@@ -218,21 +249,30 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     mse_clusters = mean_squared_error(y_test, y_pred_clusters)
     mse_barebones = mean_squared_error(y_test, y_pred_barebones)
 
-    #Write the real values and the predicted valus by all models to a csv file
-    df_results = pd.DataFrame({'Real': y_test, 'Immediate': y_pred_immediate, 'Intermediate': y_pred_intermediate, 'Clusters': y_pred_clusters, 'Barebones': y_pred_barebones})
+    # Write the real values and the predicted values by all models to a csv file
+    df_results = pd.DataFrame({'Real': y_test, 'Immediate': y_pred_immediate,
+                                'Intermediate': y_pred_intermediate, 'Clusters': y_pred_clusters,
+                                'Barebones': y_pred_barebones, 'ExcludedFeature': feature_to_exclude})
+        
+    df_results_all = df_results
 
     #Sort df_result by value of 'Real'
-    df_results = df_results.sort_values(by='Real')
+    df_results_all = df_results_all.sort_values(by='Real')
 
-    output_folder = 'prints/deep_learning/'
-    # Create a folder named "prints" if it doesn't exist
+    print(len(df_results_all))
+
+    output_folder = 'prints/deep_learning'
+    # Create a folder if it doesn't exist
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     # Get the current date and time
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
     # Create the file name
+    print(f"Creating the file {settings}_{current_datetime}.csv")
     output_file = f"{output_folder}/{settings}_{current_datetime}.csv"
     # Print desired_rows to a CSV file
-    df_results.to_csv(output_file, index=False)
+    df_results_all.to_csv(output_file, index=False)
+    #Print path to the created file
+    print(f"Results saved to {output_file}")
 
     return mse_barebones, mse_immediate, mse_intermediate, mse_clusters
