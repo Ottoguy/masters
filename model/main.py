@@ -109,17 +109,17 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [10]  # Update with your desired values
-        epochs_values = [300]  # Update with your desired values
-        batch_size_values = [32]  # Update with your desired values
-        layer1_units_values = [128]  # Update with your desired values
-        layer2_units_values = [64]  # Update with your desired values
+        cluster_values = [8, 10, 15]  # Update with your desired values
+        epochs_values = [10, 100, 500]  # Update with your desired values
+        batch_size_values = [16, 32, 64]  # Update with your desired values
+        layer1_units_values = [64, 128]  # Update with your desired values
+        layer2_units_values = [64, 128]  # Update with your desired values
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
         features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
                            'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        activation_functions_layer1 = ['relu', 'tanh', 'sigmoid', 'softmax']
-        activation_functions_layer2 = ['relu', 'tanh', 'sigmoid', 'softmax']
+        activation_functions_layer1 = ['relu', 'tanh', 'sigmoid']
+        activation_functions_layer2 = ['relu',]
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
@@ -143,22 +143,22 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                                     layer1activation=activation_function_layer1,
                                                                                     layer2activation=activation_function_layer2)
 
-                                    # Record the results in the DataFrame
-                                    results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                        'Clusters': [clusters],
-                                        'Epochs': [epochs],
-                                        'Batch_Size': [batch_size],
-                                        'Layer1_Units': [layer1_units],
-                                        'Layer2_Units': [layer2_units],
-                                        'Dropout_Rate': [dropout_rate],
-                                        'MSE_Barebones_DL': [mse_barebones_dl],
-                                        'MSE_Immediate_DL': [mse_immediate_dl],
-                                        'MSE_Intermediate_DL': [mse_intermediate_dl],
-                                        'MSE_Clusters_DL': [mse_clusters_dl],
-                                        'ExcludedFeature': [feature_to_exclude],
-                                        'Layer1Activation': [activation_function_layer1],
-                                        'Layer2Activation': [activation_function_layer2]
-                                    })], ignore_index=True)
+                                            # Record the results in the DataFrame
+                                            results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                'Clusters': [clusters],
+                                                'Epochs': [epochs],
+                                                'Batch_Size': [batch_size],
+                                                'Layer1_Units': [layer1_units],
+                                                'Layer2_Units': [layer2_units],
+                                                'Dropout_Rate': [dropout_rate],
+                                                'MSE_Barebones_DL': [mse_barebones_dl],
+                                                'MSE_Immediate_DL': [mse_immediate_dl],
+                                                'MSE_Intermediate_DL': [mse_intermediate_dl],
+                                                'MSE_Clusters_DL': [mse_clusters_dl],
+                                                'ExcludedFeature': [feature_to_exclude],
+                                                'Layer1Activation': [activation_function_layer1],
+                                                'Layer2Activation': [activation_function_layer2]
+                                            })], ignore_index=True)
 
         # Sort the DataFrame by 'MSE_intermediate_DL' column
         results_df_dl = results_df_dl.sort_values(by='MSE_Clusters_DL')
