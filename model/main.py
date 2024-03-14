@@ -11,6 +11,9 @@ from ts_eval import TsEval
 from regression import Regression
 from deep_regression import DeepLearningRegression
 import pandas as pd
+import os
+from datetime import datetime
+
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
          ts_clustering_experimental, ts_clustering_plotting, ts_eval, regression, deep_regression, ts_sample_value):
@@ -115,6 +118,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         # Define the features to exclude one at a time
         features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
                            'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        activation_functions_layer1 = ['relu', 'tanh', 'sigmoid', 'softmax']
+        activation_functions_layer2 = ['relu', 'tanh', 'sigmoid', 'softmax']
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
@@ -127,12 +132,16 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                         for layer2_units in layer2_units_values:
                             for dropout_rate in dropout_rate_values:
                                 for feature_to_exclude in features_to_exclude:
-                                    # Call the DeepLearningRegression function
-                                    mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
-                                                                            clusters=clusters, test_size=0.3,
-                                                                            random_state=42, epochs=epochs, batch_size=batch_size,
-                                                                            layer1_units=layer1_units, layer2_units=layer2_units,
-                                                                            dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude)
+                                    for activation_function_layer1 in activation_functions_layer1:
+                                        for activation_function_layer2 in activation_functions_layer2:
+                                            # Call the DeepLearningRegression function
+                                            mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                                                                    clusters=clusters, test_size=0.3,
+                                                                                    random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                                    layer1_units=layer1_units, layer2_units=layer2_units,
+                                                                                    dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
+                                                                                    layer1activation=activation_function_layer1,
+                                                                                    layer2activation=activation_function_layer2)
 
                                     # Record the results in the DataFrame
                                     results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
@@ -146,17 +155,27 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                         'MSE_Immediate_DL': [mse_immediate_dl],
                                         'MSE_Intermediate_DL': [mse_intermediate_dl],
                                         'MSE_Clusters_DL': [mse_clusters_dl],
-                                        'ExcludedFeature': [feature_to_exclude]
+                                        'ExcludedFeature': [feature_to_exclude],
+                                        'Layer1Activation': [activation_function_layer1],
+                                        'Layer2Activation': [activation_function_layer2]
                                     })], ignore_index=True)
 
         # Sort the DataFrame by 'MSE_intermediate_DL' column
-        results_df_dl = results_df_dl.sort_values(by='MSE_Intermediate_DL')
+        results_df_dl = results_df_dl.sort_values(by='MSE_Clusters_DL')
 
-        # Save the sorted DataFrame to a CSV file
-        csv_filename_dl = 'deep_regression_results_sorted.csv'
-        results_df_dl.to_csv(csv_filename_dl, index=False)
-
-        print(f"Results saved to {csv_filename_dl}")
+        output_folder = 'prints/dl_overview/'
+        # Create a folder if it doesn't exist
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        # Get the current date and time
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Create the file name
+        print(f"Creating the file {current_datetime}.csv")
+        output_file = f"{output_folder}/{current_datetime}.csv"
+        # Print desired_rows to a CSV file
+        results_df_dl.to_csv(output_file, index=False)
+        #Print path to the created file
+        print(f"Results saved to {output_file}")
 
     print("Main function finished")
     

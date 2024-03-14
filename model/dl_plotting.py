@@ -15,11 +15,10 @@ def DeepLearningPlotting():
     # Take the latest file
     latest_file = file_list[0]
     # Load your data from the latest file
-    #df = pd.read_csv(latest_file)
-    df = pd.read_csv('prints/deep_learning/ts_samples_60_clusters_10_test_size_0.3_epochs_400_batch_size_32_layer1_units_128_layer2_units_64_dropout_rate_0.4_20240312_124401.csv')
+    df = pd.read_csv(latest_file)
 
     #Drop the Barebones and immediate columns
-    df = df.drop(['Barebones', 'Immediate'], axis=1)
+    df = df.drop(['ExcludedFeature'], axis=1)
 
     # Plotting
     plt.figure(figsize=(10, 6))  # Adjust the figure size as needed

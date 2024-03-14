@@ -12,10 +12,13 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras import Sequential
 from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Concatenate
 from datetime import datetime
 
 def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
-                            epochs, batch_size, layer1_units, layer2_units, dropout_rate, feature_to_exclude):
+                            epochs, batch_size, layer1_units, layer2_units, dropout_rate, feature_to_exclude,
+                            layer1activation, layer2activation):
     print("Loading data for regression")
 
     settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_dropout_rate_" + str(dropout_rate)
@@ -99,6 +102,26 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     features_to_normalize = ['MaxVoltage','MaxCurrent','Energy_Uptake','AverageVoltageDifference','AverageCurrentDifference', 'TimeConnected_sin', 'TimeConnected_cos']
     immediate_features_to_normalize = ['TimeConnected_sin', 'TimeConnected_cos']
 
+    # One-hot encode the 'Weekend' column if it exists
+    if 'Weekend' in df_immediate.columns:
+        df_immediate = pd.get_dummies(df_immediate, columns=['Weekend'])
+
+    if 'Weekend' in df_intermediate.columns:
+        df_intermediate = pd.get_dummies(df_intermediate, columns=['Weekend'])
+
+    if 'Weekend' in df_final.columns:
+        df_final = pd.get_dummies(df_final, columns=['Weekend'])
+
+    # One-hot encode the 'FullyCharged' column if it exists
+    if 'FullyCharged' in df_immediate.columns:
+        df_immediate = pd.get_dummies(df_immediate, columns=['FullyCharged'])
+
+    if 'FullyCharged' in df_intermediate.columns:
+        df_intermediate = pd.get_dummies(df_intermediate, columns=['FullyCharged'])
+
+    if 'FullyCharged' in df_final.columns:
+        df_final = pd.get_dummies(df_final, columns=['FullyCharged'])
+
     #Make new dataframe merging immediate and intermediate dataframes on ID
     df_immediateintermediate = pd.merge(df_immediate, df_intermediate, on='ID')
 
@@ -135,21 +158,6 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         df_immediate_excluded = df_immediate.drop([feature_to_exclude], axis=1)
     else:
         df_immediate_excluded = df_immediate
-
-    if feature_to_exclude in df_intermediate.columns:
-        df_intermediate_excluded = df_intermediate.drop([feature_to_exclude], axis=1)
-    else:
-        df_intermediate_excluded = df_intermediate
-
-    if feature_to_exclude in df_final.columns:
-        df_final_excluded = df_final.drop([feature_to_exclude], axis=1)
-    else:
-        df_final_excluded = df_final
-
-    if feature_to_exclude in df_clusters.columns:
-        df_clusters_excluded = df_clusters.drop([feature_to_exclude], axis=1)
-    else:
-        df_clusters_excluded = df_clusters
 
     if feature_to_exclude in df_immediateintermediate.columns:
         df_immediateintermediate_excluded = df_immediateintermediate.drop([feature_to_exclude], axis=1)
@@ -190,9 +198,9 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     # Define the neural network model
     def build_model(input_dim):
         model = Sequential()
-        model.add(Dense(layer1_units, input_dim=input_dim, activation='relu'))
+        model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
         model.add(Dropout(dropout_rate))
-        model.add(Dense(layer2_units, activation='relu'))
+        model.add(Dense(layer2_units, activation=layer2activation))
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
@@ -263,8 +271,8 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     # Get the current date and time
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
     # Create the file name
-    print(f"Creating the file {settings}_{current_datetime}.csv")
-    output_file = f"{output_folder}/{settings}_{current_datetime}.csv"
+    print(f"Creating the file {current_datetime}_{settings}.csv")
+    output_file = f"{output_folder}/{current_datetime}_{settings}.csv"
     # Print desired_rows to a CSV file
     df_results_all.to_csv(output_file, index=False)
     #Print path to the created file
