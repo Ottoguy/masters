@@ -63,7 +63,6 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         origin_3_phase = "3-Phase_" + str(clusters) + "_clusters"
         ts_cluster_1_phase_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin_1_phase + '/'
         ts_cluster_3_phase_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin_3_phase + '/'
-        cluster_file_name = ""
 
         # Get a list of all files in the specified format within the chosen subfolder for 1-phase
         id_cluster_1_phase_files = glob.glob(os.path.join(ts_cluster_1_phase_folder, '*.csv'))
@@ -130,22 +129,63 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     df_pred = df_pred.sort_values(by='ID')
     df_barebones = df_barebones.sort_values(by='ID')
 
-    # Define the features (X) and the target variable (y) for each dataframe
-    X_immediate = df_immediate.drop(['ID', 'TimeConnected'], axis=1)
-    X_intermediate = df_immediateintermediate.drop(['ID', 'TimeConnected'], axis=1)
-    X_clusters = df_immediateintermediate_clusters.drop(['ID', 'TimeConnected'], axis=1)
-    X_barebones = df_barebones.drop(['ID', 'Half_Minutes', 'Charging_Half_Minutes'], axis=1)
+    # Exclude one feature at a time if it exists in the dataframe
+    print("Feature to exclude:", feature_to_exclude)
+    if feature_to_exclude in df_immediate.columns:
+        df_immediate_excluded = df_immediate.drop([feature_to_exclude], axis=1)
+    else:
+        df_immediate_excluded = df_immediate
 
-    #print sizes of dataframes
-    print("Size of immediate dataframe: ", X_immediate.shape)
-    print("Size of intermediate dataframe: ", X_intermediate.shape)
-    print("Size of immediateintermediate dataframe: ", df_immediateintermediate.shape)
-    print("Size of immediateintermediate_clusters dataframe: ", X_clusters.shape)
-    print("Size of clusters dataframe: ", X_clusters.shape)
-    print("Size of barebones dataframe: ", X_barebones.shape)
+    if feature_to_exclude in df_intermediate.columns:
+        df_intermediate_excluded = df_intermediate.drop([feature_to_exclude], axis=1)
+    else:
+        df_intermediate_excluded = df_intermediate
+
+    if feature_to_exclude in df_final.columns:
+        df_final_excluded = df_final.drop([feature_to_exclude], axis=1)
+    else:
+        df_final_excluded = df_final
+
+    if feature_to_exclude in df_clusters.columns:
+        df_clusters_excluded = df_clusters.drop([feature_to_exclude], axis=1)
+    else:
+        df_clusters_excluded = df_clusters
+
+    if feature_to_exclude in df_immediateintermediate.columns:
+        df_immediateintermediate_excluded = df_immediateintermediate.drop([feature_to_exclude], axis=1)
+    else:
+        df_immediateintermediate_excluded = df_immediateintermediate
+
+    if feature_to_exclude in df_immediateintermediate_clusters.columns:
+        df_immediateintermediate_clusters_excluded = df_immediateintermediate_clusters.drop([feature_to_exclude], axis=1)
+    else:
+        df_immediateintermediate_clusters_excluded = df_immediateintermediate_clusters
+
+    if feature_to_exclude in df_barebones.columns:
+        df_barebones_excluded = df_barebones.drop([feature_to_exclude], axis=1)
+    else:
+        df_barebones_excluded = df_barebones
+
+    # Define the features (X) and the target variable (y) for each dataframe
+    X_immediate_excluded = df_immediate_excluded.drop(['ID', 'TimeConnected'], axis=1)
+    X_intermediate_excluded = df_immediateintermediate_excluded.drop(['ID', 'TimeConnected'], axis=1)
+    X_clusters_excluded = df_immediateintermediate_clusters_excluded.drop(['ID', 'TimeConnected'], axis=1)
+    X_barebones_excluded = df_barebones_excluded.drop(['ID', 'Half_Minutes', 'Charging_Half_Minutes'], axis=1)
 
     #Feature to predict
     y = df_pred['Charging_Half_Minutes']
+
+    X_immediate_excluded = np.asarray(X_immediate_excluded).astype('float32')
+    X_intermediate_excluded = np.asarray(X_intermediate_excluded).astype('float32')
+    X_clusters_excluded = np.asarray(X_clusters_excluded).astype('float32')
+    X_barebones_excluded = np.asarray(X_barebones_excluded).astype('float32')
+    y = np.asarray(y).astype('float32')
+
+    # Get the input dimensions for the neural network
+    input_dim_immediate = X_immediate_excluded.shape[1]
+    input_dim_intermediate = X_intermediate_excluded.shape[1]
+    input_dim_clusters = X_clusters_excluded.shape[1]
+    input_dim_barebones = X_barebones_excluded.shape[1]
 
     # Define the neural network model
     def build_model(input_dim):
@@ -156,51 +196,6 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
-
-    X_immediate = np.asarray(X_immediate).astype('float32')
-    X_intermediate = np.asarray(X_intermediate).astype('float32')
-    X_clusters = np.asarray(X_clusters).astype('float32')
-    X_barebones = np.asarray(X_barebones).astype('float32')
-    y = np.asarray(y).astype('float32')
-
-    #print length of the numpy arrays
-    print("Length of X_immediate: ", len(X_immediate))
-    print("Length of X_intermediate: ", len(X_intermediate))
-    print("Length of X_clusters: ", len(X_clusters))
-    print("Length of X_barebones: ", len(X_barebones))
-    print("Length of y: ", len(y))
-
-    # Exclude one feature at a time if it exists in the dataframe
-    print("Feature to exclude:", feature_to_exclude)
-    if feature_to_exclude in df_immediate.columns:
-        excluded_feature_index_immediate = df_immediate.columns.get_loc(feature_to_exclude)
-        X_immediate_excluded = np.delete(X_immediate, excluded_feature_index_immediate, axis=1)
-    else:
-        X_immediate_excluded = X_immediate.copy()
-
-    if feature_to_exclude in df_immediateintermediate.columns:
-        excluded_feature_index_intermediate = df_immediateintermediate.columns.get_loc(feature_to_exclude)
-        X_intermediate_excluded = np.delete(X_intermediate, excluded_feature_index_intermediate, axis=1)
-    else:
-        X_intermediate_excluded = X_intermediate.copy()
-
-    if feature_to_exclude in df_immediateintermediate_clusters.columns:
-        excluded_feature_index_clusters = df_immediateintermediate_clusters.columns.get_loc(feature_to_exclude)
-        X_clusters_excluded = np.delete(X_clusters, excluded_feature_index_clusters, axis=1)
-    else:
-        X_clusters_excluded = X_clusters.copy()
-
-    if feature_to_exclude in df_barebones.columns:
-        excluded_feature_index_barebones = df_barebones.columns.get_loc(feature_to_exclude)
-        X_barebones_excluded = np.delete(X_barebones, excluded_feature_index_barebones, axis=1)
-    else:
-        X_barebones_excluded = X_barebones.copy()
-
-    # Get the input dimensions for the neural network
-    input_dim_immediate = X_immediate_excluded.shape[1]
-    input_dim_intermediate = X_intermediate_excluded.shape[1]
-    input_dim_clusters = X_clusters_excluded.shape[1]
-    input_dim_barebones = X_barebones_excluded.shape[1]
 
     # Build models
     model_immediate = build_model(input_dim_immediate)

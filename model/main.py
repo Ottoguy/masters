@@ -107,12 +107,11 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
         # Set the ranges of values for hyperparameters
         cluster_values = [10]  # Update with your desired values
-        epochs_values = [500]  # Update with your desired values
+        epochs_values = [300]  # Update with your desired values
         batch_size_values = [32]  # Update with your desired values
         layer1_units_values = [128]  # Update with your desired values
         layer2_units_values = [64]  # Update with your desired values
         dropout_rate_values = [0.4]  # Update with your desired values
-
         # Define the features to exclude one at a time
         features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
                            'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']

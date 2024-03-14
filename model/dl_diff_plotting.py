@@ -20,7 +20,7 @@ def DeepLearningDiffPlotting():
     # Calculate absolute differences between each column and the "Real" column
     for column in df.columns:
         if column != 'Real':
-            df[column + '_abs_diff'] = abs(df['Real'] - df[column])
+            df[column + '_abs_diff'] = abs(float(df['Real']) - float(df[column]))
 
     # Plotting
     plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
