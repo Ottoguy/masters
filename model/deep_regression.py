@@ -14,6 +14,7 @@ from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Embedding
 from tensorflow.keras.layers import Concatenate
+from tensorflow.keras.layers import Flatten
 from datetime import datetime
 
 def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
@@ -194,8 +195,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
     input_dim_intermediate = X_intermediate_excluded.shape[1]
     input_dim_clusters = X_clusters_excluded.shape[1]
     input_dim_barebones = X_barebones_excluded.shape[1]
-
-    # Define the neural network model
+    
     def build_model(input_dim):
         model = Sequential()
         model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
@@ -204,12 +204,28 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
+    
+    def build_model_with_embedding(input_dim, num_categories, embedding_dim):
+        model = Sequential()
+        model.add(Embedding(input_dim=num_categories, output_dim=embedding_dim))
+        model.add(Flatten())
+        model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
+        model.add(Dropout(dropout_rate))
+        model.add(Dense(layer2_units, activation=layer2activation))
+        model.add(Dense(1, activation='linear'))  # Output layer for regression
+        model.compile(optimizer='adam', loss='mean_squared_error')
+        return model
+    
+    # Define the number of categories and embedding dimension
+    num_categories = len(df_immediateintermediate_clusters['Cluster'].unique())
+    #Normal rule of thumb
+    embedding_dim = min(50, num_categories // 2)
 
     # Build models
     model_immediate = build_model(input_dim_immediate)
     model_intermediate = build_model(input_dim_intermediate)
-    model_clusters = build_model(input_dim_clusters)
-    model_barebones = build_model(input_dim_barebones)
+    model_clusters = build_model_with_embedding(input_dim_clusters, num_categories, embedding_dim)
+    model_barebones = build_model_with_embedding(input_dim_barebones, num_categories, embedding_dim)
 
     # Split the data into training and testing sets
     X_immediate_train_excluded, X_immediate_test_excluded, y_train, y_test = train_test_split(X_immediate_excluded, y, test_size=test_size, random_state=random_state)
