@@ -110,16 +110,17 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
         # Set the ranges of values for hyperparameters
         cluster_values = [8, 10, 15]  # Update with your desired values
-        epochs_values = [10, 100, 500]  # Update with your desired values
+        epochs_values = [50, 100, 500]  # Update with your desired values
         batch_size_values = [16, 32, 64]  # Update with your desired values
-        layer1_units_values = [64, 128]  # Update with your desired values
-        layer2_units_values = [64, 128]  # Update with your desired values
+        layer1_units_values = [32, 64, 128]  # Update with your desired values
+        layer2_units_values = [32, 64, 128]  # Update with your desired values
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
         features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
                            'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
         activation_functions_layer1 = ['relu', 'tanh', 'sigmoid']
-        activation_functions_layer2 = ['relu',]
+        activation_functions_layer2 = ['relu']
+        should_embed_features = [True, False]
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
@@ -134,34 +135,40 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                 for feature_to_exclude in features_to_exclude:
                                     for activation_function_layer1 in activation_functions_layer1:
                                         for activation_function_layer2 in activation_functions_layer2:
-                                            # Call the DeepLearningRegression function
-                                            mse_barebones_dl, mse_immediate_dl, mse_intermediate_dl, mse_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
-                                                                                    clusters=clusters, test_size=0.3,
-                                                                                    random_state=42, epochs=epochs, batch_size=batch_size,
-                                                                                    layer1_units=layer1_units, layer2_units=layer2_units,
-                                                                                    dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
-                                                                                    layer1activation=activation_function_layer1,
-                                                                                    layer2activation=activation_function_layer2)
+                                            for should_embed in should_embed_features:
+                                                # Call the DeepLearningRegression function
+                                                rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                                                                        clusters=clusters, test_size=0.3,
+                                                                                        random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                                        layer1_units=layer1_units, layer2_units=layer2_units,
+                                                                                        dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
+                                                                                        layer1activation=activation_function_layer1,
+                                                                                        layer2activation=activation_function_layer2, should_embed=should_embed)
 
-                                            # Record the results in the DataFrame
-                                            results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                                'Clusters': [clusters],
-                                                'Epochs': [epochs],
-                                                'Batch_Size': [batch_size],
-                                                'Layer1_Units': [layer1_units],
-                                                'Layer2_Units': [layer2_units],
-                                                'Dropout_Rate': [dropout_rate],
-                                                'MSE_Barebones_DL': [mse_barebones_dl],
-                                                'MSE_Immediate_DL': [mse_immediate_dl],
-                                                'MSE_Intermediate_DL': [mse_intermediate_dl],
-                                                'MSE_Clusters_DL': [mse_clusters_dl],
-                                                'ExcludedFeature': [feature_to_exclude],
-                                                'Layer1Activation': [activation_function_layer1],
-                                                'Layer2Activation': [activation_function_layer2]
-                                            })], ignore_index=True)
+                                                # Record the results in the DataFrame
+                                                results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                    'Clusters': [clusters],
+                                                    'Epochs': [epochs],
+                                                    'Batch_Size': [batch_size],
+                                                    'Layer1_Units': [layer1_units],
+                                                    'Layer2_Units': [layer2_units],
+                                                    'Dropout_Rate': [dropout_rate],
+                                                    'RMSE_Barebones_DL': [rmse_barebones_dl],
+                                                    'RMSE_Immediate_DL': [rmse_immediate_dl],
+                                                    'RMSE_Intermediate_DL': [rmse_intermediate_dl],
+                                                    'RMSE_Clusters_DL': [rmse_clusters_dl],
+                                                    'MAE_Barebones_DL': [mae_barebones_dl],
+                                                    'MAE_Immediate_DL': [mae_immediate_dl],
+                                                    'MAE_Intermediate_DL': [mae_intermediate_dl],
+                                                    'MAE_Clusters_DL': [mae_clusters_dl],
+                                                    'ExcludedFeature': [feature_to_exclude],
+                                                    'Layer1Activation': [activation_function_layer1],
+                                                    'Layer2Activation': [activation_function_layer2],
+                                                    'ShouldEmbed': [should_embed]
+                                                })], ignore_index=True)
 
-        # Sort the DataFrame by 'MSE_intermediate_DL' column
-        results_df_dl = results_df_dl.sort_values(by='MSE_Clusters_DL')
+        # Sort the DataFrame by 'RMSE_intermediate_DL' column
+        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters_DL')
 
         output_folder = 'prints/dl_overview/'
         # Create a folder if it doesn't exist
