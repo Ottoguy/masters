@@ -109,15 +109,16 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [15]  # Update with your desired values
-        epochs_values = [100]  # Update with your desired values
-        batch_size_values = [32]  # Update with your desired values
-        layer1_units_values = [64]  # Update with your desired values
-        layer2_units_values = [64]  # Update with your desired values
-        dropout_rate_values = [0.4]  # Update with your desired values
+        cluster_values = [8, 10, 15]  # Update with your desired values
+        epochs_values = [10, 100, 300]  # Update with your desired values
+        batch_size_values = [16, 32, 64]  # Update with your desired values
+        layer1_units_values = [32, 64, 128]  # Update with your desired values
+        layer2_units_values = [32, 64, 128]  # Update with your desired values
+        dropout_rate_values = [0.3, 0.4, 0.5]  # Update with your desired values
         # Define the features to exclude one at a time
-        features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
-                           'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+        #                   'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        features_to_exclude = ['AverageVoltageDifference']
         #tanh performed the best for activation layer 1 2024-03-16
         activation_functions_layer1 = ['tanh']
         #RELU performed by far the best for activation layer 2 2024-03-15
