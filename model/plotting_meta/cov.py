@@ -26,7 +26,7 @@ def Cov():
     data = pd.read_csv(latest_file)
 
     # Exclude fields
-    numeric_columns = data.drop(columns=['ID', "Charging_Half_Minutes"]).select_dtypes(include=['float64', 'int64'])
+    numeric_columns = data.drop(columns=['ID', "Half_Minutes"]).select_dtypes(include=['float64', 'int64'])
 
     # Create covariance matrix
     covariance_matrix = numeric_columns.cov()

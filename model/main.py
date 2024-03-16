@@ -109,21 +109,24 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [8, 10, 15]  # Update with your desired values
-        epochs_values = [50, 100, 500]  # Update with your desired values
-        batch_size_values = [16, 32, 64]  # Update with your desired values
-        layer1_units_values = [32, 64, 128]  # Update with your desired values
-        layer2_units_values = [32, 64, 128]  # Update with your desired values
+        cluster_values = [15]  # Update with your desired values
+        epochs_values = [100]  # Update with your desired values
+        batch_size_values = [32]  # Update with your desired values
+        layer1_units_values = [64]  # Update with your desired values
+        layer2_units_values = [64]  # Update with your desired values
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
         features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
                            'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        activation_functions_layer1 = ['relu', 'tanh', 'sigmoid']
+        #tanh performed the best for activation layer 1 2024-03-16
+        activation_functions_layer1 = ['tanh']
+        #RELU performed by far the best for activation layer 2 2024-03-15
         activation_functions_layer2 = ['relu']
-        should_embed_features = [True, False]
+        #Embedding gives almost universally worse results 2024-03-16
+        should_embed_features = [False]
 
         # Create an empty DataFrame to store the results
-        results_df_dl = pd.DataFrame(columns=['Clusters', 'Test_Size', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Dropout_Rate', 'MSE_Clusters_DL'])
+        results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
 
         # Iterate over hyperparameter values
         for clusters in cluster_values:
@@ -147,24 +150,24 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
                                                 # Record the results in the DataFrame
                                                 results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                    'RMSE_Clusters': [rmse_clusters_dl],
+                                                    'RMSE_Intermediate': [rmse_intermediate_dl],
+                                                    'RMSE_Immediate': [rmse_immediate_dl],
+                                                    'RMSE_Barebones': [rmse_barebones_dl],
                                                     'Clusters': [clusters],
                                                     'Epochs': [epochs],
                                                     'Batch_Size': [batch_size],
                                                     'Layer1_Units': [layer1_units],
                                                     'Layer2_Units': [layer2_units],
                                                     'Dropout_Rate': [dropout_rate],
-                                                    'RMSE_Barebones_DL': [rmse_barebones_dl],
-                                                    'RMSE_Immediate_DL': [rmse_immediate_dl],
-                                                    'RMSE_Intermediate_DL': [rmse_intermediate_dl],
-                                                    'RMSE_Clusters_DL': [rmse_clusters_dl],
-                                                    'MAE_Barebones_DL': [mae_barebones_dl],
-                                                    'MAE_Immediate_DL': [mae_immediate_dl],
-                                                    'MAE_Intermediate_DL': [mae_intermediate_dl],
-                                                    'MAE_Clusters_DL': [mae_clusters_dl],
                                                     'ExcludedFeature': [feature_to_exclude],
                                                     'Layer1Activation': [activation_function_layer1],
                                                     'Layer2Activation': [activation_function_layer2],
-                                                    'ShouldEmbed': [should_embed]
+                                                    'ShouldEmbed': [should_embed],
+                                                    'MAE_Clusters': [mae_clusters_dl],
+                                                    'MAE_Intermediate': [mae_intermediate_dl],
+                                                    'MAE_Immediate': [mae_immediate_dl],
+                                                    'MAE_Barebones': [mae_barebones_dl]
                                                 })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
