@@ -18,7 +18,7 @@ def DeepLearningPlotting():
     df = pd.read_csv(latest_file)
 
     #Drop the Barebones and immediate columns
-    df = df.drop(['ExcludedFeature'], axis=1)
+    df = df.drop(['Barebones'], axis=1)
 
     # Plotting
     plt.figure(figsize=(10, 6))  # Adjust the figure size as needed

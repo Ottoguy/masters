@@ -19,11 +19,11 @@ from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 
 def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters, test_size, random_state,
-                            epochs, batch_size, layer1_units, layer2_units, dropout_rate, feature_to_exclude,
-                            layer1activation, layer2activation, should_embed):
+                            epochs, batch_size, layer1_units, layer2_units, layer3_units, dropout_rate, feature_to_exclude,
+                            layer1activation, layer2activation, layer3activation, should_embed):
     print("Loading data for regression")
 
-    settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_dropout_rate_" + str(dropout_rate) + "_feature_to_exclude_" + feature_to_exclude + "_layer1activation_" + layer1activation + "_layer2activation_" + layer2activation
+    settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_layer3_units_" + str(layer3_units) + "_dropout_rate_" + str(dropout_rate) + "_feature_to_exclude_" + feature_to_exclude + "_layer1activation_" + layer1activation + "_layer2activation_" + layer2activation + "_layer3activation_" + layer3activation
 
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
@@ -202,6 +202,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
         model.add(Dropout(dropout_rate))
         model.add(Dense(layer2_units, activation=layer2activation))
+        model.add(Dense(layer3_units, activation=layer3activation))
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
@@ -213,6 +214,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
         model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
         model.add(Dropout(dropout_rate))
         model.add(Dense(layer2_units, activation=layer2activation))
+        model.add(Dense(layer3_units, activation=layer3activation))
         model.add(Dense(1, activation='linear'))  # Output layer for regression
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model

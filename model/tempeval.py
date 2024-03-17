@@ -4,6 +4,9 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 import re
 
+#Evaluates the data in prints/deep_learning and saves the results in prints/deep_learning/ 
+#To be used when deeo learning is aborted or has crashed, but results are to be fetched from the prints/deep_learning files
+
 # Directory where the CSV files are saved
 directory = 'prints/deep_learning'
 
