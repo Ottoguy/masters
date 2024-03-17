@@ -109,12 +109,17 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [8, 10, 15]  # Update with your desired values
-        epochs_values = [10, 100, 300]  # Update with your desired values
-        batch_size_values = [16, 32, 64]  # Update with your desired values
-        layer1_units_values = [32, 64, 128]  # Update with your desired values
-        layer2_units_values = [32, 64, 128]  # Update with your desired values
-        dropout_rate_values = [0.3, 0.4, 0.5]  # Update with your desired values
+        cluster_values = [10]  # Update with your desired values
+        #More seems to be better (tested between 10 and 600) 2024-03-17
+        epochs_values = [500, 1000]  # Update with your desired values
+        #16, 32, 64: 64 useless, 16 best 2024-03-17
+        batch_size_values = [12, 16]  # Update with your desired values
+        #128 best, 32 not good 2024-03-17
+        layer1_units_values = [64, 128, 256]  # Update with your desired values
+        #128 best, 32 not good 2024-03-17
+        layer2_units_values = [64, 128, 256]  # Update with your desired values
+        #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
+        dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
         #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
         #                   'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
@@ -172,7 +177,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                 })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
-        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters_DL')
+        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
 
         output_folder = 'prints/dl_overview/'
         # Create a folder if it doesn't exist
