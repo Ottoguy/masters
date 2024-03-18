@@ -9,13 +9,14 @@ from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
 from regression import Regression
 from deep_regression import DeepLearningRegression
+from dl_merge import DLMerge
 import pandas as pd
 import os
 from datetime import datetime
 
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
-          ts_clustering_plotting, ts_eval, regression, deep_regression, ts_sample_value):
+          ts_clustering_plotting, ts_eval, regression, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -101,9 +102,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [10, 15]  # Update with your desired values
+        cluster_values = [10]  # Update with your desired values
         #Higher than 1000 not an improvement 2024-03-18
-        epochs_values = [1000]  # Update with your desired values
+        epochs_values = [500]  # Update with your desired values
         #64 useless, 16 best 2024-03-17
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
@@ -158,22 +159,22 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             'RMSE_Intermediate': [rmse_intermediate_dl],
                                                             'RMSE_Immediate': [rmse_immediate_dl],
                                                             'RMSE_Barebones': [rmse_barebones_dl],
+                                                            'MAE_Clusters': [mae_clusters_dl],
+                                                            'MAE_Intermediate': [mae_intermediate_dl],
+                                                            'MAE_Immediate': [mae_immediate_dl],
+                                                            'MAE_Barebones': [mae_barebones_dl],
                                                             'Clusters': [clusters],
                                                             'Epochs': [epochs],
                                                             'Batch_Size': [batch_size],
                                                             'Layer1_Units': [layer1_units],
                                                             'Layer2_Units': [layer2_units],
                                                             'Layer3_Units': [layer3_units],
-                                                            'Dropout_Rate': [dropout_rate],
-                                                            'ExcludedFeature': [feature_to_exclude],
                                                             'Layer1Activation': [activation_function_layer1],
                                                             'Layer2Activation': [activation_function_layer2],
                                                             'Layer3Activation': [activation_function_layer3],
-                                                            'ShouldEmbed': [should_embed],
-                                                            'MAE_Clusters': [mae_clusters_dl],
-                                                            'MAE_Intermediate': [mae_intermediate_dl],
-                                                            'MAE_Immediate': [mae_immediate_dl],
-                                                            'MAE_Barebones': [mae_barebones_dl]
+                                                            'Dropout_Rate': [dropout_rate],
+                                                            'ExcludedFeature': [feature_to_exclude],
+                                                            'ShouldEmbed': [should_embed]
                                                         })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
@@ -192,9 +193,13 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         results_df_dl.to_csv(output_file, index=False)
         #Print path to the created file
         print(f"Results saved to {output_file}")
+    
+    if merge_dl:
+        print("Merging deep learning results")
+        DLMerge()
 
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=False, ts_clustering_plotting=False, ts_eval=False, regression=False,
-     deep_regression=True, ts_sample_value=60)
+     deep_regression=True, ts_sample_value=60, merge_dl=True)
