@@ -103,7 +103,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         # Set the ranges of values for hyperparameters
         cluster_values = [10, 15]  # Update with your desired values
         #Higher than 1000 not an improvement 2024-03-18
-        epochs_values = [1000, 2000]  # Update with your desired values
+        epochs_values = [1000]  # Update with your desired values
         #64 useless, 16 best 2024-03-17
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
