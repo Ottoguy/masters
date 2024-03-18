@@ -20,7 +20,7 @@ for filename in os.listdir(directory):
         df = pd.read_csv(filepath)
         
         # Extract settings from filename using regular expressions
-        match = re.match(r".*?(\d{8}_\d{6})_ts_samples_(\d+)_clusters_(\d+)_test_size_(\d+\.\d+)_epochs_(\d+)_batch_size_(\d+)_layer1_units_(\d+)_layer2_units_(\d+)_dropout_rate_(\d+\.\d+)_feature_to_exclude_(.*?)_layer1activation_(.*?)_layer2activation_(.*?)\.csv", filename)
+        match = re.match(r".*?(\d{8}_\d{6})_ts_samples_(\d+)_clusters_(\d+)_test_size_(\d+\.\d+)_epochs_(\d+)_batch_size_(\d+)_l1_units_(\d+)_l2_units_(\d+)_l3_units_(\d+)_dropout_rate_(\d+\.\d+)_exclude_(.*?)_l1activation_(.*?)_l2activation_(.*?)_l3activation_(.*?)\.csv", filename)
         if match:
             settings_dict = {
                 'timestamp': match.group(1),
@@ -31,10 +31,12 @@ for filename in os.listdir(directory):
                 'batch_size': int(match.group(6)),
                 'layer1_units': int(match.group(7)),
                 'layer2_units': int(match.group(8)),
-                'dropout_rate': float(match.group(9)),
-                'feature_to_exclude': match.group(10),
-                'layer1activation': match.group(11),
-                'layer2activation': match.group(12)
+                'layer3_units': int(match.group(9)),
+                'dropout_rate': float(match.group(10)),
+                'feature_to_exclude': match.group(11),
+                'layer1activation': match.group(12),
+                'layer2activation': match.group(13),
+                'layer3activation': match.group(14)
             }
         else:
             print(f"Could not parse settings from filename: {filename}")
@@ -70,4 +72,4 @@ if results_dfs:
     results_aggregated = results_aggregated.sort_values(by='RMSE_Clusters')
     
     # Save aggregated results to CSV
-    results_aggregated.to_csv('prints/deep_learning/aggregated_results2.csv', index=False)
+    results_aggregated.to_csv('prints/deep_learning/aggregated_results3.csv', index=False)

@@ -23,7 +23,7 @@ def DeepLearningRegression(num_cores, ts_samples, include_ts_clusters, clusters,
                             layer1activation, layer2activation, layer3activation, should_embed):
     print("Loading data for regression")
 
-    settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_layer1_units_" + str(layer1_units) + "_layer2_units_" + str(layer2_units) + "_layer3_units_" + str(layer3_units) + "_dropout_rate_" + str(dropout_rate) + "_feature_to_exclude_" + feature_to_exclude + "_layer1activation_" + layer1activation + "_layer2activation_" + layer2activation + "_layer3activation_" + layer3activation
+    settings = "ts_samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_size_" + str(batch_size) + "_l1_units_" + str(layer1_units) + "_l2_units_" + str(layer2_units) + "_l3_units_" + str(layer3_units) + "_dropout_rate_" + str(dropout_rate) + "_exclude_" + feature_to_exclude + "_l1activation_" + layer1activation + "_l2activation_" + layer2activation + "_l3activation_" + layer3activation
 
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
