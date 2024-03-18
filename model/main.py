@@ -102,7 +102,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
+        cluster_values = [10]  # Update with your desired values
         #Higher than 1000 not an improvement 2024-03-18
         epochs_values = [750]  # Update with your desired values
         #64 useless, 16 best 2024-03-17
@@ -112,7 +112,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #64 seems to be as good as any higher value 2024-03-17
         layer2_units_values = [64]  # Update with your desired values
         #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
-        layer3_units_values = [1, 4, 16]  # Update with your desired values
+        layer3_units_values = [1, 16]  # Update with your desired values
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
