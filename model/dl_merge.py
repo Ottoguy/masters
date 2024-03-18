@@ -39,7 +39,7 @@ def DLMerge():
     df = df.dropna(axis=1, how='all')
 
     #Remove the columns ,timestamp,ts_samples,clusters,test_size,epochs,batch_size,layer1_units,layer2_units,dropout_rate,feature_to_exclude,layer1activation,layer2activation
-    df = df.drop(columns=['timestamp','ts_samples','clusters','test_size','epochs','batch_size','layer1_units','layer2_units','dropout_rate','feature_to_exclude','layer1activation','layer2activation'])
+    df = df.drop(columns=['timestamp','ts_samples','clusters','test_size','epochs','batch_size','layer1_units','layer2_units','dropout_rate','feature_to_exclude','layer1activation','layer2activation', 'OneHotEncode'])
 
     #Remove the suffix "_DL" from the column names it is present in, and merge those columns with the same name
     df.columns = df.columns.str.replace('_DL', '')
@@ -51,6 +51,12 @@ def DLMerge():
                 'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
                 'ExcludedFeature', 'ShouldEmbed', 'Timestamp']]
+    
+    #Fill the empty values with None
+    df = df.fillna('None')
+
+    #Convert RMSE and MAE columns to numeric
+    df['RMSE_Clusters'] = pd.to_numeric(df['RMSE_Clusters'], errors='coerce')
 
     # Sort by 'RMSE_Clusters'
     df.sort_values(by='RMSE_Clusters', inplace=True)

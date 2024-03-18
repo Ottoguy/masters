@@ -102,16 +102,16 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         # Set the ranges of values for hyperparameters
-        cluster_values = [10]  # Update with your desired values
+        cluster_values = [8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
         #Higher than 1000 not an improvement 2024-03-18
-        epochs_values = [500]  # Update with your desired values
+        epochs_values = [750]  # Update with your desired values
         #64 useless, 16 best 2024-03-17
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
         layer1_units_values = [256]  # Update with your desired values
         #64 seems to be as good as any higher value 2024-03-17
         layer2_units_values = [64]  # Update with your desired values
-        #This layer maybe does not improve the model 2024-03-18
+        #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
         layer3_units_values = [1, 4, 16]  # Update with your desired values
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
         dropout_rate_values = [0.4]  # Update with your desired values
@@ -145,13 +145,14 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                 for activation_function_layer3 in activation_functions_layer3:
                                                     for should_embed in should_embed_features:
                                                         # Call the DeepLearningRegression function
-                                                        rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl = DeepLearningRegression(num_cores=-1, ts_samples=ts_sample_value, include_ts_clusters=True,
+                                                        rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl = DeepLearningRegression(ts_samples=ts_sample_value,
                                                                                                 clusters=clusters, test_size=0.3,
                                                                                                 random_state=42, epochs=epochs, batch_size=batch_size,
                                                                                                 layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
                                                                                                 dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
-                                                                                                layer1activation=activation_function_layer1,
-                                                                                                layer2activation=activation_function_layer2, layer3activation=activation_function_layer3, should_embed=should_embed)
+                                                                                                layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
+                                                                                                layer3activation=activation_function_layer3, should_embed=should_embed,
+                                                                                                train_immediate=False, train_barebones=False)
 
                                                         # Record the results in the DataFrame
                                                         results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
