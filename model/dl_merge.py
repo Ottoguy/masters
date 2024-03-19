@@ -9,7 +9,7 @@ def DLMerge():
 
     # Create an empty DataFrame with desired columns
     columns = ['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones',
-                'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones',
+                'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
                'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
                'ExcludedFeature', 'ShouldEmbed', 'Timestamp']
@@ -47,7 +47,7 @@ def DLMerge():
 
     #Sort the columns like this 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones','RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones','Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units','Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate','ExcludedFeature', 'ShouldEmbed'
     df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones',
-             'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones',
+             'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
                 'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
                 'ExcludedFeature', 'ShouldEmbed', 'Timestamp']]
