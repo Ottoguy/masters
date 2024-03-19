@@ -104,7 +104,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         # Set the ranges of values for hyperparameters
         cluster_values = [10]  # Update with your desired values
         #Higher than 1000 not an improvement 2024-03-18
-        epochs_values = [750]  # Update with your desired values
+        epochs_values = [10, 25, 50, 100, 250, 500, 750, 1000, 1500]  # Update with your desired values
         #64 useless, 16 best 2024-03-17
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
@@ -116,9 +116,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
-        #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
-        #                   'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        features_to_exclude = ['AverageVoltageDifference']
+        features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+                           'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        #features_to_exclude = ['AverageVoltageDifference']
         #tanh performed the best for activation layer 1 2024-03-16
         activation_functions_layer1 = ['tanh']
         #RELU performed by far the best for activation layer 2 2024-03-15
