@@ -66,15 +66,15 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #How many samples should we use for the time series
         ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
-        cluster_values = [10]  # Update with your desired values
+        cluster_values = [8]  # Update with your desired values
         #750+ epochs best
-        epochs_values = [1111]  # Update with your desired values
-        #64 useless, 16 best 2024-03-17
-        batch_size_values = [4, 8, 16]  # Update with your desired values
+        epochs_values = [100]  # Update with your desired values
+        #64 useless, 16 best 2024-03-17, smaller not too good
+        batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
-        layer1_units_values = [192, 256, 320]  # Update with your desired values
+        layer1_units_values = [192,]  # Update with your desired values
         #64 seems to be as good as any higher value 2024-03-17
-        layer2_units_values = [48, 64, 96]  # Update with your desired values
+        layer2_units_values = [64]  # Update with your desired values
         #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
         layer3_units_values = [1]  # Update with your desired values
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
@@ -83,8 +83,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
         #                   'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
         features_to_exclude = ['None']
-        #tanh performed the best for activation layer 1 2024-03-16
-        activation_functions_layer1 = ['tanh', 'relu']
+        #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
+        activation_functions_layer1 = ['tanh']
         #RELU performed by far the best for activation layer 2 2024-03-15
         activation_functions_layer2 = ['relu']
         #RELU performed by far the best for activation layer 3 2024-03-18
