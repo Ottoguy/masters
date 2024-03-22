@@ -49,8 +49,12 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if ts_clustering:
         print("Clustering time series")
-        TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
-                     distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=10)
+        ts_sample_values = [30, 60, 120]  # Update with your desired values
+        min_cluster_sizes = [5, 10, 20, 30, 40]
+        for ts_sample_value in ts_sample_values:
+            for min_cluster_size in min_cluster_sizes:
+                TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
+                            distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=min_cluster_size)
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
@@ -64,15 +68,15 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Performing deep regression")
 
         #How many samples should we use for the time series
-        ts_sample_values = [60]  # Update with your desired values
+        ts_sample_values = [30, 60, 120]  # Update with your desired values
         # Set the ranges of values for hyperparameters
         cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
         #750+ epochs best
         epochs_values = [1000]  # Update with your desired values
         #64 useless, 16 best 2024-03-17, smaller not too good
-        batch_size_values = [12, 16]  # Update with your desired values
+        batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
-        layer1_units_values = [128, 192, 256]  # Update with your desired values
+        layer1_units_values = [192]  # Update with your desired values
         #64 seems to be as good as any higher value 2024-03-17
         layer2_units_values = [64]  # Update with your desired values
         #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
@@ -114,12 +118,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         )
 
         total_epochs = 0
-
         for epoch in epochs_values:
             total_epochs += epoch
-
         start_time = time.time()
-        
         print(f"Will iterate over {total_iterations} iterations for {total_epochs} epochs in total")
 
         # Iterate over hyperparameter values
@@ -202,5 +203,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_plotting=False, ts_eval=False,
+     ts_clustering=True, ts_clustering_plotting=False, ts_eval=True,
      deep_regression=True, ts_sample_value=60, merge_dl=True)
