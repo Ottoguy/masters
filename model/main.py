@@ -16,7 +16,7 @@ from datetime import datetime
 import time
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
-          ts_clustering_plotting, ts_eval, regression, deep_regression, ts_sample_value, merge_dl):
+          ts_clustering_plotting, ts_eval, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -50,7 +50,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if ts_clustering:
         print("Clustering time series")
         TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
-                     distance_metric='dtw', split_phases=True, ts_samples=ts_sample_value)
+                     distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=10)
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
@@ -66,13 +66,13 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #How many samples should we use for the time series
         ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
-        cluster_values = [8]  # Update with your desired values
+        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
         #750+ epochs best
-        epochs_values = [100]  # Update with your desired values
+        epochs_values = [1000]  # Update with your desired values
         #64 useless, 16 best 2024-03-17, smaller not too good
-        batch_size_values = [16]  # Update with your desired values
+        batch_size_values = [12, 16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
-        layer1_units_values = [192,]  # Update with your desired values
+        layer1_units_values = [128, 192, 256]  # Update with your desired values
         #64 seems to be as good as any higher value 2024-03-17
         layer2_units_values = [64]  # Update with your desired values
         #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
@@ -137,7 +137,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                     for activation_function_layer3 in activation_functions_layer3:
                                                         for should_embed in should_embed_features:
                                                             # Call the DeepLearningRegression function
-                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl = DeepLearningRegression(
+                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta = DeepLearningRegression(
                                                                                                     ts_samples=ts_sample_value,
                                                                                                     clusters=clusters, test_size=0.3,
                                                                                                     random_state=42, epochs=epochs, batch_size=batch_size,
@@ -169,7 +169,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                 'Layer3Activation': [activation_function_layer3],
                                                                 'Dropout_Rate': [dropout_rate],
                                                                 'ExcludedFeature': [feature_to_exclude],
-                                                                'ShouldEmbed': [should_embed]
+                                                                'ShouldEmbed': [should_embed],
+                                                                'Clustering Settings': [cluster_meta]
                                                             })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
@@ -201,5 +202,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_plotting=False, ts_eval=False, regression=False,
+     ts_clustering=False, ts_clustering_plotting=False, ts_eval=False,
      deep_regression=True, ts_sample_value=60, merge_dl=True)

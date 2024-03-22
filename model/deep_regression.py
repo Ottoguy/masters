@@ -96,6 +96,14 @@ def DeepLearningRegression(ts_samples, clusters, test_size, random_state,
     df_immediate = df_immediate[df_immediate['ID'].isin(df_clusters['ID'])]
     df_intermediate = df_intermediate[df_intermediate['ID'].isin(df_clusters['ID'])]
     df_final = df_final[df_final['ID'].isin(df_clusters['ID'])]
+
+    #Make a new df called "df_cluster_meta" which contains the first row of df_cluster
+    df_cluster_meta = df_clusters.head(1)
+    #Make a string out of this row
+    cluster_meta = df_cluster_meta.to_string(index=False, header=False)
+
+    #Remove all rows from df_clusters that are not "ID" or "Clusters"
+    df_clusters = df_clusters[['ID', 'Cluster']]
     
     #Print how many rows were removed
     print("Removed", len(df_immediate) - len(df_clusters), "rows from the immediate dataframe (filtered in preprocessing or because of phase?)")
@@ -330,4 +338,4 @@ def DeepLearningRegression(ts_samples, clusters, test_size, random_state,
     #Print path to the created file
     print(f"Results saved to {output_file}")
 
-    return rmse_barebones, rmse_immediate, rmse_intermediate, rmse_clusters, mae_barebones, mae_immediate, mae_intermediate, mae_clusters
+    return rmse_barebones, rmse_immediate, rmse_intermediate, rmse_clusters, mae_barebones, mae_immediate, mae_intermediate, mae_clusters, cluster_meta

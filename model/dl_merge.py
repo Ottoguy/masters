@@ -12,7 +12,7 @@ def DLMerge():
                 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
                'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-               'ExcludedFeature', 'ShouldEmbed', 'Timestamp']
+               'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'Clustering Settings']
     df = pd.DataFrame(columns=columns)
 
     # Create a pattern to match CSV files
@@ -50,7 +50,7 @@ def DLMerge():
              'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
                 'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-                'ExcludedFeature', 'ShouldEmbed', 'Timestamp']]
+                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'Clustering Settings']]
     
     #Fill the empty values with None
     df = df.fillna('None')
