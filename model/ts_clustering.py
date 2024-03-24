@@ -100,9 +100,11 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
     ################################################################################################################################
 
 
-
     # Iterate over different numbers of clusters for 1-Phase data
     for num_clusters in num_clusters_1_phase_range:
+        #Initialize s_score to avoid error
+        s_score = 0
+
         print(f"Clustering time series data with {num_clusters} clusters...")
 
         # Apply TimeSeriesKMeans clustering with DTW as the metric
@@ -123,9 +125,6 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
             time_series_1_phase_dataset_filtered = time_series_1_phase_dataset[labels != -1]
             # Calculate silhouette score using filtered data
             s_score = silhouette_score(time_series_1_phase_dataset_filtered, labels_filtered, metric=distance_metric, n_jobs=num_cores)
-
-        # Print silhouette score for the current number of clusters
-        print(f"Silhouette Score for {num_clusters} clusters: {s_score}")
 
         # If there are clusters removed, re-run clustering
         if len(clusters_to_remove) > 0:
@@ -166,9 +165,6 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
         # Calculate silhouette score
             time_series_3_phase_dataset_filtered = time_series_3_phase_dataset[labels != -1]
             s_score = silhouette_score(time_series_3_phase_dataset_filtered, labels_filtered, metric=distance_metric, n_jobs=num_cores)
-
-        # Print silhouette score for the current number of clusters
-        print(f"Silhouette Score for {num_clusters} clusters: {s_score}")
 
         # If there are clusters removed, re-run clustering
         if len(clusters_to_remove) > 0:

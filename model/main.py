@@ -204,6 +204,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=True, ts_clustering_plotting=False, ts_eval=True,
      deep_regression=True, ts_sample_value=60, merge_dl=True)
