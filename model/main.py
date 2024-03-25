@@ -5,9 +5,9 @@ from plotting_df.df_plotting import DfPlotting
 from plotting_df.extracted_plotting import ExtractedPlotting
 from plotting_df.filtered_plotting import FilteredPlotting
 from ts_clustering import TsClustering
+from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
-from regression import Regression
 from deep_regression import DeepLearningRegression
 from dl_merge import DLMerge
 import pandas as pd
@@ -15,13 +15,13 @@ import os
 from datetime import datetime
 import time
 
-def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
+def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_experimental,
           ts_clustering_plotting, ts_eval, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
         print("Preprocessing data")
-        ts_sample_values = [30, 60, 120]  # Update with your desired values
+        ts_sample_values = [30, 60, 90, 120]  # Update with your desired values
         for ts_sample_value in ts_sample_values:
             Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
                         should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
@@ -51,12 +51,37 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if ts_clustering:
         print("Clustering time series")
-        ts_sample_values = [30, 60, 120]  # Update with your desired values
+        ts_sample_values = [30, 60, 120]
         min_cluster_sizes = [5, 10, 20, 30, 40]
         for ts_sample_value in ts_sample_values:
             for min_cluster_size in min_cluster_sizes:
                 TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
                             distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=min_cluster_size)
+    
+    if ts_clustering_experimental:
+        print("Clustering time series experimental")
+        #ts_sample_values = [30, 60, 90, 120]
+        ts_sample_values = [60]
+        #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 25, 26, 27, 28, 29, 30]
+        num_clusters = [10]
+        algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
+        #max_iters = [25, 50, 100, 500, 1000]
+        max_iters = [100]
+        #tols = [1e-4, 1e-3, 1e-2]
+        tols = [1e-3]
+        #n_inits = [1, 5, 10, 50]
+        n_inits = [1]
+        metrics = ['dtw', 'softdtw', 'euclidian'] #Only for tskmeans
+        #max_iter_barycenters = [50, 100, 250] #Only for tskmeans softdtw and dtw
+        max_iter_barycenters = [100]
+        use_voltages = [True, False]
+        use_all3_phases = [True, False]
+        #min_cluster_sizes = [5, 10, 20, 30, 40]
+        min_cluster_sizes = [10]
+        #max_cluster_sizes = [50, 100, 250, 500] #Note that these have to be higher than the min_cluster_sizes
+        max_cluster_sizes = [50]
+        handle_min_clusters = ['reassign', 'merge', 'remove', 'outlier'] #Reassign points to other clusters, merge with nearest cluster, remove all items in this cluster, or mark all points in underpopulated clusters as outliers
+        handle_max_clusters = ['split', 'reassign'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
@@ -205,5 +230,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=True, ts_clustering_plotting=False, ts_eval=True,
+     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=True,
      deep_regression=True, ts_sample_value=60, merge_dl=True)
