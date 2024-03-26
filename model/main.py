@@ -15,6 +15,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import time
+import glob
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_experimental,
           ts_clustering_plotting, ts_eval, deep_regression, ts_sample_value, merge_dl):
@@ -61,28 +62,28 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if ts_clustering_experimental:
         print("Clustering time series experimental")
-        #ts_sample_values = [30, 60, 90, 120]
         ts_sample_values = [60]
-        #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 25, 26, 27, 28, 29, 30]
         num_clusters = [10]
-        #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
-        algorithms = ['kshape']
-        max_iters = [50, 500]
-        #max_iters = [100]
-        tols = [1e-6]
+        algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
+        max_iters = [50, 100]
+        tols = [5e-7, 1e-6, 5e-6]
         n_inits = [1,10]
-        #metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
-        metrics = ['euclidean']
+        metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [10]
-        max_cluster_sizes = [500] #Note that these have to be higher than the min_cluster_sizes
-        #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
-        handle_min_clusters = ['nothing']
-        #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
-        handle_max_clusters = ['nothing']
+        min_cluster_sizes = [6, 10, 25]
+        max_cluster_sizes = [100, 500] #Note that these have to be higher than the min_cluster_sizes
+        handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
+        handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
 
+        columns=["NumClusters", "Algorithm", "MaxIter", "Tolerance", "NInit",
+                                            "Metric", "MaxIterBarycenter", "UseVoltage", "UseAll3Phases",
+                                            "MinClusterSize", "MaxClusterSize", "HandleMinClusters",
+                                            "HandleMaxClusters", "SilhouetteScore"]
+        results_df = pd.DataFrame(columns=columns)
+
+        # Grid search loop
         for ts_sample_value in ts_sample_values:
             for num_cluster in num_clusters:
                 for algorithm in algorithms:
@@ -97,10 +98,51 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                     for max_cluster_size in max_cluster_sizes:
                                                         for handle_min_cluster in handle_min_clusters:
                                                             for handle_max_cluster in handle_max_clusters:
-                                                                TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
-                                                                                        tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
-                                                                                        use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
-                                                                                        handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
+                                                                # Call clustering function
+                                                                settings_and_score = TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
+                                                                                                            tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
+                                                                                                            use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
+                                                                                                            handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
+                                                                
+                                                                # Assign values from settings_and_score to results_df
+                                                                results_df = settings_and_score[results_df.columns]
+
+        # Sort results by SilhouetteScore
+        results_df['SilhouetteScore'] = pd.to_numeric(results_df['SilhouetteScore'], errors='coerce')
+        results_df = results_df.sort_values(by="SilhouetteScore", ascending=False)
+
+        # Specify the directory where your files are located
+        load_path = 'prints/ts_eval_experimental/'
+        # Create a pattern to match CSV files
+        file_pattern = '*.csv'
+        # Get a list of all CSV files matching the pattern
+        file_list = glob.glob(os.path.join(load_path, file_pattern))
+        # Iterate over each file, load it, and concatenate to the main DataFrame
+        for file in file_list:
+            temp_df = pd.read_csv(file)
+            # Fill missing columns with None
+            for column in columns:
+                if column not in temp_df.columns:
+                    temp_df[column] = None
+            #Add the file name to the DataFrame
+            temp_df['Timestamp'] = os.path.basename(file).split('.')[0]
+            df = pd.concat([results_df, temp_df])
+        #Remove columns with only None values
+        df = df.dropna(axis=1, how='all')
+
+        output_folder = 'prints/ts_merge/'
+        # Create a folder if it doesn't exist
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        # Get the current date and time
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Create the file name
+        print(f"Creating the file {current_datetime}.csv")
+        output_file = f"{output_folder}/{current_datetime}.csv"
+        # Print desired_rows to a CSV file
+        df.to_csv(output_file, index=False)
+        #Print path to the created file
+        print(f"Results saved to {output_file}")
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")

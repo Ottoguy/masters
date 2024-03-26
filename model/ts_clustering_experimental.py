@@ -266,4 +266,26 @@ def TsClusteringExperimental(ts_samples, num_clusters, algorithm, max_iter, tol,
 
     print("Results saved to:", output_file)
 
-    return cluster_df
+
+    #Make a df "return_df" with the first row of cluster_df
+    return_df = cluster_df.iloc[[0]].copy()
+    #Drop the columns 'ID' and 'Cluster' from the DataFrame
+    return_df.drop(columns=['ID', 'Cluster'], inplace=True)
+    #Reorder so 'SilhouetteScore' is the first column
+    return_df = return_df[['SilhouetteScore'] + [col for col in return_df.columns if col != 'SilhouetteScore']]
+
+    eval_folder = 'prints/ts_eval_experimental'
+    # Create a folder if it doesn't exist
+    if not os.path.exists(eval_folder):
+        os.makedirs(eval_folder)
+    # Get the current date and time
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Create the file name
+    print(f"Creating the file {current_datetime}.csv")
+    output_file = f"{eval_folder}/{current_datetime}.csv"
+    # Print desired_rows to a CSV file
+    return_df.to_csv(output_file, index=False)
+    #Print path to the created file
+    print(f"Results saved to {output_file}")
+
+    return return_df
