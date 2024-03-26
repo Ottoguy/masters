@@ -9,6 +9,7 @@ from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
 from ts_eval import TsEval
 from deep_regression import DeepLearningRegression
+from deep_regression_experimental import DeepLearningRegressionExperimental
 from dl_merge import DLMerge
 import pandas as pd
 import os
@@ -64,24 +65,42 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         ts_sample_values = [60]
         #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 34, 25, 26, 27, 28, 29, 30]
         num_clusters = [10]
-        algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
-        #max_iters = [25, 50, 100, 500, 1000]
-        max_iters = [100]
-        #tols = [1e-4, 1e-3, 1e-2]
-        tols = [1e-3]
-        #n_inits = [1, 5, 10, 50]
-        n_inits = [1]
-        metrics = ['dtw', 'softdtw', 'euclidian'] #Only for tskmeans
-        #max_iter_barycenters = [50, 100, 250] #Only for tskmeans softdtw and dtw
+        #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
+        algorithms = ['kshape']
+        max_iters = [50, 500]
+        #max_iters = [100]
+        tols = [1e-6]
+        n_inits = [1,10]
+        #metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
+        metrics = ['euclidean']
         max_iter_barycenters = [100]
-        use_voltages = [True, False]
-        use_all3_phases = [True, False]
-        #min_cluster_sizes = [5, 10, 20, 30, 40]
+        use_voltages = [True]
+        use_all3_phases = [True]
         min_cluster_sizes = [10]
-        #max_cluster_sizes = [50, 100, 250, 500] #Note that these have to be higher than the min_cluster_sizes
-        max_cluster_sizes = [50]
-        handle_min_clusters = ['reassign', 'merge', 'remove', 'outlier'] #Reassign points to other clusters, merge with nearest cluster, remove all items in this cluster, or mark all points in underpopulated clusters as outliers
-        handle_max_clusters = ['split', 'reassign'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
+        max_cluster_sizes = [500] #Note that these have to be higher than the min_cluster_sizes
+        #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
+        handle_min_clusters = ['nothing']
+        #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
+        handle_max_clusters = ['nothing']
+
+        for ts_sample_value in ts_sample_values:
+            for num_cluster in num_clusters:
+                for algorithm in algorithms:
+                    for max_iter in max_iters:
+                        for tol in tols:
+                            for n_init in n_inits:
+                                for metric in metrics:
+                                    for max_iter_barycenter in max_iter_barycenters:
+                                        for use_voltage in use_voltages:
+                                            for use_all3_phase in use_all3_phases:
+                                                for min_cluster_size in min_cluster_sizes:
+                                                    for max_cluster_size in max_cluster_sizes:
+                                                        for handle_min_cluster in handle_min_clusters:
+                                                            for handle_max_cluster in handle_max_clusters:
+                                                                TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
+                                                                                        tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
+                                                                                        use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
+                                                                                        handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
@@ -165,7 +184,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                     for activation_function_layer3 in activation_functions_layer3:
                                                         for should_embed in should_embed_features:
                                                             # Call the DeepLearningRegression function
-                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta = DeepLearningRegression(
+                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta = DeepLearningRegressionExperimental(
                                                                                                     ts_samples=ts_sample_value,
                                                                                                     clusters=clusters, test_size=0.3,
                                                                                                     random_state=42, epochs=epochs, batch_size=batch_size,
@@ -230,5 +249,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=True,
-     deep_regression=True, ts_sample_value=60, merge_dl=True)
+     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=False, ts_sample_value=60, merge_dl=False)
