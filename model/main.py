@@ -66,17 +66,19 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         ts_sample_values = [60]
         num_clusters = [10]
         algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
-        max_iters = [50, 100]
+        max_iters = [50, 100, 500]
         tols = [5e-7, 1e-6, 5e-6]
         n_inits = [1,10]
         metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [7, 10, 25]
-        max_cluster_sizes = [200, 500] #Note that these have to be higher than the min_cluster_sizes
-        handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
-        handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
+        min_cluster_sizes = [5]
+        max_cluster_sizes = [500] #Note that these have to be higher than the min_cluster_sizes
+        #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
+        handle_min_clusters = ['nothing']
+        #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
+        handle_max_clusters = ['nothing']
 
         columns=["NumClusters", "Algorithm", "MaxIter", "Tolerance", "NInit",
                                             "Metric", "MaxIterBarycenter", "UseVoltage", "UseAll3Phases",
@@ -107,7 +109,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                 
                                                                 # Assign values from settings_and_score to results_df
                                                                 results_df = settings_and_score[results_df.columns]
-                                                                TSMerge()
+                                                                TSMerge(columns)
 
         
     if ts_clustering_plotting:
