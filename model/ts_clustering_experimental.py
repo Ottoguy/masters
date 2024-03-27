@@ -255,7 +255,7 @@ def TsClusteringExperimental(ts_samples, num_clusters, algorithm, max_iter, tol,
 
     # Calculate silhouette score
     print('Calculating silhouette score')
-    silhouette = silhouette_score(X, labels, metric=metric)
+    silhouette = silhouette_score(X, labels, metric=metric, n_jobs=-1)
 
     # Append silhouette score to cluster_df
     cluster_df['SilhouetteScore'] = silhouette
