@@ -68,7 +68,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         max_iters = [50, 100, 500]
         tols = [5e-7, 1e-6, 5e-6]
-        n_inits = [1,10]
+        n_inits = [1,5]
         metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
         max_iter_barycenters = [100]
         use_voltages = [True]
