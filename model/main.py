@@ -11,6 +11,7 @@ from ts_eval import TsEval
 from deep_regression import DeepLearningRegression
 from deep_regression_experimental import DeepLearningRegressionExperimental
 from dl_merge import DLMerge
+from ts_merge import TSMerge
 import pandas as pd
 import os
 from datetime import datetime
@@ -72,8 +73,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [6, 10, 25]
-        max_cluster_sizes = [100, 500] #Note that these have to be higher than the min_cluster_sizes
+        min_cluster_sizes = [7, 10, 25]
+        max_cluster_sizes = [200, 500] #Note that these have to be higher than the min_cluster_sizes
         handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
         handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
 
@@ -106,43 +107,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                 
                                                                 # Assign values from settings_and_score to results_df
                                                                 results_df = settings_and_score[results_df.columns]
+                                                                TSMerge()
 
-        # Sort results by SilhouetteScore
-        results_df['SilhouetteScore'] = pd.to_numeric(results_df['SilhouetteScore'], errors='coerce')
-        results_df = results_df.sort_values(by="SilhouetteScore", ascending=False)
-
-        # Specify the directory where your files are located
-        load_path = 'prints/ts_eval_experimental/'
-        # Create a pattern to match CSV files
-        file_pattern = '*.csv'
-        # Get a list of all CSV files matching the pattern
-        file_list = glob.glob(os.path.join(load_path, file_pattern))
-        # Iterate over each file, load it, and concatenate to the main DataFrame
-        for file in file_list:
-            temp_df = pd.read_csv(file)
-            # Fill missing columns with None
-            for column in columns:
-                if column not in temp_df.columns:
-                    temp_df[column] = None
-            #Add the file name to the DataFrame
-            temp_df['Timestamp'] = os.path.basename(file).split('.')[0]
-            df = pd.concat([results_df, temp_df])
-        #Remove columns with only None values
-        df = df.dropna(axis=1, how='all')
-
-        output_folder = 'prints/ts_merge/'
-        # Create a folder if it doesn't exist
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        # Get the current date and time
-        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # Create the file name
-        print(f"Creating the file {current_datetime}.csv")
-        output_file = f"{output_folder}/{current_datetime}.csv"
-        # Print desired_rows to a CSV file
-        df.to_csv(output_file, index=False)
-        #Print path to the created file
-        print(f"Results saved to {output_file}")
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
