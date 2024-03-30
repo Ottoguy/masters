@@ -66,7 +66,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         ts_sample_values = [60]
         num_clusters = [10]
         algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
-        max_iters = [50, 100, 500]
+        max_iters = [50, 100]
         tols = [5e-7, 1e-6, 5e-6]
         n_inits = [1,5]
         metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
