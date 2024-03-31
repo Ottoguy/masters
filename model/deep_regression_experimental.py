@@ -63,6 +63,10 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
     df_final = pd.read_csv(latest_file)
 
     input_folder = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/"
+    #Print error if folder does not exist
+    if not os.path.exists(input_folder):
+        print("Error: The folder does not exist, have that number of ts_samples been clustered?")
+        return None
 
     # Get a list of all files in the specified format within the chosen subfolder for 1-phase
     files = glob.glob(os.path.join(input_folder, '*.csv'))

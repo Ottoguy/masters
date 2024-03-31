@@ -65,8 +65,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Clustering time series experimental")
         ts_sample_values = [60]
         num_clusters = [10]
-        ##algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
-        algorithms = ['kernelkmeans', 'kshape']
+        ###KernelKMeans and KShape provide very low silhouette scores###
+        #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
+        algorithms = ['tskmeans']
         max_iters = [50, 100]
         tols = [5e-7, 1e-6, 5e-6]
         n_inits = [1,3]
@@ -123,17 +124,22 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if deep_regression:
         print("Performing deep regression")
-
+        #######################################################################
+        ###TS CLUSTERING-DEPENDENT SETTINGS###
         #How many samples should we use for the time series
         ts_sample_values = [30, 60, 120]  # Update with your desired values
         # Set the ranges of values for hyperparameters
         cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
+
+
+        #######################################################################
+        ###DEEP REGRESSION SETTINGS###
         #750+ epochs best
         epochs_values = [1000]  # Update with your desired values
         #64 useless, 16 best 2024-03-17, smaller not too good
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
-        layer1_units_values = [192]  # Update with your desired values
+        layer1_units_values = [256]  # Update with your desired values
         #64 seems to be as good as any higher value 2024-03-17
         layer2_units_values = [64]  # Update with your desired values
         #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
@@ -157,7 +163,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
-
         # Calculate total number of iterations
         total_iterations = (
             len(cluster_values)
