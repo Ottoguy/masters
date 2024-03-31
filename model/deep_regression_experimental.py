@@ -71,11 +71,24 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
     # Get a list of all files in the specified format within the chosen subfolder for 1-phase
     files = glob.glob(os.path.join(input_folder, '*.csv'))
     # Sort the files based on modification time (latest first)
-    files.sort(key=os.path.getmtime, reverse=True)
+    #files.sort(key=os.path.getmtime, reverse=True)
     # Take the latest file from the chosen subfolder
-    latest_file = files[0]
+    #latest_file = files[0]
     # Load your ID-cluster mapping data from the latest file
-    df_clusters= pd.read_csv(latest_file)
+    #df_clusters= pd.read_csv(latest_file)
+    # Define a function to extract SilhouetteScore from the first row of a CSV file
+    def get_silhouette_score(file_path):
+        df = pd.read_csv(file_path)
+        return float(df.iloc[0]['SilhouetteScore'])
+
+    # Sort the files based on the SilhouetteScore of their first row (highest first)
+    files.sort(key=get_silhouette_score, reverse=True)
+
+    # Take the file with the highest SilhouetteScore
+    latest_file = files[0]
+
+    # Load your ID-cluster mapping data from the file with the highest SilhouetteScore
+    df_clusters = pd.read_csv(latest_file)
 
     #Replace NaN values with -1 (some ID's have not been clustered?)
     df_clusters['Cluster'] = df_clusters['Cluster'].fillna(-1)
@@ -87,8 +100,11 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
 
     #Make a new df called "df_cluster_meta" which contains the first row of df_cluster
     df_cluster_meta = df_clusters.head(1)
-    #Make a string out of this row
-    cluster_meta = df_cluster_meta.to_string(index=False, header=False)
+    #Drop the ID, NumClusters, and Cluster columns from df_cluster_meta
+    df_cluster_meta = df_cluster_meta.drop(columns=['ID', 'NumClusters', 'Cluster'])
+    #Make a string out of this row, with the name of the feature in df_cluster_meta joined before very value
+    cluster_meta = ' '.join([f"{col} {df_cluster_meta[col].values[0]}" for col in df_cluster_meta.columns])
+    #cluster_meta = df_cluster_meta.to_string(index=False, header=False)
 
     #Remove all rows from df_clusters that are not "ID" or "Clusters"
     df_clusters = df_clusters[['ID', 'Cluster']]

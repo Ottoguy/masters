@@ -8,11 +8,10 @@ def DLMerge():
     load_path = 'prints/dl_overview/'
 
     # Create an empty DataFrame with desired columns
-    columns = ['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones',
-                'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
+    columns = ['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones', 'Clustering Settings', 'TS_Samples',
                'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-               'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'Clustering Settings']
+               'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', ]
     df = pd.DataFrame(columns=columns)
 
     # Create a pattern to match CSV files
@@ -46,11 +45,10 @@ def DLMerge():
     df = df.groupby(level=0, axis=1).first()
 
     #Sort the columns like this 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones','RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones','Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units','Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate','ExcludedFeature', 'ShouldEmbed'
-    df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones',
-             'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'TS_Samples',
-                'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
+    df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones', 'Clustering Settings',
+                'TS_Samples', 'Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'Clustering Settings']]
+                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', ]]
     
     #Fill the empty values with None
     df = df.fillna('None')

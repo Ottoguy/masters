@@ -127,15 +127,16 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #######################################################################
         ###TS CLUSTERING-DEPENDENT SETTINGS###
         #How many samples should we use for the time series
-        ts_sample_values = [30, 60, 120]  # Update with your desired values
+        ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
-        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
+        #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
+        cluster_values = [10]
 
 
         #######################################################################
         ###DEEP REGRESSION SETTINGS###
         #750+ epochs best
-        epochs_values = [1000]  # Update with your desired values
+        epochs_values = [1500]  # Update with your desired values
         #64 useless, 16 best 2024-03-17, smaller not too good
         batch_size_values = [16]  # Update with your desired values
         #256 best, 32 not good 2024-03-17
@@ -216,10 +217,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                 'RMSE_Intermediate': [rmse_intermediate_dl],
                                                                 'RMSE_Immediate': [rmse_immediate_dl],
                                                                 'RMSE_Barebones': [rmse_barebones_dl],
-                                                                'MAE_Clusters': [mae_clusters_dl],
-                                                                'MAE_Intermediate': [mae_intermediate_dl],
-                                                                'MAE_Immediate': [mae_immediate_dl],
-                                                                'MAE_Barebones': [mae_barebones_dl],
+                                                                'Clustering Settings': [cluster_meta],
                                                                 'TS_Samples': [ts_sample_value],
                                                                 'Clusters': [clusters],
                                                                 'Epochs': [epochs],
@@ -233,7 +231,10 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                                 'Dropout_Rate': [dropout_rate],
                                                                 'ExcludedFeature': [feature_to_exclude],
                                                                 'ShouldEmbed': [should_embed],
-                                                                'Clustering Settings': [cluster_meta]
+                                                                'MAE_Clusters': [mae_clusters_dl],
+                                                                'MAE_Intermediate': [mae_intermediate_dl],
+                                                                'MAE_Immediate': [mae_immediate_dl],
+                                                                'MAE_Barebones': [mae_barebones_dl],
                                                             })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
@@ -265,5 +266,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=False, ts_sample_value=60, merge_dl=False)
+     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=True, ts_sample_value=60, merge_dl=True)
