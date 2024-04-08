@@ -273,7 +273,6 @@ def Preprocessing(data, ts_samples, meta_lower_bound, empty_charge, streak_perce
         df['Phase2Voltage'] = df['Phase2Voltage'].abs()
         df['Phase3Voltage'] = df['Phase3Voltage'].abs()
         
-        # Calculate accumulated kWh for each row in df
         # Assuming each row of current lasts 30 seconds
         df['Effect'] = (df['Phase1Current']*df["Phase1Voltage"] +
                                 df['Phase2Current']*df["Phase2Voltage"] + df['Phase3Current']*df["Phase3Voltage"]) * 30 / 3600

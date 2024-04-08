@@ -16,13 +16,13 @@ from tensorflow.keras.layers import Flatten
 from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 
-def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_state,
+def DeepLearningRegressionExperimental(ts_samples, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, layer3_units, dropout_rate, feature_to_exclude,
                             layer1activation, layer2activation, layer3activation, should_embed,
-                            train_immediate, train_barebones):
+                            train_immediate, train_barebones, loopno):
     print("Loading data for regression")
 
-    settings = "samples_" + str(ts_samples) + "_clusters_" + str(clusters) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + feature_to_exclude + "_l1_a_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
+    settings = "samples_" + str(ts_samples) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + feature_to_exclude + "_l1_a_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
 
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
@@ -67,28 +67,15 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
     if not os.path.exists(input_folder):
         print("Error: The folder does not exist, have that number of ts_samples been clustered?")
         return None
-
-    # Get a list of all files in the specified format within the chosen subfolder for 1-phase
+    # Get a list of all files in the specified format within the chosen subfolder
     files = glob.glob(os.path.join(input_folder, '*.csv'))
     # Sort the files based on modification time (latest first)
-    #files.sort(key=os.path.getmtime, reverse=True)
+    files.sort(key=os.path.getmtime, reverse=True)
     # Take the latest file from the chosen subfolder
-    #latest_file = files[0]
+    latest_file = files[loopno]
+    print("Loading data for clustering from", latest_file)
     # Load your ID-cluster mapping data from the latest file
-    #df_clusters= pd.read_csv(latest_file)
-    # Define a function to extract SilhouetteScore from the first row of a CSV file
-    def get_silhouette_score(file_path):
-        df = pd.read_csv(file_path)
-        return float(df.iloc[0]['SilhouetteScore'])
-
-    # Sort the files based on the SilhouetteScore of their first row (highest first)
-    files.sort(key=get_silhouette_score, reverse=True)
-
-    # Take the file with the highest SilhouetteScore
-    latest_file = files[0]
-
-    # Load your ID-cluster mapping data from the file with the highest SilhouetteScore
-    df_clusters = pd.read_csv(latest_file)
+    df_clusters= pd.read_csv(latest_file)
 
     #Replace NaN values with -1 (some ID's have not been clustered?)
     df_clusters['Cluster'] = df_clusters['Cluster'].fillna(-1)
@@ -101,6 +88,7 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
     #Make a new df called "df_cluster_meta" which contains the first row of df_cluster
     df_cluster_meta = df_clusters.head(1)
     #Drop the ID, NumClusters, and Cluster columns from df_cluster_meta
+    df_numclusters = df_cluster_meta['NumClusters']
     df_cluster_meta = df_cluster_meta.drop(columns=['ID', 'NumClusters', 'Cluster'])
     #Make a string out of this row, with the name of the feature in df_cluster_meta joined before very value
     cluster_meta = ' '.join([f"{col} {df_cluster_meta[col].values[0]}" for col in df_cluster_meta.columns])
@@ -342,4 +330,4 @@ def DeepLearningRegressionExperimental(ts_samples, clusters, test_size, random_s
     #Print path to the created file
     print(f"Results saved to {output_file}")
 
-    return rmse_barebones, rmse_immediate, rmse_intermediate, rmse_clusters, mae_barebones, mae_immediate, mae_intermediate, mae_clusters, cluster_meta
+    return rmse_barebones, rmse_immediate, rmse_intermediate, rmse_clusters, mae_barebones, mae_immediate, mae_intermediate, mae_clusters, cluster_meta, df_numclusters.values[0]

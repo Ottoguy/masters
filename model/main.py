@@ -64,14 +64,15 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if ts_clustering_experimental:
         print("Clustering time series experimental")
         ts_sample_values = [60]
-        num_clusters = [10]
+        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         ###KernelKMeans and KShape provide very low silhouette scores###
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
-        max_iters = [50, 100]
-        tols = [5e-7, 1e-6, 5e-6]
-        n_inits = [1,3]
-        metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
+        max_iters = [100]
+        tols = [7e-07]
+        n_inits = [1]
+        #metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
+        metrics = ['softdtw']
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
@@ -130,7 +131,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
         #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
-        cluster_values = [10]
+        cluster_values = [11]
 
 
         #######################################################################
@@ -200,42 +201,43 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                 for activation_function_layer2 in activation_functions_layer2:
                                                     for activation_function_layer3 in activation_functions_layer3:
                                                         for should_embed in should_embed_features:
-                                                            # Call the DeepLearningRegression function
-                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta = DeepLearningRegressionExperimental(
-                                                                                                    ts_samples=ts_sample_value,
-                                                                                                    clusters=clusters, test_size=0.3,
-                                                                                                    random_state=42, epochs=epochs, batch_size=batch_size,
-                                                                                                    layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
-                                                                                                    dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
-                                                                                                    layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
-                                                                                                    layer3activation=activation_function_layer3, should_embed=should_embed,
-                                                                                                    train_immediate=train_immediate, train_barebones=train_barebones)
+                                                            for loop in range(19):
+                                                                print(f"Running loop {loop}")
+                                                                # Call the DeepLearningRegression function
+                                                                rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegressionExperimental(
+                                                                                                        ts_samples=ts_sample_value, test_size=0.3,
+                                                                                                        random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                                                        layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
+                                                                                                        dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
+                                                                                                        layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
+                                                                                                        layer3activation=activation_function_layer3, should_embed=should_embed,
+                                                                                                        train_immediate=train_immediate, train_barebones=train_barebones, loopno=loop)
 
-                                                            # Record the results in the DataFrame
-                                                            results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                                                'RMSE_Clusters': [rmse_clusters_dl],
-                                                                'RMSE_Intermediate': [rmse_intermediate_dl],
-                                                                'RMSE_Immediate': [rmse_immediate_dl],
-                                                                'RMSE_Barebones': [rmse_barebones_dl],
-                                                                'Clustering Settings': [cluster_meta],
-                                                                'TS_Samples': [ts_sample_value],
-                                                                'Clusters': [clusters],
-                                                                'Epochs': [epochs],
-                                                                'Batch_Size': [batch_size],
-                                                                'Layer1_Units': [layer1_units],
-                                                                'Layer2_Units': [layer2_units],
-                                                                'Layer3_Units': [layer3_units],
-                                                                'Layer1Activation': [activation_function_layer1],
-                                                                'Layer2Activation': [activation_function_layer2],
-                                                                'Layer3Activation': [activation_function_layer3],
-                                                                'Dropout_Rate': [dropout_rate],
-                                                                'ExcludedFeature': [feature_to_exclude],
-                                                                'ShouldEmbed': [should_embed],
-                                                                'MAE_Clusters': [mae_clusters_dl],
-                                                                'MAE_Intermediate': [mae_intermediate_dl],
-                                                                'MAE_Immediate': [mae_immediate_dl],
-                                                                'MAE_Barebones': [mae_barebones_dl],
-                                                            })], ignore_index=True)
+                                                                # Record the results in the DataFrame
+                                                                results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                                    'RMSE_Clusters': [rmse_clusters_dl],
+                                                                    'RMSE_Intermediate': [rmse_intermediate_dl],
+                                                                    'RMSE_Immediate': [rmse_immediate_dl],
+                                                                    'RMSE_Barebones': [rmse_barebones_dl],
+                                                                    'Clustering Settings': [cluster_meta],
+                                                                    'TS_Samples': [ts_sample_value],
+                                                                    'Clusters': [df_numclusters],
+                                                                    'Epochs': [epochs],
+                                                                    'Batch_Size': [batch_size],
+                                                                    'Layer1_Units': [layer1_units],
+                                                                    'Layer2_Units': [layer2_units],
+                                                                    'Layer3_Units': [layer3_units],
+                                                                    'Layer1Activation': [activation_function_layer1],
+                                                                    'Layer2Activation': [activation_function_layer2],
+                                                                    'Layer3Activation': [activation_function_layer3],
+                                                                    'Dropout_Rate': [dropout_rate],
+                                                                    'ExcludedFeature': [feature_to_exclude],
+                                                                    'ShouldEmbed': [should_embed],
+                                                                    'MAE_Clusters': [mae_clusters_dl],
+                                                                    'MAE_Intermediate': [mae_intermediate_dl],
+                                                                    'MAE_Immediate': [mae_immediate_dl],
+                                                                    'MAE_Barebones': [mae_barebones_dl],
+                                                                })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
         results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
