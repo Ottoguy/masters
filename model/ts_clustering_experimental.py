@@ -234,7 +234,7 @@ def TsClusteringExperimental(ts_samples, num_clusters, algorithm, max_iter, tol,
                         break
 
     # Save the figure with the current date and time in the filename
-    results_dir = "prints/ts_clustering_experimental/" + str(ts_samples) + "/"
+    results_dir = "prints/ts_clustering_experimental/" + str(ts_samples) + "/" + str(num_clusters) + "/"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -265,7 +265,6 @@ def TsClusteringExperimental(ts_samples, num_clusters, algorithm, max_iter, tol,
     cluster_df.to_csv(output_file, index=False)
 
     print("Results saved to:", output_file)
-
 
     #Make a df "return_df" with the first row of cluster_df
     return_df = cluster_df.iloc[[0]].copy()

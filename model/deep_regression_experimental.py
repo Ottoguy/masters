@@ -16,10 +16,10 @@ from tensorflow.keras.layers import Flatten
 from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 
-def DeepLearningRegressionExperimental(ts_samples, test_size, random_state,
+def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, layer3_units, dropout_rate, feature_to_exclude,
                             layer1activation, layer2activation, layer3activation, should_embed,
-                            train_immediate, train_barebones, loopno):
+                            train_immediate, train_barebones):
     print("Loading data for regression")
 
     settings = "samples_" + str(ts_samples) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + feature_to_exclude + "_l1_a_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
@@ -62,17 +62,17 @@ def DeepLearningRegressionExperimental(ts_samples, test_size, random_state,
     # Load your data from the latest file
     df_final = pd.read_csv(latest_file)
 
-    input_folder = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/"
+    input_folder = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/" + str(numclusters) + "/"
     #Print error if folder does not exist
     if not os.path.exists(input_folder):
-        print("Error: The folder does not exist, have that number of ts_samples been clustered?")
+        print("Error: The folder does not exist, have that number of ts_samples and numclusters been clustered?")
         return None
     # Get a list of all files in the specified format within the chosen subfolder
     files = glob.glob(os.path.join(input_folder, '*.csv'))
     # Sort the files based on modification time (latest first)
     files.sort(key=os.path.getmtime, reverse=True)
     # Take the latest file from the chosen subfolder
-    latest_file = files[loopno]
+    latest_file = files[0]
     print("Loading data for clustering from", latest_file)
     # Load your ID-cluster mapping data from the latest file
     df_clusters= pd.read_csv(latest_file)
