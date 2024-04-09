@@ -130,9 +130,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #How many samples should we use for the time series
         ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
-        #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # Update with your desired values
-        cluster_values = [11]
-
 
         #######################################################################
         ###DEEP REGRESSION SETTINGS###
