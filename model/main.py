@@ -24,11 +24,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if preprocessing:
         from load_dans import all_data as data
         print("Preprocessing data")
-        ts_sample_values = [30, 60, 90, 120]  # Update with your desired values
-        for ts_sample_value in ts_sample_values:
-            Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=60, empty_charge=60, streak_percentage=0.2,
-                        should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
-                        export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True, diffs=False)
+        Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=60, empty_charge=ts_sample_value, streak_percentage=0.2,
+                    should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
+                    export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True, diffs=False)
         
     if preproc_split:
         print("Splitting preprocessed data")
@@ -54,17 +52,14 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     if ts_clustering:
         print("Clustering time series")
-        ts_sample_values = [30, 60, 120]
         min_cluster_sizes = [5, 10, 20, 30, 40]
-        for ts_sample_value in ts_sample_values:
-            for min_cluster_size in min_cluster_sizes:
-                TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
-                            distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=min_cluster_size)
+        for min_cluster_size in min_cluster_sizes:
+            TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
+                        distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=min_cluster_size)
     
     if ts_clustering_experimental:
         print("Clustering time series experimental")
-        ts_sample_values = [60]
-        num_clusters = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         ###KernelKMeans and KShape provide very low silhouette scores###
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
@@ -90,29 +85,28 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         results_df = pd.DataFrame(columns=columns)
 
         # Grid search loop
-        for ts_sample_value in ts_sample_values:
-            for num_cluster in num_clusters:
-                for algorithm in algorithms:
-                    for max_iter in max_iters:
-                        for tol in tols:
-                            for n_init in n_inits:
-                                for metric in metrics:
-                                    for max_iter_barycenter in max_iter_barycenters:
-                                        for use_voltage in use_voltages:
-                                            for use_all3_phase in use_all3_phases:
-                                                for min_cluster_size in min_cluster_sizes:
-                                                    for max_cluster_size in max_cluster_sizes:
-                                                        for handle_min_cluster in handle_min_clusters:
-                                                            for handle_max_cluster in handle_max_clusters:
-                                                                # Call clustering function
-                                                                settings_and_score = TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
-                                                                                                            tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
-                                                                                                            use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
-                                                                                                            handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
-                                                                
-                                                                # Assign values from settings_and_score to results_df
-                                                                results_df = settings_and_score[results_df.columns]
-                                                                TSMerge(columns)
+        for num_cluster in num_clusters:
+            for algorithm in algorithms:
+                for max_iter in max_iters:
+                    for tol in tols:
+                        for n_init in n_inits:
+                            for metric in metrics:
+                                for max_iter_barycenter in max_iter_barycenters:
+                                    for use_voltage in use_voltages:
+                                        for use_all3_phase in use_all3_phases:
+                                            for min_cluster_size in min_cluster_sizes:
+                                                for max_cluster_size in max_cluster_sizes:
+                                                    for handle_min_cluster in handle_min_clusters:
+                                                        for handle_max_cluster in handle_max_clusters:
+                                                            # Call clustering function
+                                                            settings_and_score = TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
+                                                                                                        tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
+                                                                                                        use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
+                                                                                                        handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
+                                                            
+                                                            # Assign values from settings_and_score to results_df
+                                                            results_df = settings_and_score[results_df.columns]
+                                                            TSMerge(columns)
 
         
     if ts_clustering_plotting:
@@ -128,7 +122,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #######################################################################
         ###TS CLUSTERING-DEPENDENT SETTINGS###
         #How many samples should we use for the time series
-        ts_sample_values = [60]  # Update with your desired values
         # Set the ranges of values for hyperparameters
         cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
         #######################################################################
@@ -185,54 +178,53 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print(f"Will iterate over {total_iterations} iterations for {total_epochs} epochs in total")
 
         # Iterate over hyperparameter values
-        for ts_sample_value in ts_sample_values:
-            for numclusters in cluster_values:
-                for epochs in epochs_values:
-                    for batch_size in batch_size_values:
-                        for layer1_units in layer1_units_values:
-                            for layer2_units in layer2_units_values:
-                                for layer3_units in layer3_units_values:
-                                    for dropout_rate in dropout_rate_values:
-                                        for feature_to_exclude in features_to_exclude:
-                                            for activation_function_layer1 in activation_functions_layer1:
-                                                for activation_function_layer2 in activation_functions_layer2:
-                                                    for activation_function_layer3 in activation_functions_layer3:
-                                                        for should_embed in should_embed_features:
-                                                            # Call the DeepLearningRegression function
-                                                            rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegressionExperimental(
-                                                                                                    ts_samples=ts_sample_value, numclusters=numclusters, test_size=0.3,
-                                                                                                    random_state=42, epochs=epochs, batch_size=batch_size,
-                                                                                                    layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
-                                                                                                    dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
-                                                                                                    layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
-                                                                                                    layer3activation=activation_function_layer3, should_embed=should_embed,
-                                                                                                    train_immediate=train_immediate, train_barebones=train_barebones)
+        for numclusters in cluster_values:
+            for epochs in epochs_values:
+                for batch_size in batch_size_values:
+                    for layer1_units in layer1_units_values:
+                        for layer2_units in layer2_units_values:
+                            for layer3_units in layer3_units_values:
+                                for dropout_rate in dropout_rate_values:
+                                    for feature_to_exclude in features_to_exclude:
+                                        for activation_function_layer1 in activation_functions_layer1:
+                                            for activation_function_layer2 in activation_functions_layer2:
+                                                for activation_function_layer3 in activation_functions_layer3:
+                                                    for should_embed in should_embed_features:
+                                                        # Call the DeepLearningRegression function
+                                                        rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegressionExperimental(
+                                                                                                ts_samples=ts_sample_value, numclusters=numclusters, test_size=0.3,
+                                                                                                random_state=42, epochs=epochs, batch_size=batch_size,
+                                                                                                layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
+                                                                                                dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
+                                                                                                layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
+                                                                                                layer3activation=activation_function_layer3, should_embed=should_embed,
+                                                                                                train_immediate=train_immediate, train_barebones=train_barebones)
 
-                                                            # Record the results in the DataFrame
-                                                            results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                                                'RMSE_Clusters': [rmse_clusters_dl],
-                                                                'RMSE_Intermediate': [rmse_intermediate_dl],
-                                                                'RMSE_Immediate': [rmse_immediate_dl],
-                                                                'RMSE_Barebones': [rmse_barebones_dl],
-                                                                'TS_Samples': [ts_sample_value],
-                                                                'Clusters': [df_numclusters],
-                                                                'Clustering Settings': [cluster_meta],
-                                                                'Epochs': [epochs],
-                                                                'Batch_Size': [batch_size],
-                                                                'Layer1_Units': [layer1_units],
-                                                                'Layer2_Units': [layer2_units],
-                                                                'Layer3_Units': [layer3_units],
-                                                                'Layer1Activation': [activation_function_layer1],
-                                                                'Layer2Activation': [activation_function_layer2],
-                                                                'Layer3Activation': [activation_function_layer3],
-                                                                'Dropout_Rate': [dropout_rate],
-                                                                'ExcludedFeature': [feature_to_exclude],
-                                                                'ShouldEmbed': [should_embed],
-                                                                'MAE_Clusters': [mae_clusters_dl],
-                                                                'MAE_Intermediate': [mae_intermediate_dl],
-                                                                'MAE_Immediate': [mae_immediate_dl],
-                                                                'MAE_Barebones': [mae_barebones_dl],
-                                                            })], ignore_index=True)
+                                                        # Record the results in the DataFrame
+                                                        results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                            'RMSE_Clusters': [rmse_clusters_dl],
+                                                            'RMSE_Intermediate': [rmse_intermediate_dl],
+                                                            'RMSE_Immediate': [rmse_immediate_dl],
+                                                            'RMSE_Barebones': [rmse_barebones_dl],
+                                                            'TS_Samples': [ts_sample_value],
+                                                            'Clusters': [df_numclusters],
+                                                            'Clustering Settings': [cluster_meta],
+                                                            'Epochs': [epochs],
+                                                            'Batch_Size': [batch_size],
+                                                            'Layer1_Units': [layer1_units],
+                                                            'Layer2_Units': [layer2_units],
+                                                            'Layer3_Units': [layer3_units],
+                                                            'Layer1Activation': [activation_function_layer1],
+                                                            'Layer2Activation': [activation_function_layer2],
+                                                            'Layer3Activation': [activation_function_layer3],
+                                                            'Dropout_Rate': [dropout_rate],
+                                                            'ExcludedFeature': [feature_to_exclude],
+                                                            'ShouldEmbed': [should_embed],
+                                                            'MAE_Clusters': [mae_clusters_dl],
+                                                            'MAE_Intermediate': [mae_intermediate_dl],
+                                                            'MAE_Immediate': [mae_immediate_dl],
+                                                            'MAE_Barebones': [mae_barebones_dl],
+                                                        })], ignore_index=True)
 
         # Sort the DataFrame by 'RMSE_intermediate_DL' column
         results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
@@ -262,6 +254,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value=60, merge_dl=True)
+     deep_regression=True, ts_sample_value=90, merge_dl=True)
