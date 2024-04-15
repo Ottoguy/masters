@@ -35,7 +35,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if plotting_meta:
         print("Plotting meta data")
         MetaPlotting(connectiondurationa=True, connectiondurationa_threshold=8640, connectiondurationb=True, connectiondurationb_threshold=8640
-                , covtime=True, cov=True, currentdifference=True, featuresvhalfminutes=True, hourconnected=True, timeencodingplot=True,
+                , covtime=True, cov=True, currentdifference=True, featuresvhalfminutes=True, hourconnected=True, hourconnectedtot = True, timeencodingplot=True,
                 voltage_difference=True)
     
     if plotting_df:
@@ -254,6 +254,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value=90, merge_dl=True)
+Main(preprocessing=False, preproc_split=False, plotting_meta=True, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=False, ts_sample_value=90, merge_dl=False)

@@ -7,9 +7,10 @@ from plotting_meta.features_v_half_minutes import FeaturesVHalfMinutes
 from plotting_meta.hour_connected import HourConnected
 from plotting_meta.time_encoding_plot import TimeEncodingPlot
 from plotting_meta.voltage_difference import VoltageDifference
+from plotting_meta.hour_connected_tot import HourConnectedTot
 
 def MetaPlotting(connectiondurationa, connectiondurationa_threshold, connectiondurationb, connectiondurationb_threshold, covtime, cov,
-                 currentdifference, featuresvhalfminutes, hourconnected, timeencodingplot, voltage_difference):
+                 currentdifference, featuresvhalfminutes, hourconnected, hourconnectedtot, timeencodingplot, voltage_difference):
     # Set the threshold (half-minutes) for disregarding EVs in the ConnectionDurationA plot
     # 5760 is 48hrs
     # 8640 is 72hrs
@@ -34,6 +35,9 @@ def MetaPlotting(connectiondurationa, connectiondurationa_threshold, connectiond
     if hourconnected:
         print("Meta plotting HourConnected")
         HourConnected()
+    if hourconnectedtot:
+        print("Meta plotting HourConnectedTot")
+        HourConnectedTot()
     if timeencodingplot:
         print("Meta plotting TimeEncodingPlot")
         TimeEncodingPlot()
