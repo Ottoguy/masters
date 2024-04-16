@@ -139,9 +139,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
-        #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
-        #                   'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        features_to_exclude = ['None']
+        features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+                           'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        #features_to_exclude = ['None']
         #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
         activation_functions_layer1 = ['tanh']
         #RELU performed by far the best for activation layer 2 2024-03-15
@@ -226,27 +226,27 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             'MAE_Barebones': [mae_barebones_dl],
                                                         })], ignore_index=True)
 
-        # Sort the DataFrame by 'RMSE_intermediate_DL' column
-        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
+                                                        # Sort the DataFrame by 'RMSE_intermediate_DL' column
+                                                        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
 
-        output_folder = 'prints/dl_overview/'
-        # Create a folder if it doesn't exist
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-        # Get the current date and time
-        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # Create the file name
-        print(f"Creating the file {current_datetime}.csv")
-        output_file = f"{output_folder}/{current_datetime}.csv"
-        # Print desired_rows to a CSV file
-        results_df_dl.to_csv(output_file, index=False)
-        #Print path to the created file
-        print(f"Results saved to {output_file}")
+                                                        output_folder = 'prints/dl_overview/'
+                                                        # Create a folder if it doesn't exist
+                                                        if not os.path.exists(output_folder):
+                                                            os.makedirs(output_folder)
+                                                        # Get the current date and time
+                                                        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                                        # Create the file name
+                                                        print(f"Creating the file {current_datetime}.csv")
+                                                        output_file = f"{output_folder}/{current_datetime}.csv"
+                                                        # Print desired_rows to a CSV file
+                                                        results_df_dl.to_csv(output_file, index=False)
+                                                        #Print path to the created file
+                                                        print(f"Results saved to {output_file}")
 
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print("Execution time: {} seconds".format(execution_time))
-        print("Code execution completed.")
+                                                        end_time = time.time()
+                                                        execution_time = end_time - start_time
+                                                        print("Execution time: {} seconds".format(execution_time))
+                                                        print("Code execution completed.")
     
     if merge_dl:
         print("Merging deep learning results")
@@ -256,4 +256,4 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=True, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=False, ts_sample_value=90, merge_dl=False)
+     deep_regression=True, ts_sample_value=60, merge_dl=True)

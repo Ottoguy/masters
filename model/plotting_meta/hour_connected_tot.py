@@ -52,7 +52,7 @@ def HourConnectedTot():
         if ax == axs[0, 0]:
             data_weekday_connected = data[(data['Weekend'] == False)].groupby('HourConnected')['Half_Minutes'].median()
             count_weekday_connected = data[(data['Weekend'] == False)].groupby('HourConnected')['Half_Minutes'].count()
-            ax.bar(data_weekday_connected.index, data_weekday_connected, width=0.8, color=plt.cm.Reds(count_weekday_connected / max_count))
+            ax.bar(data_weekday_connected.index, data_weekday_connected, width=0.8, color=plt.cm.Greens(count_weekday_connected / max_count))
             ax.set_title('Weekend=False - TimeConnected')
             ax.set_xlabel('Hour of the Day')
             ax.set_ylabel('Median Charging Duration (hours)')
@@ -60,7 +60,7 @@ def HourConnectedTot():
         elif ax == axs[0, 1]:
             data_weekend_connected = data[data['Weekend'] == True].groupby('HourConnected')['Half_Minutes'].median()
             count_weekend_connected = data[data['Weekend'] == True].groupby('HourConnected')['Half_Minutes'].count()
-            ax.bar(data_weekend_connected.index, data_weekend_connected, width=0.8, color=plt.cm.Reds(count_weekend_connected / max_count))
+            ax.bar(data_weekend_connected.index, data_weekend_connected, width=0.8, color=plt.cm.Greens(count_weekend_connected / max_count))
             ax.set_title('Weekend=True - TimeConnected')
             ax.set_xlabel('Hour of the Day')
             ax.set_ylabel('Median Charging Duration (hours)')
@@ -68,7 +68,7 @@ def HourConnectedTot():
         elif ax == axs[1, 0]:
             data_weekday_disconnected = data[data['Weekend'] == False].groupby('HourDisconnected')['Half_Minutes'].median()
             count_weekday_disconnected = data[data['Weekend'] == False].groupby('HourDisconnected')['Half_Minutes'].count()
-            ax.bar(data_weekday_disconnected.index, data_weekday_disconnected, width=0.8, color=plt.cm.Reds(count_weekday_disconnected / max_count))
+            ax.bar(data_weekday_disconnected.index, data_weekday_disconnected, width=0.8, color=plt.cm.Greens(count_weekday_disconnected / max_count))
             ax.set_title('Weekend=False - TimeDisconnected')
             ax.set_xlabel('Hour of the Day')
             ax.set_ylabel('Median Charging Duration (hours)')
@@ -76,7 +76,7 @@ def HourConnectedTot():
         elif ax == axs[1, 1]:
             data_weekend_disconnected = data[data['Weekend'] == True].groupby('HourDisconnected')['Half_Minutes'].median()
             count_weekend_disconnected = data[data['Weekend'] == True].groupby('HourDisconnected')['Half_Minutes'].count()
-            ax.bar(data_weekend_disconnected.index, data_weekend_disconnected, width=0.8, color=plt.cm.Reds(count_weekend_disconnected / max_count))
+            ax.bar(data_weekend_disconnected.index, data_weekend_disconnected, width=0.8, color=plt.cm.Greens(count_weekend_disconnected / max_count))
             ax.set_title('Weekend=True - TimeDisconnected')
             ax.set_xlabel('Hour of the Day')
             ax.set_ylabel('Median Charging Duration (hours)')
@@ -86,7 +86,7 @@ def HourConnectedTot():
 
         # Add a colorbar to each subplot
         norm = Normalize(vmin=0, vmax=max_count)
-        sm = ScalarMappable(cmap=plt.cm.Reds, norm=norm)
+        sm = ScalarMappable(cmap=plt.cm.Greens, norm=norm)
         sm.set_array([])
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical')
         cbar.set_label('Number of Entries')

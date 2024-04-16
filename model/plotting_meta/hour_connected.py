@@ -35,6 +35,7 @@ def HourConnected():
     data['HourConnected'] = data['TimeConnected'].dt.hour
     data['HourDisconnected'] = data['TimeDisconnected'].dt.hour
 
+    #greys not really used because the is no floor=0, hence this is used in hour_connected_tot.py
     colours = [plt.cm.Greys, plt.cm.Reds, plt.cm.Blues, plt.cm.Greens, plt.cm.Purples, plt.cm.Oranges]
 
     # Find the floor with the maximum count
