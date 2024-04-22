@@ -256,4 +256,4 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
 Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=False, ts_sample_value = 0, merge_dl=False)
+     deep_regression=False, ts_sample_value = 30, merge_dl=False)
