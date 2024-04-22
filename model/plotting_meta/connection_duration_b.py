@@ -52,11 +52,16 @@ def ConnectionDurationB(threshold):
     connection_durations_3phase_hours_minutes_fully_charged = filtered_3phase_fully_charged['Half_Minutes'] / 2 / 60
 
     # Set the bins and range for the histogram in hours and minutes
-    bins = 50
+    bins = 47
     range_vals_hours_minutes = (
         min(connection_durations_1phase_hours_minutes_all.min(), connection_durations_3phase_hours_minutes_all.min()),
         max(connection_durations_1phase_hours_minutes_all.max(), connection_durations_3phase_hours_minutes_all.max())
     )
+
+    #Fixing columns occluding each other by artificially adding them to each other in correct order
+    connection_durations_3phase_hours_minutes_fully_charged = pd.concat([connection_durations_3phase_hours_minutes_fully_charged, connection_durations_3phase_hours_minutes_not_fully_charged, connection_durations_1phase_hours_minutes_fully_charged, connection_durations_1phase_hours_minutes_not_fully_charged])
+    connection_durations_1phase_hours_minutes_fully_charged = pd.concat([connection_durations_1phase_hours_minutes_fully_charged, connection_durations_1phase_hours_minutes_not_fully_charged, connection_durations_3phase_hours_minutes_not_fully_charged])
+    connection_durations_3phase_hours_minutes_not_fully_charged = pd.concat([connection_durations_3phase_hours_minutes_not_fully_charged, connection_durations_1phase_hours_minutes_not_fully_charged])
 
     # Create a single subplot
     fig, ax = plt.subplots(figsize=(12, 10))
@@ -77,10 +82,15 @@ def ConnectionDurationB(threshold):
     ax.set(xlabel='Connection Duration (Hours)', ylabel='Number of EVs')
     ax.grid(True, which='both', linestyle=':', linewidth=0.3, color='gray', alpha=0.5)
     ax.minorticks_on()
-
+    
     # Add legend for disregarded EVs and types
     legend_text = f'Omitted EVs (>{threshold/120} hours): {disregarded_count}'
     fig.legend([legend_text], loc='upper center', bbox_to_anchor=(0.5, 0.95), ncol=1, fancybox=True, shadow=True)
+
+    #For showing the first 24 hours, we want every hour to be shown on the x-axis
+    if threshold == 2880:
+        tick_positions = np.arange(0, (bins + 1)/2, 1)
+        ax.set_xticks(tick_positions)
 
     plt.annotate(f"Created: {current_datetime}", xy=(10, 10), xycoords="figure pixels", fontsize=8, color='dimgray')
 

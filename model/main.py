@@ -24,7 +24,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if preprocessing:
         from load_dans import all_data as data
         print("Preprocessing data")
-        Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=60, empty_charge=ts_sample_value, streak_percentage=0.2,
+        Preprocessing(data, ts_samples=ts_sample_value, meta_lower_bound=ts_sample_value, empty_charge=ts_sample_value, streak_percentage=0.2,
                     should_filter_1911001328A_2_and_1911001328A_1=True, export_meta=True, export_extracted=True, export_filtered=False,
                     export_all=True, export_specific_id=False, id_to_export="1911001328A_2", strict_charge_extract=True, diffs=False)
         
@@ -254,6 +254,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=True, plotting_meta=True, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value = 120, merge_dl=True)
+Main(preprocessing=True, preproc_split=True, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=False, ts_sample_value = 0, merge_dl=False)
