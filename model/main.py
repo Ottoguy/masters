@@ -139,9 +139,9 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
         dropout_rate_values = [0.4]  # Update with your desired values
         # Define the features to exclude one at a time
-        features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
-                           'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        #features_to_exclude = ['None']
+        #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+        #                  'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+        features_to_exclude = ['None']
         #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
         activation_functions_layer1 = ['tanh']
         #RELU performed by far the best for activation layer 2 2024-03-15
@@ -254,6 +254,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=False, preproc_split=False, plotting_meta=True, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value=60, merge_dl=True)
+Main(preprocessing=True, preproc_split=True, plotting_meta=True, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+     ts_clustering=False, ts_clustering_experimental=True, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=True, ts_sample_value = 120, merge_dl=True)
