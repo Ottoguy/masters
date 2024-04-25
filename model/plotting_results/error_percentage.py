@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 
-def resultsplot():
-    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-
+def error_percentage():
     # Specify the directory where your files are located
     folder_path = 'prints/dl_merge/'
 
@@ -30,19 +28,23 @@ def resultsplot():
     data = data.drop_duplicates()
 
     # Delete all columns except "TS_Samples", "Clusters" and "RMSE_Clusters"
-    data = data[['TS_Samples', 'Clusters', 'RMSE_Clusters', 'RMSE_Intermediate']]
+    data = data[['TS_Samples', 'Clusters', 'MAE_Clusters', 'MAE_Intermediate']]
 
     # Delete rows with TS_Samples = 10
     data = data[data.TS_Samples != 10]
 
     # Sort by lowest RMSE
-    data = data.sort_values(by=['RMSE_Clusters'])
+    data = data.sort_values(by=['MAE_Clusters'])
 
     # Save the first row for every unique combination of "TS_Samples" and "Clusters" and delete the rest
     data = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
 
     # Group data by 'TS_Samples'
     grouped_data = data.groupby('TS_Samples')
+
+    #Express "MAE_Clusters" and "MAE_Intermediate" as percentages of TS_Samples
+    data['MAE_Clusters'] = data['MAE_Clusters'] / data['TS_Samples'] * 100
+    data['MAE_Intermediate'] = data['MAE_Intermediate'] / data['TS_Samples'] * 100
 
     # Define colormap
     colors = plt.cm.viridis(np.linspace(0, 1, len(grouped_data)))
@@ -52,18 +54,15 @@ def resultsplot():
         # Sort the data within the group based on 'Clusters' column
         sorted_group = group.sort_values(by='Clusters')
         # Plot scatter points and lines for "RMSE_Clusters"
-        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], label=f"TS_Samples = {name}", color=colors[i])
-        plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], linestyle='-', color=colors[i])
-        # Plot scatter points and lines for "RMSE_Intermediate"
-        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], label=f"TS_Samples = {name} (Intermediate)", color=colors[i], marker='x')
-        plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], linestyle='--', color=colors[i])
+        plt.scatter(sorted_group['Clusters'], sorted_group['MAE_Clusters'], label=f"TS_Samples = {name}", color=colors[i])
+        plt.plot(sorted_group['Clusters'], sorted_group['MAE_Clusters'], linestyle='-', color=colors[i])
 
     plt.xlabel('Clusters')
-    plt.ylabel('RMSE')
-    plt.title('RMSE vs Clusters for different TS_Samples')
+    plt.ylabel('Error (%)')
+    plt.title('Error in percentages for different Clusters and TS_Samples')
     plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
     plt.legend()
     plt.grid(True)
     plt.show()
 
-resultsplot()
+error_percentage()

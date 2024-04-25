@@ -22,7 +22,7 @@ def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, rando
                             train_immediate, train_barebones):
     print("Loading data for regression")
 
-    settings = "samples_" + str(ts_samples) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + feature_to_exclude + "_l1_a_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
+    settings = "clusters_" + str(numclusters) + "samples_" + str(ts_samples) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
 
     # Specify the directory where your files are located
     folder_immediate_path = 'prints/preproc_immediate/'
