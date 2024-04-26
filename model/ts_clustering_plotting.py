@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-def TsClusteringPlotting(phase, ts_samples, tot_clusters):
+def TsClusteringPlotting(ts_samples, tot_clusters):
     # Load the data from the latest CSV file containing time series data
     ts_files = glob.glob('prints/extracted/' + str(ts_samples) + '/*.csv')
     latest_ts_file = max(ts_files, key=os.path.getmtime)
@@ -12,10 +12,8 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
 
     number_of_ticks = ts_samples
 
-    origin = phase + "_" + str(tot_clusters) + "_clusters"
-
     # Specify the directory where your ID-cluster mapping files are located
-    id_cluster_folder_path = 'prints/ts_clustering/' + str(ts_samples) + "/" + origin + '/'
+    id_cluster_folder_path = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/" + str(tot_clusters) + '/'
 
     # Get a list of all files in the specified format within the chosen subfolder
     id_cluster_files = glob.glob(os.path.join(id_cluster_folder_path, '*.csv'))
@@ -87,7 +85,7 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
         #axes[cluster_id, 1].legend()
 
     # Add overall titles, labels, etc. for the entire figure
-    plt.suptitle(f'{origin} – Current and Voltage Time Series for {num_clusters} clusters')
+    plt.suptitle(f'{ts_samples} – Current and Voltage Time Series for {num_clusters} clusters')
     plt.xlabel('Time')
     plt.tight_layout()
 
@@ -102,3 +100,5 @@ def TsClusteringPlotting(phase, ts_samples, tot_clusters):
     plt.close()
     print(f"Figure saved as {current_datetime}.png in {results_dir}")
     print("TsClusteringPlotting function finished")
+
+TsClusteringPlotting(120, 8)

@@ -44,6 +44,24 @@ def HourConnected():
     # Calculate the maximum count for normalizing the color, based on the floor with the maximum count
     max_count = data[data['Floor'] == max_count_floor].groupby('HourConnected')['Half_Minutes'].count().max()
 
+    #Print 'ID', 'Floor', 'Weekend', 'HourConnected', 'HourDisconnected', 'Half_Minutes' columns to a csv file
+    data2 = data[['ID', 'Floor', 'Weekend', 'HourConnected', 'HourDisconnected', 'Half_Minutes']]
+    data3 = pd.DataFrame(columns=['Floor', 'Weekend', 'HourConnected', 'MedianConnected', 'CountConnected', 'MedianDisconnected', 'CountDisconnected'])
+    #Loop through the unique values of "Floor" column
+    for floor_value in data2['Floor'].unique():
+        for weekend_value in data2['Weekend'].unique():
+            for hour_value in data2['HourConnected'].unique():
+                #Get median and count of "Half_Minutes" for each unique combination of "Floor", "Weekend" and "HourConnected"
+                median_connected = data2[(data2['Floor'] == floor_value) & (data2['Weekend'] == weekend_value) & (data2['HourConnected'] == hour_value)]['Half_Minutes'].median()
+                count_connected = data2[(data2['Floor'] == floor_value) & (data2['Weekend'] == weekend_value) & (data2['HourConnected'] == hour_value)]['Half_Minutes'].count()
+                median_disconnected = data2[(data2['Floor'] == floor_value) & (data2['Weekend'] == weekend_value) & (data2['HourDisconnected'] == hour_value)]['Half_Minutes'].median()
+                count_disconnected = data2[(data2['Floor'] == floor_value) & (data2['Weekend'] == weekend_value) & (data2['HourDisconnected'] == hour_value)]['Half_Minutes'].count()
+                data3 = data3._append({'Floor': floor_value, 'Weekend': weekend_value, 'HourConnected': hour_value, 'MedianConnected': median_connected, 'CountConnected': count_connected, 'MedianDisconnected': median_disconnected, 'CountDisconnected': count_disconnected}, ignore_index=True)
+    data3.to_csv('prints/hour_connected.csv', index=False)
+
+    
+
+
     #Loop through the unique values of "Floor" column
     for floor_value in data['Floor'].unique():
         print(f"Plotting for floor {floor_value}", end='\r')
@@ -120,3 +138,5 @@ def HourConnected():
         plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
 
         plt.close()
+
+HourConnected()

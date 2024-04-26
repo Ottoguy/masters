@@ -13,14 +13,17 @@ from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Embedding
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.layers import Flatten
+from tensorflow.keras.optimizers import Adam
 from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 
 def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, layer3_units, dropout_rate, feature_to_exclude,
                             layer1activation, layer2activation, layer3activation, should_embed,
-                            train_immediate, train_barebones):
+                            train_immediate, train_barebones, learning_rate):
     print("Loading data for regression")
+    print("Number of clusters:", numclusters)
+    print("Number of samples in time series:", ts_samples)
 
     settings = "clusters_" + str(numclusters) + "samples_" + str(ts_samples) + "_test_size_" + str(test_size) + "_epochs_" + str(epochs) + "_batch_" + str(batch_size) + "_l1_u_" + str(layer1_units) + "_l2_u_" + str(layer2_units) + "_l3_u_" + str(layer3_units) + "_dropout_" + str(dropout_rate) + "_exclude_" + layer1activation + "_l2_a_" + layer2activation + "_l3_a_" + layer3activation + "_embed_" + str(should_embed)
 
@@ -205,14 +208,15 @@ def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, rando
         input_dim_barebones = X_barebones_excluded.shape[1]
     y = np.asarray(y).astype('float32')
     
-    def build_model(input_dim):
+    def build_model(input_dim, learning_rate):
+        optimizer = Adam(learning_rate=learning_rate)
         model = Sequential()
         model.add(Dense(layer1_units, input_dim=input_dim, activation=layer1activation))
         model.add(Dropout(dropout_rate))
         model.add(Dense(layer2_units, activation=layer2activation))
         model.add(Dense(layer3_units, activation=layer3activation))
         model.add(Dense(1, activation='linear'))  # Output layer for regression
-        model.compile(optimizer='adam', loss='mean_squared_error')
+        model.compile(optimizer=optimizer, loss='mean_squared_error')
         return model
     
     def build_model_with_embedding(input_dim, num_categories, embedding_dim):
@@ -234,17 +238,17 @@ def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, rando
 
     # Build models
     if train_immediate:
-        model_immediate = build_model(input_dim_immediate)
-    model_intermediate = build_model(input_dim_intermediate)
+        model_immediate = build_model(input_dim_immediate, learning_rate)
+    model_intermediate = build_model(input_dim_intermediate, learning_rate)
 
     if should_embed:
         model_clusters = build_model_with_embedding(input_dim_clusters, num_categories, embedding_dim)
         if train_barebones:
             model_barebones = build_model_with_embedding(input_dim_barebones, num_categories, embedding_dim)
     else:
-        model_clusters = build_model(input_dim_clusters)
+        model_clusters = build_model(input_dim_clusters, learning_rate)
         if train_barebones:
-            model_barebones = build_model(input_dim_barebones)
+            model_barebones = build_model(input_dim_barebones, learning_rate)
 
     # Split the data for each set separately
     if train_immediate:
