@@ -11,7 +11,7 @@ def DLMerge():
     columns = ['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones', 'TS_Samples', 'Clusters', 'Clustering Settings',
                'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-               'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', ]
+               'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'RandomState', 'LearningRate']
     df = pd.DataFrame(columns=columns)
 
     # Create a pattern to match CSV files
@@ -48,7 +48,7 @@ def DLMerge():
     df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones', 'TS_Samples', 'Clusters', 'Clustering Settings',
                 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', ]]
+                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'RandomState', 'LearningRate']]
     
     #Fill the empty values with None
     df = df.fillna('None')
@@ -58,6 +58,9 @@ def DLMerge():
 
     # Sort by 'RMSE_Clusters'
     df.sort_values(by='RMSE_Clusters', inplace=True)
+
+    #Delete duplicates
+    df.drop_duplicates(inplace=True)
 
     output_folder = 'prints/dl_merge/'
     # Create a folder if it doesn't exist

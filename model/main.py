@@ -60,7 +60,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if ts_clustering_experimental:
         print("Clustering time series experimental")
         #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        num_clusters = [10]
+        num_clusters = [7]
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
         max_iters = [100]
@@ -71,8 +71,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [10]
-        max_cluster_sizes = [250] #Note that these have to be higher than the min_cluster_sizes
+        min_cluster_sizes = [5, 10, 25]
+        max_cluster_sizes = [100, 250, 500] #Note that this has to be higher than the min_cluster_sizes
         handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
         #handle_min_clusters = ['nothing']
         handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
@@ -124,7 +124,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #How many samples should we use for the time series
         # Set the ranges of values for hyperparameters
         #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
-        cluster_values = [17]
+        cluster_values = [7]
         #######################################################################
         ###DEEP REGRESSION SETTINGS###
         #750+ epochs best
@@ -153,7 +153,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         should_embed_features = [False]
         train_immediate=True
         train_barebones=True
-        learning_rates = [0.01, 0.001, 0.0001]
+        learning_rates = [0.005]
 
         # Create an empty DataFrame to store the results
         results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
@@ -173,7 +173,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
             * len(should_embed_features)
         )
 
-        random_values = [7]
+        random_values = [7, 15, 23, 987, 2345]
 
         total_epochs = 0
         for epoch in epochs_values:
@@ -261,6 +261,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
+Main(preprocessing=True, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
      ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value = 60, merge_dl=True)
+     deep_regression=False, ts_sample_value = 60, merge_dl=False)
