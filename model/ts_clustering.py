@@ -11,10 +11,9 @@ import numpy as np
 # num_clusters_1_phase_range: Range of numbers of clusters to try for 1-Phase data
 # num_clusters_3_phase_range: Range of numbers of clusters to try for 3-Phase data
 # use_all_3_phase_data: Set to True to use all 3 phases for 3-Phase data, set to False to use only Phase1Voltage and Phase1Current
-def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters):
+def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters, calculate_silhouette):
     # Specify the directory where your files are located
     folder_path = 'prints/extracted/' + str(ts_samples) + '/'
-    meta_path = 'prints/meta/'
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -26,11 +25,6 @@ def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, met
     latest_file = file_list[0]
     # Load your data from the latest file
     df = pd.read_csv(latest_file)
-
-    meta_list = glob.glob(os.path.join(meta_path, file_pattern))
-    meta_list.sort(key=os.path.getmtime, reverse=True)
-    latest_meta = meta_list[0]
-    meta_df = pd.read_csv(latest_meta)
 
     cluster_df = pd.DataFrame(columns=['ID', 'Cluster'])
     cluster_df['ID'] = df['ID'].unique()
@@ -253,12 +247,13 @@ def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, met
     print('cluster_df:', cluster_df.head())
     print('labels:', labels[:5])
 
-    if calulate_silhouette:
+    if calculate_silhouette:
         # Calculate silhouette score
         print('Calculating silhouette score')
         silhouette = silhouette_score(X, labels, metric=metric, n_jobs=-1)
     else:
-        silhouette = None
+        #Create a list of None values with the same length as if the silhouette score was calculated
+        silhouette = [None] * len(cluster_df)
 
     # Append silhouette score to cluster_df
     cluster_df['SilhouetteScore'] = silhouette

@@ -13,7 +13,7 @@ def TsClusteringPlotting(ts_samples, tot_clusters):
     number_of_ticks = ts_samples
 
     # Specify the directory where your ID-cluster mapping files are located
-    id_cluster_folder_path = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/" + str(tot_clusters) + '/'
+    id_cluster_folder_path = 'prints/ts_clustering/' + str(ts_samples) + "/" + str(tot_clusters) + '/'
 
     # Get a list of all files in the specified format within the chosen subfolder
     id_cluster_files = glob.glob(os.path.join(id_cluster_folder_path, '*.csv'))
@@ -100,5 +100,3 @@ def TsClusteringPlotting(ts_samples, tot_clusters):
     plt.close()
     print(f"Figure saved as {current_datetime}.png in {results_dir}")
     print("TsClusteringPlotting function finished")
-
-TsClusteringPlotting(120, 8)

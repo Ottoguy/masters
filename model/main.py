@@ -15,7 +15,7 @@ from datetime import datetime
 import time
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
-          ts_clustering_plotting, ts_eval, deep_regression, ts_sample_value, merge_dl):
+          ts_clustering_plotting, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
     if preprocessing:
         from load_dans import all_data as data
@@ -48,8 +48,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if ts_clustering:
         print("Clustering time series")
-        #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        num_clusters = [10]
+        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        #num_clusters = [10]
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
         max_iters = [100]
@@ -60,8 +60,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [25]
-        max_cluster_sizes = [100] #Note that this has to be higher than the min_cluster_sizes
+        min_cluster_sizes = [1]
+        max_cluster_sizes = [10] #Note that this has to be higher than the min_cluster_sizes
         #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
         handle_min_clusters = ['nothing']
         #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
@@ -91,7 +91,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             settings_and_score = TsClustering(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
                                                                                                         tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
                                                                                                         use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
-                                                                                                        handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
+                                                                                                        handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster, calculate_silhouette=False)
                                                             
                                                             # Assign values from settings_and_score to results_df
                                                             results_df = settings_and_score[results_df.columns]
@@ -246,5 +246,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, ts_clustering=True, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=True, ts_sample_value = 60, merge_dl=True)
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
+     ts_clustering=True, ts_clustering_plotting=False, deep_regression=False, ts_sample_value = 30, merge_dl=False)

@@ -138,5 +138,3 @@ def HourConnected():
         plt.savefig(os.path.join(results_dir, current_datetime + '.png'))
 
         plt.close()
-
-HourConnected()
