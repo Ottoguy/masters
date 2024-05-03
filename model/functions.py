@@ -58,7 +58,5 @@ def export_csv_for_id(df, id_to_export, ts_samples=0):
         print(f"Meta exported to: {output_file}")
     elif id_to_export.lower() == "all":
         print(f"All rows exported to: {output_file}")
-    elif id_to_export.lower() == "famd":
-        print(f"FAMD exported to: {output_file}")
     else:
         print(f"Exported rows for ID {id_to_export} to: {output_file}")

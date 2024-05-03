@@ -6,7 +6,7 @@ from datetime import datetime
 
 def TSMerge(columns):
     # Specify the directory where your files are located
-    load_path = 'prints/ts_eval_experimental/'
+    load_path = 'prints/ts_eval/'
     # Create a pattern to match CSV files
     file_pattern = '*.csv'
     # Get a list of all CSV files matching the pattern

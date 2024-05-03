@@ -5,20 +5,16 @@ from plotting_df.df_plotting import DfPlotting
 from plotting_df.extracted_plotting import ExtractedPlotting
 from plotting_df.filtered_plotting import FilteredPlotting
 from ts_clustering import TsClustering
-from ts_clustering_experimental import TsClusteringExperimental
 from ts_clustering_plotting import TsClusteringPlotting
-from ts_eval import TsEval
-from deep_regression_experimental import DeepLearningRegressionExperimental
+from deep_regression import DeepLearningRegression
 from dl_merge import DLMerge
 from ts_merge import TSMerge
 import pandas as pd
 import os
 from datetime import datetime
 import time
-import glob
-import numpy as np
 
-def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering, ts_clustering_experimental,
+def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
           ts_clustering_plotting, ts_eval, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
     if preprocessing:
@@ -49,18 +45,11 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if plotting_filtered:
         print("Plotting filtered data")
         FilteredPlotting()
-
+    
     if ts_clustering:
         print("Clustering time series")
-        min_cluster_sizes = [5, 10, 20, 30, 40]
-        for min_cluster_size in min_cluster_sizes:
-            TsClustering(num_cores=-1, num_clusters_1_phase_range=range(2, 16), num_clusters_3_phase_range=range(2, 16), use_all_3_phase_data=True,
-                        distance_metric='dtw', ts_samples=ts_sample_value, min_cluster_size=min_cluster_size)
-    
-    if ts_clustering_experimental:
-        print("Clustering time series experimental")
         #num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        num_clusters = [7]
+        num_clusters = [10]
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
         max_iters = [100]
@@ -71,12 +60,12 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
-        min_cluster_sizes = [5, 10, 25]
-        max_cluster_sizes = [100, 250, 500] #Note that this has to be higher than the min_cluster_sizes
-        handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
-        #handle_min_clusters = ['nothing']
-        handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
-        #handle_max_clusters = ['nothing']
+        min_cluster_sizes = [25]
+        max_cluster_sizes = [100] #Note that this has to be higher than the min_cluster_sizes
+        #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
+        handle_min_clusters = ['nothing']
+        #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
+        handle_max_clusters = ['nothing']
 
         columns=["NumClusters", "Algorithm", "MaxIter", "Tolerance", "NInit",
                                             "Metric", "MaxIterBarycenter", "UseVoltage", "UseAll3Phases",
@@ -99,7 +88,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                     for handle_min_cluster in handle_min_clusters:
                                                         for handle_max_cluster in handle_max_clusters:
                                                             # Call clustering function
-                                                            settings_and_score = TsClusteringExperimental(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
+                                                            settings_and_score = TsClustering(ts_samples=ts_sample_value, num_clusters=num_cluster, algorithm=algorithm, max_iter=max_iter,
                                                                                                         tol=tol, n_init=n_init, metric=metric, max_iter_barycenter=max_iter_barycenter, use_voltage=use_voltage,
                                                                                                         use_all3_phases=use_all3_phase, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size,
                                                                                                         handle_min_clusters=handle_min_cluster, handle_max_clusters=handle_max_cluster)
@@ -112,10 +101,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     if ts_clustering_plotting:
         print("Plotting time series clustering")
         TsClusteringPlotting(ts_samples=ts_sample_value, tot_clusters=10)
-
-    if ts_eval:
-        print("Evaluating time series clustering")
-        TsEval(ts_samples=ts_sample_value)
     
     if deep_regression:
         print("Performing deep regression")
@@ -124,7 +109,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         #How many samples should we use for the time series
         # Set the ranges of values for hyperparameters
         #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
-        cluster_values = [7]
+        cluster_values = [10]
         #######################################################################
         ###DEEP REGRESSION SETTINGS###
         #750+ epochs best
@@ -151,8 +136,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         activation_functions_layer3 = ['relu']
         #Embedding gives almost universally worse results 2024-03-16
         should_embed_features = [False]
-        train_immediate=True
-        train_barebones=True
+        train_immediate=False
+        train_barebones=False
         learning_rates = [0.005]
 
         # Create an empty DataFrame to store the results
@@ -173,7 +158,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
             * len(should_embed_features)
         )
 
-        random_values = [7, 15, 23, 987, 2345]
+        random_values = [7, 15, 23]
 
         total_epochs = 0
         for epoch in epochs_values:
@@ -196,7 +181,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                         for random in random_values:
                                                             for lr in learning_rates:
                                                                 # Call the DeepLearningRegression function
-                                                                rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegressionExperimental(
+                                                                rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegression(
                                                                                                         ts_samples=ts_sample_value, numclusters=numclusters, test_size=0.3,
                                                                                                         random_state=random, epochs=epochs, batch_size=batch_size,
                                                                                                         layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
@@ -261,6 +246,5 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
     
-Main(preprocessing=True, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False,
-     ts_clustering=False, ts_clustering_experimental=False, ts_clustering_plotting=False, ts_eval=False,
-     deep_regression=False, ts_sample_value = 60, merge_dl=False)
+Main(preprocessing=True, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, ts_clustering=True, ts_clustering_plotting=False, ts_eval=False,
+     deep_regression=True, ts_sample_value = 60, merge_dl=True)

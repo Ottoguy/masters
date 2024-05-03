@@ -5,19 +5,16 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-import tensorflow as tf
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import Dense
 from tensorflow.keras import Sequential
-from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Embedding
-from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.optimizers import Adam
 from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 
-def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, random_state,
+def DeepLearningRegression(ts_samples, numclusters, test_size, random_state,
                             epochs, batch_size, layer1_units, layer2_units, layer3_units, dropout_rate, feature_to_exclude,
                             layer1activation, layer2activation, layer3activation, should_embed,
                             train_immediate, train_barebones, learning_rate):
@@ -65,7 +62,7 @@ def DeepLearningRegressionExperimental(ts_samples, numclusters, test_size, rando
     # Load your data from the latest file
     df_final = pd.read_csv(latest_file)
 
-    input_folder = 'prints/ts_clustering_experimental/' + str(ts_samples) + "/" + str(numclusters) + "/"
+    input_folder = 'prints/ts_clustering/' + str(ts_samples) + "/" + str(numclusters) + "/"
     #Print error if folder does not exist
     if not os.path.exists(input_folder):
         print("Error: The folder does not exist, have that number of ts_samples and numclusters been clustered?")

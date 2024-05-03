@@ -1,7 +1,7 @@
 import os
 import glob
 import pandas as pd
-from tslearn.clustering import TimeSeriesKMeans, silhouette_score
+from tslearn.clustering import TimeSeriesKMeans, KernelKMeans, KShape, silhouette_score
 from tslearn.utils import to_time_series_dataset
 from sklearn.preprocessing import StandardScaler
 from datetime import datetime
@@ -11,7 +11,7 @@ import numpy as np
 # num_clusters_1_phase_range: Range of numbers of clusters to try for 1-Phase data
 # num_clusters_3_phase_range: Range of numbers of clusters to try for 3-Phase data
 # use_all_3_phase_data: Set to True to use all 3 phases for 3-Phase data, set to False to use only Phase1Voltage and Phase1Current
-def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_range, use_all_3_phase_data, distance_metric, ts_samples, min_cluster_size):
+def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters):
     # Specify the directory where your files are located
     folder_path = 'prints/extracted/' + str(ts_samples) + '/'
     meta_path = 'prints/meta/'
@@ -32,154 +32,262 @@ def TsClustering(num_cores, num_clusters_1_phase_range, num_clusters_3_phase_ran
     latest_meta = meta_list[0]
     meta_df = pd.read_csv(latest_meta)
 
-    # Extract relevant columns
-    time_series_data_1_phase = df[['ID', 'Phase1Voltage', 'Phase1Current']].copy()
-    if use_all_3_phase_data:
-        time_series_data_3_phase = df[['ID', 'Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage', 'Phase1Current', 'Phase2Current', 'Phase3Current']].copy()
-    else:
-        time_series_data_3_phase = df[['ID', 'Phase1Voltage', 'Phase1Current']].copy()
+    cluster_df = pd.DataFrame(columns=['ID', 'Cluster'])
+    cluster_df['ID'] = df['ID'].unique()
 
-    print("Scaling time series data...")
-    # Separate standard scaling for 'Phase1Voltage' and 'Phase1Current'
+    cluster_df['NumClusters'] = num_clusters
+    cluster_df['Algorithm'] = algorithm
+    cluster_df['MaxIter'] = max_iter
+    cluster_df['Tolerance'] = tol
+    cluster_df['NInit'] = n_init
+    cluster_df['Metric'] = metric
+    cluster_df['MaxIterBarycenter'] = max_iter_barycenter
+    cluster_df['UseVoltage'] = use_voltage
+    cluster_df['UseAll3Phases'] = use_all3_phases
+    cluster_df['MinClusterSize'] = min_cluster_size
+    cluster_df['MaxClusterSize'] = max_cluster_size
+    cluster_df['HandleMinClusters'] = handle_min_clusters
+    cluster_df['HandleMaxClusters'] = handle_max_clusters
+
+    print('Data loaded from:', latest_file)
+    print('Scaling Time Series Clustering for:', algorithm)
     scaler_voltage = StandardScaler()
     scaler_current = StandardScaler()
 
-    # Fit and transform each feature
-    time_series_data_1_phase['Phase1Voltage'] = scaler_voltage.fit_transform(time_series_data_1_phase[['Phase1Voltage']].dropna())
-    time_series_data_1_phase['Phase1Current'] = scaler_current.fit_transform(time_series_data_1_phase[['Phase1Current']].dropna())
-    time_series_data_3_phase['Phase1Voltage'] = scaler_voltage.fit_transform(time_series_data_3_phase[['Phase1Voltage']].dropna())
-    time_series_data_3_phase['Phase1Current'] = scaler_current.fit_transform(time_series_data_3_phase[['Phase1Current']].dropna())
-    if use_all_3_phase_data:
-        time_series_data_3_phase['Phase2Voltage'] = scaler_voltage.fit_transform(time_series_data_3_phase[['Phase2Voltage']].dropna())
-        time_series_data_3_phase['Phase3Voltage'] = scaler_voltage.fit_transform(time_series_data_3_phase[['Phase3Voltage']].dropna())
-        time_series_data_3_phase['Phase2Current'] = scaler_current.fit_transform(time_series_data_3_phase[['Phase2Current']].dropna())
-        time_series_data_3_phase['Phase3Current'] = scaler_current.fit_transform(time_series_data_3_phase[['Phase3Current']].dropna())
+    df['Phase1Current'] = scaler_current.fit_transform(df['Phase1Current'].values.reshape(-1, 1))
+    if use_all3_phases:
+        df['Phase2Current'] = scaler_current.fit_transform(df['Phase2Current'].values.reshape(-1, 1))
+        df['Phase3Current'] = scaler_current.fit_transform(df['Phase3Current'].values.reshape(-1, 1))
+    if use_voltage:
+        df['Phase1Voltage'] = scaler_voltage.fit_transform(df['Phase1Voltage'].values.reshape(-1, 1))
+        if use_all3_phases:
+            df['Phase2Voltage'] = scaler_voltage.fit_transform(df['Phase2Voltage'].values.reshape(-1, 1))
+            df['Phase3Voltage'] = scaler_voltage.fit_transform(df['Phase3Voltage'].values.reshape(-1, 1))
 
-    # Round the values to 3 decimals
-    time_series_data_1_phase = time_series_data_1_phase.round({'Phase1Voltage': 3, 'Phase1Current': 3})
-    if use_all_3_phase_data:
-        time_series_data_3_phase = time_series_data_3_phase.round({'Phase1Voltage': 3, 'Phase2Voltage': 3, 'Phase3Voltage': 3, 'Phase1Current': 3, 'Phase2Current': 3, 'Phase3Current': 3})
-    else:
-        time_series_data_3_phase = time_series_data_3_phase.round({'Phase1Voltage': 3, 'Phase1Current': 3})
+    df['Phase1Current'] = df['Phase1Current'].astype(np.float32)
+    if use_all3_phases:
+        df['Phase2Current'] = df['Phase2Current'].astype(np.float32)
+        df['Phase3Current'] = df['Phase3Current'].astype(np.float32)
+    if use_voltage:
+        df['Phase1Voltage'] = df['Phase1Voltage'].astype(np.float32)
+        if use_all3_phases:
+            df['Phase2Voltage'] = df['Phase2Voltage'].astype(np.float32)
+            df['Phase3Voltage'] = df['Phase3Voltage'].astype(np.float32)
 
-    #Divide the time series data into one dataframe for Current_Type in meta_df = "1-Phase" and = "3-Phase"
-    time_series_data_1_phase = time_series_data_1_phase[time_series_data_1_phase['ID'].isin(meta_df[meta_df['Current_Type'] == "1-Phase"]['ID'])]
-    time_series_data_3_phase = time_series_data_3_phase[time_series_data_3_phase['ID'].isin(meta_df[meta_df['Current_Type'] == "3-Phase"]['ID'])]
+    df_list = []
 
-    # Reshape the DataFrame with variable length time series
-    time_series_1_phase_list = []
-    time_series_3_phase_list = []
-
-    for id_value, group in time_series_data_1_phase.groupby('ID'):
-        features = group[['Phase1Voltage', 'Phase1Current']].values
-        time_series_1_phase_list.append(features)
-
-    for id_value, group in time_series_data_3_phase.groupby('ID'):
-        if use_all_3_phase_data:
-            features = group[['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage', 'Phase1Current', 'Phase2Current', 'Phase3Current']].values
-        else:
+    for id_value, group in df.groupby('ID'):
+        if use_voltage and use_all3_phases:
+            features = group[['Phase1Voltage', 'Phase1Current', 'Phase2Voltage', 'Phase2Current', 'Phase3Voltage', 'Phase3Current']].values
+        elif use_voltage:
             features = group[['Phase1Voltage', 'Phase1Current']].values
-        time_series_3_phase_list.append(features)
+        elif use_all3_phases:
+            features = group[['Phase1Current', 'Phase2Current', 'Phase3Current']].values
+        else:
+            features = group[['Phase1Current']].values
+        df_list.append(features)
 
-    # Convert to time series dataset if needed
-    time_series_1_phase_dataset = to_time_series_dataset(time_series_1_phase_list)
-    time_series_3_phase_dataset = to_time_series_dataset(time_series_3_phase_list)
+    X = to_time_series_dataset(df_list)
+    labels = []
 
-    # Print the shape of the reshaped data
-    print("Reshaped 1-Phase Data Shape:", time_series_1_phase_dataset.shape)
-    print("Reshaped 3-Phase Data Shape:", time_series_3_phase_dataset.shape)
+    def TSKMeans(labels, cluster_df, num_clusters, max_iter, tol, n_init, metric, max_iter_barycenter):
+        print('Clustering with', num_clusters, 'clusters')
+        model = TimeSeriesKMeans(n_clusters=num_clusters, metric=metric, max_iter=max_iter, tol=tol, n_init=n_init, max_iter_barycenter=max_iter_barycenter, verbose=True, random_state=42, n_jobs=-1)
+        labels = model.fit_predict(X)
+        return labels, cluster_df
+
+    def KKMeans(labels, cluster_df, num_clusters, max_iter, tol, n_init):
+        print('Clustering with', num_clusters, 'clusters')
+        model = KernelKMeans(n_clusters=num_clusters, max_iter=max_iter, tol=tol, n_init=n_init, kernel="gak", verbose=True, random_state=42, n_jobs=-1)
+        labels = model.fit_predict(X)
+        return labels, cluster_df
+
+    def KS(labels, cluster_df, num_clusters, max_iter, tol, n_init):
+        print('Clustering with', num_clusters, 'clusters')
+        model = KShape(n_clusters=num_clusters, max_iter=max_iter, tol=tol, n_init=n_init, verbose=True, random_state=42)
+        labels = model.fit_predict(X)
+        return labels, cluster_df
+
+    if algorithm == 'tskmeans':
+        print('Clustering with TimeSeriesKMeans')
+        labels, cluster_df = TSKMeans(labels, cluster_df, num_clusters, max_iter, tol, n_init, metric, max_iter_barycenter)
+    elif algorithm == 'kernelkmeans':
+        print('Clustering with KernelKMeans')
+        labels, cluster_df = KKMeans(labels, cluster_df, num_clusters, max_iter, tol, n_init)
+    elif algorithm == 'kshape':
+        print('Clustering with KShape')
+        labels, cluster_df = KS(labels, cluster_df, num_clusters, max_iter, tol, n_init)
+
+    # Add cluster labels to cluster_df
+    cluster_df['Cluster'] = labels
+
+    print('Clustering done, handling min and max clusters now...')
+
+    print('Clustering done, handling min and max clusters now...')
+    print('Unique labels:', np.unique(labels))
+    print('len of labels:', len(labels))
+    print('len of cluster_df:', len(cluster_df))
+    print('len of X:', len(X))
+    print('Unique ids in cluster_df:', cluster_df['ID'].nunique())
+    #Heads of X an cluster_df and labels
+    print('X:', X[:5])
+    print('cluster_df:', cluster_df.head())
+    print('labels:', labels[:5])
+
+    unique_labels, counts = np.unique(labels, return_counts=True)
+    min_clusters_to_handle = unique_labels[counts < min_cluster_size]
+    print('Clusters with less than the limit ', min_cluster_size, 'samples:', min_clusters_to_handle)
+    max_clusters_to_handle = unique_labels[counts > max_cluster_size]
+    print('Clusters with more than the limit ', max_cluster_size, 'samples:', max_clusters_to_handle)
+
+    #Handling min clusters
+    if min_clusters_to_handle.size > 0:
+        if handle_min_clusters == 'merge':
+            print('Merging clusters with less than the limit ', min_cluster_size, 'samples')
+            for cluster in min_clusters_to_handle:
+                # Find the centroid of the cluster
+                centroid = X[labels == cluster].mean(axis=0)
+                # Calculate distances between centroid and centroids of other clusters
+                distances = [np.linalg.norm(centroid - X[labels == lbl].mean(axis=0)) for lbl in unique_labels if lbl != cluster]
+                # Find the index of the closest cluster
+                closest_cluster_index = np.argmin(distances)
+                closest_cluster_label = unique_labels[closest_cluster_index]
+                
+                # Update labels for samples in the current cluster
+                cluster_indices = np.where(labels == cluster)[0]
+                labels[cluster_indices] = closest_cluster_label
+        elif handle_min_clusters == 'reassign':
+            print('Reassigning clusters with less than the limit ', min_cluster_size, 'samples')
+            for cluster in min_clusters_to_handle:
+                # Get indices of samples in the current cluster
+                cluster_indices = np.where(labels == cluster)[0]
+                for index in cluster_indices:
+                    print('Reassigning sample', index)
+                    # Get the current sample
+                    sample = X[index]
+                    print('Sample:', sample)
+                    # Calculate distances between the sample and all centroids
+                    distances = [np.linalg.norm(sample - centroid) for centroid in X[labels != cluster].mean(axis=0)]
+                    print('Distances:', distances)
+                    # Find the index of the nearest centroid
+                    nearest_centroid_index = np.argmin(distances)
+                    print('Nearest centroid index:', nearest_centroid_index)
+                    # Get the label of the nearest cluster
+                    nearest_cluster_label = (labels[labels != cluster])[nearest_centroid_index]
+                    # Assign the sample to the nearest cluster
+                    labels[index] = nearest_cluster_label
+        elif handle_min_clusters == 'outliers':
+            print('Marking clusters with less than the limit ', min_cluster_size, 'samples as outliers')
+            for cluster in min_clusters_to_handle:
+                cluster_df['Cluster'].replace({cluster: -1}, inplace=True)
+                
+    #Handling max clusters
+    if max_clusters_to_handle.size > 0:
+        if handle_max_clusters == 'split':
+            print('Splitting clusters with more than the limit ', max_cluster_size, 'samples')
+            for cluster in max_clusters_to_handle:
+                # Initialize two new clusters
+                new_cluster1_label = max(unique_labels) + 1
+                new_cluster2_label = max(unique_labels) + 2
+                unique_labels = np.append(unique_labels, [new_cluster1_label, new_cluster2_label])
+                
+                # Find the centroid of the cluster
+                centroid = X[labels == cluster].mean(axis=0)
+                
+                # Identify points in the cluster
+                cluster_indices = np.where(labels == cluster)[0]
+                
+                # Calculate distances between centroid and all points in the cluster
+                distances = [np.linalg.norm(centroid - X[index]) for index in cluster_indices]
+                
+                # Sort indices of points by their distances to the centroid
+                sorted_indices = np.array(cluster_indices)[np.argsort(distances)]
+                
+                # Distribute points from the cluster to the new clusters
+                for i, index in enumerate(sorted_indices):
+                    if i % 2 == 0:
+                        labels[index] = new_cluster1_label
+                    else:
+                        labels[index] = new_cluster2_label
+
+        elif handle_max_clusters == 'reassign':
+            print('Reassigning clusters with more than the limit ', max_cluster_size, 'samples')
+            for cluster in max_clusters_to_handle:
+                # Find the centroid of the cluster
+                centroid = X[labels == cluster].mean(axis=0)
+                # Get indices of points in the current cluster
+                cluster_indices = np.where(labels == cluster)[0]
+                # Sort cluster points by distance to centroid in descending order
+                sorted_indices = sorted(cluster_indices, key=lambda idx: np.linalg.norm(X[idx] - centroid), reverse=True)
+                
+                for index in sorted_indices:
+                    # Calculate distances between the current point and all centroids except the centroid of the current cluster
+                    distances = [np.linalg.norm(X[index] - centroid) for centroid in X[labels != cluster].mean(axis=0)]
+                    # Find the index of the nearest centroid
+                    nearest_centroid_index = np.argmin(distances)
+                    # Get the label of the nearest cluster
+                    nearest_cluster_label = (labels[labels != cluster])[nearest_centroid_index]
+                    # Assign the point to the nearest cluster
+                    labels[index] = nearest_cluster_label
+                    # Check if the size of the current cluster is within the desired range
+                    if len(X[labels == cluster]) <= max_cluster_size:
+                        break
 
     # Save the figure with the current date and time in the filename
-    results_dir = "prints/ts_clustering/" + str(ts_samples) + "/"
+    results_dir = "prints/ts_clustering/" + str(ts_samples) + "/" + str(num_clusters) + "/"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+    # Update labels to cluster_df
+    cluster_df['Cluster'] = labels
 
-    ################################################################################################################################
-    ################################################################################################################################
+    print('Handling done.')
+    print('Unique labels:', np.unique(labels))
+    print('len of labels:', len(labels))
+    print('len of cluster_df:', len(cluster_df))
+    print('len of X:', len(X))
+    print('Unique ids in cluster_df:', cluster_df['ID'].nunique())
+    #Heads of X an cluster_df and labels
+    print('X:', X[:5])
+    print('cluster_df:', cluster_df.head())
+    print('labels:', labels[:5])
 
-
-    # Iterate over different numbers of clusters for 1-Phase data
-    for num_clusters in num_clusters_1_phase_range:
-        #Initialize s_score to avoid error
-        s_score = 0
-
-        print(f"Clustering time series data with {num_clusters} clusters...")
-
-        # Apply TimeSeriesKMeans clustering with DTW as the metric
-        kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric=distance_metric, n_jobs=num_cores, verbose=True)
-        labels = kmeans.fit_predict(time_series_1_phase_dataset)
-
-        # Remove clusters with fewer than min_cluster_size items
-        unique_labels, counts = np.unique(labels, return_counts=True)
-        clusters_to_remove = unique_labels[counts < min_cluster_size]
-
-        for cluster_label in clusters_to_remove:
-            labels[labels == cluster_label] = -1  # Assign a placeholder value to mark for removal
-
-        # Remove marked clusters with fewer than min_cluster_size items
-        labels_filtered = labels[labels != -1]
-
-        if len(np.unique(labels_filtered)) > 1:
-            time_series_1_phase_dataset_filtered = time_series_1_phase_dataset[labels != -1]
-            # Calculate silhouette score using filtered data
-            s_score = silhouette_score(time_series_1_phase_dataset_filtered, labels_filtered, metric=distance_metric, n_jobs=num_cores)
-
-        # If there are clusters removed, re-run clustering
-        if len(clusters_to_remove) > 0:
-            print("Re-running clustering after removing clusters with fewer than", min_cluster_size, "items...")
-            continue  # Restart the loop to re-run clustering
-
-        # Create a subfolder for the current number of clusters
-        subfolder_path = os.path.join(results_dir, f"1-Phase_{num_clusters}_clusters")
-        if not os.path.exists(subfolder_path):
-            os.makedirs(subfolder_path)
-
-        # Save the clustered data to a file within the subfolder
-        clustered_data_file_path = 'clustered_data_'
-        clustered_data = pd.DataFrame(
-            {'ID': time_series_data_1_phase['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters})
-        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + "ts_samples" + str(ts_samples) +
-                                        "distance_metric" + distance_metric + "num_clusters" + str(num_clusters) + ").csv"), index=False)
-
-    # Iterate over different numbers of clusters for 1-Phase data
-    for num_clusters in num_clusters_3_phase_range:
-        print(f"Clustering time series data with {num_clusters} clusters...")
-
-        # Apply TimeSeriesKMeans clustering with DTW as the metric
-        kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric=distance_metric, n_jobs=num_cores, verbose=True)
-        labels = kmeans.fit_predict(time_series_3_phase_dataset)
-
-        # Remove clusters with fewer than min_cluster_size items
-        unique_labels, counts = np.unique(labels, return_counts=True)
-        clusters_to_remove = unique_labels[counts < min_cluster_size]
-
-        for cluster_label in clusters_to_remove:
-            labels[labels == cluster_label] = -1  # Assign a placeholder value to mark for removal
-
-        # Remove marked items
-        labels_filtered = labels[labels != -1]
-
-        if len(np.unique(labels_filtered)) > 1:
+    if calulate_silhouette:
         # Calculate silhouette score
-            time_series_3_phase_dataset_filtered = time_series_3_phase_dataset[labels != -1]
-            s_score = silhouette_score(time_series_3_phase_dataset_filtered, labels_filtered, metric=distance_metric, n_jobs=num_cores)
+        print('Calculating silhouette score')
+        silhouette = silhouette_score(X, labels, metric=metric, n_jobs=-1)
+    else:
+        silhouette = None
 
-        # If there are clusters removed, re-run clustering
-        if len(clusters_to_remove) > 0:
-            print("Re-running clustering after removing clusters with fewer than", min_cluster_size, "items...")
-            continue  # Restart the loop to re-run clustering
+    # Append silhouette score to cluster_df
+    cluster_df['SilhouetteScore'] = silhouette
 
-        # Create a subfolder for the current number of clusters
-        subfolder_path = os.path.join(results_dir, f"3-Phase_{num_clusters}_clusters")
-        if not os.path.exists(subfolder_path):
-            os.makedirs(subfolder_path)
+    # Save the DataFrame to a CSV file
+    output_file = os.path.join(results_dir, f"clustering_results_{current_datetime}.csv")
+    cluster_df.to_csv(output_file, index=False)
 
-        # Save the clustered data to a file within the subfolder
-        clustered_data_file_path = 'clustered_data_'
-        clustered_data = pd.DataFrame(
-            {'ID': time_series_data_3_phase['ID'].unique(), 'Cluster': labels, 'Silhouette Score': s_score, 'Num Clusters': num_clusters, 'TS Samples': ts_samples, 'Min Cluster Size': min_cluster_size, 'Use All 3 Phases': use_all_3_phase_data, 'Distance Metric': distance_metric})
-        clustered_data.to_csv(os.path.join(subfolder_path, clustered_data_file_path + current_datetime + " (use_all_3_phases"
-                                        + str(use_all_3_phase_data) + "ts_samples" + str(ts_samples) + "distance_metric" + distance_metric +
-                                        "num_clusters" + str(num_clusters) + ").csv"), index=False)
+    print("Results saved to:", output_file)
+
+    #Make a df "return_df" with the first row of cluster_df
+    return_df = cluster_df.iloc[[0]].copy()
+    #Drop the columns 'ID' and 'Cluster' from the DataFrame
+    return_df.drop(columns=['ID', 'Cluster'], inplace=True)
+    #Reorder so 'SilhouetteScore' is the first column
+    return_df = return_df[['SilhouetteScore'] + [col for col in return_df.columns if col != 'SilhouetteScore']]
+
+    eval_folder = 'prints/ts_eval'
+    # Create a folder if it doesn't exist
+    if not os.path.exists(eval_folder):
+        os.makedirs(eval_folder)
+    # Get the current date and time
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Create the file name
+    print(f"Creating the file {current_datetime}.csv")
+    output_file = f"{eval_folder}/{current_datetime}.csv"
+    # Print desired_rows to a CSV file
+    return_df.to_csv(output_file, index=False)
+    #Print path to the created file
+    print(f"Results saved to {output_file}")
+
+    return return_df
