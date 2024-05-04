@@ -108,8 +108,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         ###TS CLUSTERING-DEPENDENT SETTINGS###
         #How many samples should we use for the time series
         # Set the ranges of values for hyperparameters
-        #cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
-        cluster_values = [10]
+        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
+        #cluster_values = [10]
         #######################################################################
         ###DEEP REGRESSION SETTINGS###
         #750+ epochs best
@@ -158,7 +158,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
             * len(should_embed_features)
         )
 
-        random_values = [7, 15, 23]
+        random_values = [7765, 113465, 23643, 9843, 987]
 
         total_epochs = 0
         for epoch in epochs_values:
@@ -247,4 +247,10 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     print("Main function finished")
     
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-     ts_clustering=True, ts_clustering_plotting=False, deep_regression=False, ts_sample_value = 30, merge_dl=False)
+     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 30, merge_dl=True)
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
+     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 60, merge_dl=True)
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
+     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 90, merge_dl=True)
+Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
+     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 30, merge_dl=True)

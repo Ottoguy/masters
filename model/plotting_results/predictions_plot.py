@@ -30,23 +30,25 @@ def predictions_plot():
     #Delete rows with 'TS_Samples' = NaN
     data = data.dropna(subset=['TS_Samples'])
 
+    #Sort by lowest RMSE
+    data = data.sort_values(by=['RMSE_Clusters'])
+
     # Delete all irrelevant columns
     data = data[['TS_Samples', 'Clusters', 'RMSE_Clusters', 'RMSE_Intermediate', 'MAE_Clusters', 'MAE_Intermediate', 'Timestamp']]
 
     # Delete rows with TS_Samples = 10
     data = data[data.TS_Samples != 10]
 
-    #Sort by lowest RMSE
-    data = data.sort_values(by=['RMSE_Clusters'])
-
-    #Delete all rows except the first entry for every unique value of 'TS_Samples'
-    data = data.drop_duplicates(subset=['TS_Samples'])
+    #Delete all rows except every unique value of "TS_Samples" with the lowest "RMSE_Clusters"
+    data = data.drop_duplicates(subset=['TS_Samples'], keep='first')
 
     #Make an array of the 'Timestamp' column
     timestamps = data['Timestamp'].to_numpy()
 
     #Make an array of the 'Clusters' column
     clusters = data['Clusters'].to_numpy()
+
+    ts_samples = data['TS_Samples'].to_numpy()
 
     # Specify the directory where your files are located
     folder_path = 'prints/deep_learning/'
@@ -69,9 +71,14 @@ def predictions_plot():
     for i in range(len(timestamps)):
         timestamp = timestamps[i]
         cluster = clusters[i]
+        ts_sample = ts_samples[i]
+
+        #Convert to integer
+        ts_sample = int(ts_sample)
+        cluster = int(cluster)
 
         # Create a pattern to match files in the specified format
-        file_pattern = f'*{timestamp}"_cluster_"{cluster}*'
+        file_pattern = f"{timestamp}_samples_{ts_sample}_*"
 
         # Get a list of all files matching the pattern
         matching_files = glob.glob(os.path.join(folder_path, file_pattern))
@@ -88,7 +95,7 @@ def predictions_plot():
         # Set labels and title
         ax.set_xlabel('Entries')
         ax.set_ylabel('Values')
-        ax.set_title(f'Prediction Data - Timestamp: {timestamp}')
+        ax.set_title(f'TS_Samples: {ts_sample}, Clusters: {cluster}, Timestamp: {timestamp}')
 
         # Add legend
         ax.legend()
