@@ -96,161 +96,157 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             # Assign values from settings_and_score to results_df
                                                             results_df = settings_and_score[results_df.columns]
                                                             TSMerge(columns)
-
+                                                            #Run the deep regression on the clustered data
+                                                            if deep_regression:
+                                                                runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=num_cluster)
+                                                            if merge_dl:
+                                                                DLMerge()
+                                                                
         
     if ts_clustering_plotting:
         print("Plotting time series clustering")
         TsClusteringPlotting(ts_samples=ts_sample_value, tot_clusters=10)
     
-    if deep_regression:
-        print("Performing deep regression")
-        #######################################################################
-        ###TS CLUSTERING-DEPENDENT SETTINGS###
-        #How many samples should we use for the time series
-        # Set the ranges of values for hyperparameters
-        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]  # Update with your desired values
-        #cluster_values = [10]
-        #######################################################################
-        ###DEEP REGRESSION SETTINGS###
-        #750+ epochs best
-        epochs_values = [1500]  # Update with your desired values
-        #64 useless, 16 best 2024-03-17, smaller not too good
-        batch_size_values = [16]  # Update with your desired values
-        #256 best, 32 not good 2024-03-17
-        layer1_units_values = [256]  # Update with your desired values
-        #64 seems to be as good as any higher value 2024-03-17
-        layer2_units_values = [64]  # Update with your desired values
-        #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
-        layer3_units_values = [1]  # Update with your desired values
-        #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
-        dropout_rate_values = [0.4]  # Update with your desired values
-        # Define the features to exclude one at a time
-        #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
-        #                  'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
-        features_to_exclude = ['None']
-        #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
-        activation_functions_layer1 = ['tanh']
-        #RELU performed by far the best for activation layer 2 2024-03-15
-        activation_functions_layer2 = ['relu']
-        #RELU performed by far the best for activation layer 3 2024-03-18
-        activation_functions_layer3 = ['relu']
-        #Embedding gives almost universally worse results 2024-03-16
-        should_embed_features = [False]
-        train_immediate=False
-        train_barebones=False
-        learning_rates = [0.005]
-
-        # Create an empty DataFrame to store the results
-        results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
-        # Calculate total number of iterations
-        total_iterations = (
-            len(cluster_values)
-            * len(epochs_values)
-            * len(batch_size_values)
-            * len(layer1_units_values)
-            * len(layer2_units_values)
-            * len(layer3_units_values)
-            * len(dropout_rate_values)
-            * len(features_to_exclude)
-            * len(activation_functions_layer1)
-            * len(activation_functions_layer2)
-            * len(activation_functions_layer3)
-            * len(should_embed_features)
-        )
-
-        random_values = [7765, 113465, 23643, 9843, 987]
-
-        total_epochs = 0
-        for epoch in epochs_values:
-            total_epochs += epoch
-        start_time = time.time()
-        print(f"Will iterate over {total_iterations} iterations for {total_epochs} epochs in total")
-        # Iterate over hyperparameter values
-        for numclusters in cluster_values:
-            for epochs in epochs_values:
-                for batch_size in batch_size_values:
-                    for layer1_units in layer1_units_values:
-                        for layer2_units in layer2_units_values:
-                            for layer3_units in layer3_units_values:
-                                for dropout_rate in dropout_rate_values:
-                                    for feature_to_exclude in features_to_exclude:
-                                        for activation_function_layer1 in activation_functions_layer1:
-                                            for activation_function_layer2 in activation_functions_layer2:
-                                                for activation_function_layer3 in activation_functions_layer3:
-                                                    for should_embed in should_embed_features:
-                                                        for random in random_values:
-                                                            for lr in learning_rates:
-                                                                # Call the DeepLearningRegression function
-                                                                rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegression(
-                                                                                                        ts_samples=ts_sample_value, numclusters=numclusters, test_size=0.3,
-                                                                                                        random_state=random, epochs=epochs, batch_size=batch_size,
-                                                                                                        layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
-                                                                                                        dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
-                                                                                                        layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
-                                                                                                        layer3activation=activation_function_layer3, should_embed=should_embed,
-                                                                                                        train_immediate=train_immediate, train_barebones=train_barebones, learning_rate=lr)
-
-                                                                # Record the results in the DataFrame
-                                                                results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
-                                                                    'RMSE_Clusters': [rmse_clusters_dl],
-                                                                    'RMSE_Intermediate': [rmse_intermediate_dl],
-                                                                    'RMSE_Immediate': [rmse_immediate_dl],
-                                                                    'RMSE_Barebones': [rmse_barebones_dl],
-                                                                    'TS_Samples': [ts_sample_value],
-                                                                    'Clusters': [df_numclusters],
-                                                                    'Clustering Settings': [cluster_meta],
-                                                                    'Epochs': [epochs],
-                                                                    'Batch_Size': [batch_size],
-                                                                    'Layer1_Units': [layer1_units],
-                                                                    'Layer2_Units': [layer2_units],
-                                                                    'Layer3_Units': [layer3_units],
-                                                                    'Layer1Activation': [activation_function_layer1],
-                                                                    'Layer2Activation': [activation_function_layer2],
-                                                                    'Layer3Activation': [activation_function_layer3],
-                                                                    'Dropout_Rate': [dropout_rate],
-                                                                    'ExcludedFeature': [feature_to_exclude],
-                                                                    'ShouldEmbed': [should_embed],
-                                                                    'MAE_Clusters': [mae_clusters_dl],
-                                                                    'MAE_Intermediate': [mae_intermediate_dl],
-                                                                    'MAE_Immediate': [mae_immediate_dl],
-                                                                    'MAE_Barebones': [mae_barebones_dl],
-                                                                    'RandomState': [random],
-                                                                    'LearningRate': [lr]
-                                                                })], ignore_index=True)
-
-                                                                # Sort the DataFrame by 'RMSE_intermediate_DL' column
-                                                                results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
-
-                                                                output_folder = 'prints/dl_overview/'
-                                                                # Create a folder if it doesn't exist
-                                                                if not os.path.exists(output_folder):
-                                                                    os.makedirs(output_folder)
-                                                                # Get the current date and time
-                                                                current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-                                                                # Create the file name
-                                                                print(f"Creating the file {current_datetime}.csv")
-                                                                output_file = f"{output_folder}/{current_datetime}.csv"
-                                                                # Print desired_rows to a CSV file
-                                                                results_df_dl.to_csv(output_file, index=False)
-                                                                #Print path to the created file
-                                                                print(f"Results saved to {output_file}")
-
-                                                                end_time = time.time()
-                                                                execution_time = end_time - start_time
-                                                                print("Execution time: {} seconds".format(execution_time))
-                                                                print("Code execution completed.")
+    #The "not" check since it is already called if true
+    if deep_regression and not ts_clustering:
+        runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=10)
     
-    if merge_dl:
+    #The "not" check since it is already called if true
+    if merge_dl and not ts_clustering:
         print("Merging deep learning results")
         DLMerge()
 
     print("Main function finished")
-    
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 30, merge_dl=True)
+
+def runDeepRegression(ts_sample_value, cluster_value):
+    print("Performing deep regression")
+    # Set the ranges of values for hyperparameters
+    #750+ epochs best
+    epochs_values = [1500]  # Update with your desired values
+    #64 useless, 16 best 2024-03-17, smaller not too good
+    batch_size_values = [16]  # Update with your desired values
+    #256 best, 32 not good 2024-03-17
+    layer1_units_values = [256]  # Update with your desired values
+    #64 seems to be as good as any higher value 2024-03-17
+    layer2_units_values = [64]  # Update with your desired values
+    #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
+    layer3_units_values = [1]  # Update with your desired values
+    #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
+    dropout_rate_values = [0.4]  # Update with your desired values
+    # Define the features to exclude one at a time
+    #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
+    #                  'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
+    features_to_exclude = ['None']
+    #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
+    activation_functions_layer1 = ['tanh']
+    #RELU performed by far the best for activation layer 2 2024-03-15
+    activation_functions_layer2 = ['relu']
+    #RELU performed by far the best for activation layer 3 2024-03-18
+    activation_functions_layer3 = ['relu']
+    #Embedding gives almost universally worse results 2024-03-16
+    should_embed_features = [False]
+    train_immediate=False
+    train_barebones=False
+    learning_rates = [0.005]
+
+    # Create an empty DataFrame to store the results
+    results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
+    # Calculate total number of iterations
+    total_iterations = (
+        len(epochs_values)
+        * len(batch_size_values)
+        * len(layer1_units_values)
+        * len(layer2_units_values)
+        * len(layer3_units_values)
+        * len(dropout_rate_values)
+        * len(features_to_exclude)
+        * len(activation_functions_layer1)
+        * len(activation_functions_layer2)
+        * len(activation_functions_layer3)
+        * len(should_embed_features)
+    )
+
+    random_values = [1, 2, 3, 4, 5]
+
+    total_epochs = 0
+    for epoch in epochs_values:
+        total_epochs += epoch
+    start_time = time.time()
+    print(f"Will iterate over {total_iterations} iterations for {total_epochs} epochs in total")
+    # Iterate over hyperparameter values
+    for epochs in epochs_values:
+        for batch_size in batch_size_values:
+            for layer1_units in layer1_units_values:
+                for layer2_units in layer2_units_values:
+                    for layer3_units in layer3_units_values:
+                        for dropout_rate in dropout_rate_values:
+                            for feature_to_exclude in features_to_exclude:
+                                for activation_function_layer1 in activation_functions_layer1:
+                                    for activation_function_layer2 in activation_functions_layer2:
+                                        for activation_function_layer3 in activation_functions_layer3:
+                                            for should_embed in should_embed_features:
+                                                for random in random_values:
+                                                    for lr in learning_rates:
+                                                        # Call the DeepLearningRegression function
+                                                        rmse_barebones_dl, rmse_immediate_dl, rmse_intermediate_dl, rmse_clusters_dl, mae_barebones_dl, mae_immediate_dl, mae_intermediate_dl, mae_clusters_dl, cluster_meta, df_numclusters = DeepLearningRegression(
+                                                                                                ts_samples=ts_sample_value, numclusters=cluster_value, test_size=0.3,
+                                                                                                random_state=random, epochs=epochs, batch_size=batch_size,
+                                                                                                layer1_units=layer1_units, layer2_units=layer2_units, layer3_units=layer3_units,
+                                                                                                dropout_rate=dropout_rate, feature_to_exclude=feature_to_exclude, 
+                                                                                                layer1activation=activation_function_layer1, layer2activation=activation_function_layer2,
+                                                                                                layer3activation=activation_function_layer3, should_embed=should_embed,
+                                                                                                train_immediate=train_immediate, train_barebones=train_barebones, learning_rate=lr)
+
+                                                        # Record the results in the DataFrame
+                                                        results_df_dl = pd.concat([results_df_dl, pd.DataFrame({
+                                                            'RMSE_Clusters': [rmse_clusters_dl],
+                                                            'RMSE_Intermediate': [rmse_intermediate_dl],
+                                                            'RMSE_Immediate': [rmse_immediate_dl],
+                                                            'RMSE_Barebones': [rmse_barebones_dl],
+                                                            'TS_Samples': [ts_sample_value],
+                                                            'Clusters': [df_numclusters],
+                                                            'Clustering Settings': [cluster_meta],
+                                                            'Epochs': [epochs],
+                                                            'Batch_Size': [batch_size],
+                                                            'Layer1_Units': [layer1_units],
+                                                            'Layer2_Units': [layer2_units],
+                                                            'Layer3_Units': [layer3_units],
+                                                            'Layer1Activation': [activation_function_layer1],
+                                                            'Layer2Activation': [activation_function_layer2],
+                                                            'Layer3Activation': [activation_function_layer3],
+                                                            'Dropout_Rate': [dropout_rate],
+                                                            'ExcludedFeature': [feature_to_exclude],
+                                                            'ShouldEmbed': [should_embed],
+                                                            'MAE_Clusters': [mae_clusters_dl],
+                                                            'MAE_Intermediate': [mae_intermediate_dl],
+                                                            'MAE_Immediate': [mae_immediate_dl],
+                                                            'MAE_Barebones': [mae_barebones_dl],
+                                                            'RandomState': [random],
+                                                            'LearningRate': [lr]
+                                                        })], ignore_index=True)
+
+                                                        # Sort the DataFrame by 'RMSE_intermediate_DL' column
+                                                        results_df_dl = results_df_dl.sort_values(by='RMSE_Clusters')
+
+                                                        output_folder = 'prints/dl_overview/'
+                                                        # Create a folder if it doesn't exist
+                                                        if not os.path.exists(output_folder):
+                                                            os.makedirs(output_folder)
+                                                        # Get the current date and time
+                                                        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                                        # Create the file name
+                                                        print(f"Creating the file {current_datetime}.csv")
+                                                        output_file = f"{output_folder}/{current_datetime}.csv"
+                                                        # Print desired_rows to a CSV file
+                                                        results_df_dl.to_csv(output_file, index=False)
+                                                        #Print path to the created file
+                                                        print(f"Results saved to {output_file}")
+
+                                                        end_time = time.time()
+                                                        execution_time = end_time - start_time
+                                                        print("Execution time: {} seconds".format(execution_time))
+                                                        print("Code execution completed.")
+
+  
 Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
      ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 60, merge_dl=True)
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 90, merge_dl=True)
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 30, merge_dl=True)
