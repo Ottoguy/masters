@@ -247,6 +247,9 @@ def runDeepRegression(ts_sample_value, cluster_value):
                                                         print("Execution time: {} seconds".format(execution_time))
                                                         print("Code execution completed.")
 
+ts_sample_values = [30, 60, 90, 120]
   
-Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-     ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = 60, merge_dl=True)
+for ts in ts_sample_values:
+    print(f"Running for ts_sample_value: {ts}")
+    Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
+        ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = ts, merge_dl=True)
