@@ -3,7 +3,6 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime
 
 def resultsplot():# Specify the directory where your files are located
     folder_path = 'prints/dl_merge/'

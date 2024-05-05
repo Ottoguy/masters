@@ -3,11 +3,10 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime
 
 def error_percentage():
     # Specify the directory where your files are located
-    folder_path = 'prints/dl_merge/'
+    folder_path = 'prints/backup_oldruns/dl_merge/'
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -28,7 +27,7 @@ def error_percentage():
     data = data.drop_duplicates()
 
     # Delete all columns except "TS_Samples", "Clusters" and "RMSE_Clusters"
-    data = data[['TS_Samples', 'Clusters', 'MAE_Clusters', 'MAE_Intermediate']]
+    data = data[['TS_Samples', 'Clusters', 'MAE_Clusters', 'MAE_Intermediate', 'Timestamp']]
 
     # Delete rows with TS_Samples = 10
     data = data[data.TS_Samples != 10]

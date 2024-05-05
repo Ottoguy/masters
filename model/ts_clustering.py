@@ -11,7 +11,7 @@ import numpy as np
 # num_clusters_1_phase_range: Range of numbers of clusters to try for 1-Phase data
 # num_clusters_3_phase_range: Range of numbers of clusters to try for 3-Phase data
 # use_all_3_phase_data: Set to True to use all 3 phases for 3-Phase data, set to False to use only Phase1Voltage and Phase1Current
-def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters, calculate_silhouette, random_state):
+def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters, calculate_silhouette):
     # Specify the directory where your files are located
     folder_path = 'prints/extracted/' + str(ts_samples) + '/'
 

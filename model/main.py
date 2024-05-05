@@ -8,7 +8,6 @@ from ts_clustering import TsClustering
 from ts_clustering_plotting import TsClusteringPlotting
 from deep_regression import DeepLearningRegression
 from dl_merge import DLMerge
-from ts_merge import TSMerge
 import pandas as pd
 import os
 from datetime import datetime
@@ -95,7 +94,6 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             
                                                             # Assign values from settings_and_score to results_df
                                                             results_df = settings_and_score[results_df.columns]
-                                                            TSMerge(columns)
                                                             #Run the deep regression on the clustered data
                                                             if deep_regression:
                                                                 runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=num_cluster)
@@ -252,4 +250,4 @@ ts_sample_values = [30, 60, 90, 120]
 for ts in ts_sample_values:
     print(f"Running for ts_sample_value: {ts}")
     Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-        ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = ts, merge_dl=True)
+        ts_clustering=True, ts_clustering_plotting=False, deep_regression=False, ts_sample_value = ts, merge_dl=False)
