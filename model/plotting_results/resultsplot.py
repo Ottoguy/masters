@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def resultsplot():# Specify the directory where your files are located
-    folder_path = 'prints/dl_merge/'
+    folder_path = 'prints/backup_oldruns/dl_merge/'
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -31,14 +31,35 @@ def resultsplot():# Specify the directory where your files are located
     # Delete rows with TS_Samples = 10
     data = data[data.TS_Samples != 10]
 
+    #Remove rows with NaN values in 'TS_Samples' column
+    data = data.dropna(subset=['TS_Samples'])
+
     # Sort by lowest RMSE
     data = data.sort_values(by=['RMSE_Clusters'])
 
-    # Save the first row for every unique combination of "TS_Samples" and "Clusters" and delete the rest
-    data = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+    # Sort by lowest RMSE_Intermediate within each unique combination of Clusters and TS_Samples
+    data = data.sort_values(by=['TS_Samples', 'Clusters', 'RMSE_Intermediate'])
+
+    # Save the first row for every unique combination of Clusters and TS_Samples based on RMSE_Intermediate
+    best_intermediate = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+
+    # Sort by lowest RMSE_Clusters within each unique combination of Clusters and TS_Samples
+    data = data.sort_values(by=['TS_Samples', 'Clusters', 'RMSE_Clusters'])
+
+    # Save the first row for every unique combination of Clusters and TS_Samples based on RMSE_Clusters
+    best_clusters = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+
+    # Merge the best_intermediate and best_clusters dataframes on 'TS_Samples' and 'Clusters'
+    merged_data = best_intermediate.merge(best_clusters, on=['TS_Samples', 'Clusters'], suffixes=('_intermediate', '_clusters'))
+
+    #Delete the columns 'RMSE_Intermediate_clusters' and 'RMSE_Clusters_intermediate' from the merged dataframe
+    merged_data = merged_data.drop(columns=['RMSE_Intermediate_clusters', 'RMSE_Clusters_intermediate'])
+
+    #Rename the columns RMSE_Intermediate_intermediate and RMSE_Clusters_clusters to RMSE_Intermediate and RMSE_Clusters
+    merged_data = merged_data.rename(columns={'RMSE_Intermediate_intermediate': 'RMSE_Intermediate', 'RMSE_Clusters_clusters': 'RMSE_Clusters'})
 
     # Group data by 'TS_Samples'
-    grouped_data = data.groupby('TS_Samples')
+    grouped_data = merged_data.groupby('TS_Samples')
 
     # Define colormap
     colors = plt.cm.viridis(np.linspace(0, 1, len(grouped_data)))
@@ -52,10 +73,10 @@ def resultsplot():# Specify the directory where your files are located
         plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], linestyle='-', color=colors[i])
 
     # Sort by lowest RMSE
-    data = data.sort_values(by=['RMSE_Intermediate'])
+    merged_data = merged_data.sort_values(by=['RMSE_Intermediate'])
     
     # Group data by 'TS_Samples'
-    grouped_data = data.groupby('TS_Samples')
+    grouped_data = merged_data.groupby('TS_Samples')
 
     # Plot each group separately
     for i, (name, group) in enumerate(grouped_data):

@@ -107,7 +107,10 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     #The "not" check since it is already called if true
     if deep_regression and not ts_clustering:
-        runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=10)
+        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        for cluster in cluster_values:
+            print(f"Running deep regression for cluster: {cluster}")
+            runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=cluster)
     
     #The "not" check since it is already called if true
     if merge_dl and not ts_clustering:
