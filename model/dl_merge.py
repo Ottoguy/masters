@@ -36,19 +36,20 @@ def DLMerge():
 
     #Remove columns with only None values
     df = df.dropna(axis=1, how='all')
+    print(df.columns)
 
     #Remove the columns ,timestamp,ts_samples,clusters,test_size,epochs,batch_size,layer1_units,layer2_units,dropout_rate,feature_to_exclude,layer1activation,layer2activation
-    df = df.drop(columns=['timestamp','ts_samples','clusters','test_size','epochs','batch_size','layer1_units','layer2_units','dropout_rate','feature_to_exclude','layer1activation','layer2activation', 'OneHotEncode'])
+    #df = df.drop(columns=['timestamp','ts_samples','clusters','test_size','epochs','batch_size','layer1_units','layer2_units','dropout_rate','feature_to_exclude','layer1activation','layer2activation', 'OneHotEncode'])
 
     #Remove the suffix "_DL" from the column names it is present in, and merge those columns with the same name
     df.columns = df.columns.str.replace('_DL', '')
     df = df.groupby(level=0, axis=1).first()
 
     #Sort the columns like this 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones','RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones','Clusters', 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units','Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate','ExcludedFeature', 'ShouldEmbed'
-    df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'RMSE_Immediate', 'RMSE_Barebones', 'TS_Samples', 'Clusters', 'Clustering Settings',
+    df = df[['RMSE_Clusters', 'RMSE_Intermediate', 'TS_Samples', 'Clusters', 'Clustering Settings',
                 'Epochs', 'Batch_Size', 'Layer1_Units', 'Layer2_Units', 'Layer3_Units',
                 'Layer1Activation', 'Layer2Activation', 'Layer3Activation', 'Dropout_Rate',
-                'ExcludedFeature', 'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'MAE_Immediate', 'MAE_Barebones', 'RandomState', 'LearningRate']]
+                'ShouldEmbed', 'Timestamp', 'MAE_Clusters', 'MAE_Intermediate', 'RandomState', 'LearningRate']]
     
     #Fill the empty values with None
     df = df.fillna('None')

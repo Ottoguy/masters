@@ -34,23 +34,20 @@ def relative_improvement():# Specify the directory where your files are located
     #Remove rows with NaN values in 'TS_Samples' column
     data = data.dropna(subset=['TS_Samples'])
 
-    # Sort by lowest RMSE
-    data = data.sort_values(by=['RMSE_Clusters'])
+    # Sort by lowest RMSE_Intermediate within each unique combination of TS_Samples
+    data_intermediate = data.sort_values(by=['TS_Samples', 'RMSE_Intermediate'])
 
-    # Sort by lowest RMSE_Intermediate within each unique combination of Clusters and TS_Samples
-    data = data.sort_values(by=['TS_Samples', 'Clusters', 'RMSE_Intermediate'])
-
-    # Save the first row for every unique combination of Clusters and TS_Samples based on RMSE_Intermediate
-    best_intermediate = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+    # Save the first row for every unique TS_Samples based on RMSE_Intermediate
+    best_intermediate = data_intermediate.drop_duplicates(subset=['TS_Samples'])
 
     # Sort by lowest RMSE_Clusters within each unique combination of Clusters and TS_Samples
-    data = data.sort_values(by=['TS_Samples', 'Clusters', 'RMSE_Clusters'])
+    data_clusters = data.sort_values(by=['TS_Samples', 'Clusters', 'RMSE_Clusters'])
 
     # Save the first row for every unique combination of Clusters and TS_Samples based on RMSE_Clusters
-    best_clusters = data.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+    best_clusters = data_clusters.drop_duplicates(subset=['TS_Samples', 'Clusters'])
 
-    # Merge the best_intermediate and best_clusters dataframes on 'TS_Samples' and 'Clusters'
-    merged_data = best_intermediate.merge(best_clusters, on=['TS_Samples', 'Clusters'], suffixes=('_intermediate', '_clusters'))
+    # Merge the best_intermediate with the best_clusters dataframes on 'TS_Samples'
+    merged_data = best_intermediate.merge(best_clusters, on=['TS_Samples'], suffixes=('_intermediate', '_clusters'))
 
     #Delete the columns 'RMSE_Intermediate_clusters' and 'RMSE_Clusters_intermediate' from the merged dataframe
     merged_data = merged_data.drop(columns=['RMSE_Intermediate_clusters', 'RMSE_Clusters_intermediate'])
