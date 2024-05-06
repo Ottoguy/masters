@@ -47,7 +47,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if ts_clustering:
         print("Clustering time series")
-        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        num_clusters = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         #num_clusters = [10]
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
@@ -97,8 +97,8 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             #Run the deep regression on the clustered data
                                                             if deep_regression:
                                                                 runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=num_cluster)
-                                                            if merge_dl:
-                                                                DLMerge()
+        if merge_dl:
+            DLMerge()
                                                                 
         
     if ts_clustering_plotting:
