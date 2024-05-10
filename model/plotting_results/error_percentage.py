@@ -56,11 +56,11 @@ def error_percentage():
         plt.scatter(sorted_group['Clusters'], sorted_group['MAE_Clusters'], label=f"TS_Samples = {name}", color=colors[i])
         plt.plot(sorted_group['Clusters'], sorted_group['MAE_Clusters'], linestyle='-', color=colors[i])
 
-    plt.xlabel('Clusters')
-    plt.ylabel('Error (%) [MAE]')
-    plt.title('Error in percentages for different Clusters and TS_Samples')
-    plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
-    plt.legend()
+    plt.xlabel('Clusters', fontsize=14)
+    plt.ylabel('Error (%) [MAE]', fontsize=14)
+    plt.title('Error in percentages for different Clusters and TS_Samples', fontsize=16)
+    plt.xticks(np.arange(2, 21, step=1), fontsize=14)  # Set x-axis ticks from 2 to 20
+    plt.legend(fontsize=14)
     plt.grid(True)
     plt.show()
 

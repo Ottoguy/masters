@@ -13,6 +13,24 @@ import os
 from datetime import datetime
 import time
 
+#This is the main function. This is always the file to run, unless specific result plots are wanted. /Otto Palmlöf 2024-05-10
+
+#The functions called save their results as files in the "prints" folder and then in subfolders based on the function called.
+#These folders are also used by other functions to read the results, so it is important to run the functions in the correct order.
+#The functions are called by setting the corresponding boolean to True. The functions are called in the order they are defined in the Main function.
+#The functions for plotting instead most often save the plots in the "plots" folder.
+
+#preprocessing: If True, the data is loaded and preprocessed
+#preproc_split: If True, the preprocessed data is split into immediate, intermediate and final features
+#plotting_meta: If True, the meta data is plotted
+#plotting_df: If True, the time series data is plotted
+#plotting_extracted: If True, the extracted data is plotted
+#plotting_filtered: If True, the filtered data is plotted
+#ts_clustering: If True, the time series are clustered
+#ts_clustering_plotting: If True, the clustering results are plotted
+#deep_regression: If True, the deep learning regression is run
+#ts_sample_value: The value of the time series samples to use
+#merge_dl: If True, the deep learning results are merged to a single file, which is easily readable, sorted by RMSE
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
           ts_clustering_plotting, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
@@ -45,27 +63,35 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
         print("Plotting filtered data")
         FilteredPlotting()
     
+    #In here, the settings for clustering are set in arrays, so that a grid search can be performed by looping over the arrays
+    #num_clusters = the number of clusters to use
+    #algorithms = the clustering algorithms to use, possible values: 'tskmeans', 'kernelkmeans', 'kshape'
+    #max_iters = the maximum number of iterations to use
+    #tols = the tolerance to use
+    #n_inits = the number of initializations to use
+    #metrics = the metrics to use, possible values: 'dtw', 'softdtw', 'euclidean'
+    #max_iter_barycenters = the maximum number of iterations to use for the barycenters
+    #use_voltages = whether to use the voltages in the clustering
+    #use_all3_phases = whether to use all 3 phases in the clustering
+    #min_cluster_sizes = the minimum cluster sizes to use
+    #max_cluster_sizes = the maximum cluster sizes to use
+    #handle_min_clusters = how to handle clusters that are too small, possible values: 'reassign', 'merge', 'outlier', 'nothing'
+    #handle_max_clusters = how to handle clusters that are too large, possible values: 'split', 'reassign', 'nothing'
     if ts_clustering:
         print("Clustering time series")
-        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        #num_clusters = [10]
-        #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
+        num_clusters = [10]
         algorithms = ['tskmeans']
         max_iters = [100]
         tols = [7e-07]
         n_inits = [1]
-        #metrics = ['dtw', 'softdtw', 'euclidean'] #Only for tskmeans
         metrics = ['softdtw']
         max_iter_barycenters = [100]
         use_voltages = [True]
         use_all3_phases = [True]
         min_cluster_sizes = [1]
-        max_cluster_sizes = [10] #Note that this has to be higher than the min_cluster_sizes
-        #handle_min_clusters = ['reassign', 'merge', 'outlier', 'nothing'] #Reassign points to other clusters, merge with nearest cluster, or mark all points in underpopulated clusters as outliers
+        max_cluster_sizes = [10]
         handle_min_clusters = ['nothing']
-        #handle_max_clusters = ['split', 'reassign', 'nothing'] #Split the cluster into two, or reassign points to other clusters until it just meets the max_cluster_size
         handle_max_clusters = ['nothing']
-
         columns=["NumClusters", "Algorithm", "MaxIter", "Tolerance", "NInit",
                                             "Metric", "MaxIterBarycenter", "UseVoltage", "UseAll3Phases",
                                             "MinClusterSize", "MaxClusterSize", "HandleMinClusters",
@@ -94,18 +120,19 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
                                                             
                                                             # Assign values from settings_and_score to results_df
                                                             results_df = settings_and_score[results_df.columns]
-                                                            #Run the deep regression on the clustered data
+                                                            #Run the deep regression on the clustered data if deep_regression is True
                                                             if deep_regression:
                                                                 runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=num_cluster)
+        #If merge_dl is True, merge the deep learning results
         if merge_dl:
             DLMerge()
                                                                 
-        
+    #If ts_clustering_plotting is True, plot the clustering results
     if ts_clustering_plotting:
         print("Plotting time series clustering")
         TsClusteringPlotting(ts_samples=ts_sample_value, tot_clusters=10)
     
-    #The "not" check since it is already called if true
+    #The "not" check is here since deep regression is already called if true
     if deep_regression and not ts_clustering:
         cluster_values = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         for cluster in cluster_values:
@@ -119,31 +146,39 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 
     print("Main function finished")
 
+#This function runs the deep regression
+#ts_sample_value: The value of the time series samples to use
+#cluster_value: The value of the clusters to use
+#epochs_values: The number of epochs to use
+#batch_size_values: The batch sizes to use
+#layer1_units_values: The number of units in the first layer
+#layer2_units_values: The number of units in the second layer
+#layer3_units_values: The number of units in the third layer
+#dropout_rate_values: The dropout rates to use
+#features_to_exclude: The features to exclude
+#activation_functions_layer1: The activation functions to use in the first layer
+#activation_functions_layer2: The activation functions to use in the second layer
+#activation_functions_layer3: The activation functions to use in the third layer
+#should_embed_features: Whether to embed the features
+#train_immediate: Whether to train the immediate features (prediction using only the immediate features)
+#train_barebones: Whether to train the barebones features (prediction using only the clusters)
+#learning_rates: The learning rates to use
+#random_values: The random values to use, recommnded to use multiple different for reliable results
 def runDeepRegression(ts_sample_value, cluster_value):
     print("Performing deep regression")
-    # Set the ranges of values for hyperparameters
-    epochs_values = [150]  # Update with your desired values
-    #64 useless, 16 best 2024-03-17, smaller not too good
-    batch_size_values = [16]  # Update with your desired values
-    #256 best, 32 not good 2024-03-17
-    layer1_units_values = [256]  # Update with your desired values
-    #64 seems to be as good as any higher value 2024-03-17
-    layer2_units_values = [64]  # Update with your desired values
-    #This layer maybe does not improve the model (1 is the same as not having the layer) 2024-03-18
-    layer3_units_values = [1]  # Update with your desired values
-    #0.3, 0.4, or 0.5 does not seem to matter much 2024-03-17
-    dropout_rate_values = [0.4]  # Update with your desired values
+    epochs_values = [150]
+    batch_size_values = [16]
+    layer1_units_values = [256]
+    layer2_units_values = [64]
+    layer3_units_values = [1]
+    dropout_rate_values = [0.4]
     # Define the features to exclude one at a time
     #features_to_exclude = ['ChargingPoint','Floor','Weekend','TimeConnected_sin','TimeConnected_cos', 'MaxVoltage', 'MaxCurrent',
     #                  'FullyCharged', 'Current_Type', 'Energy_Uptake', 'AverageVoltageDifference', 'AverageCurrentDifference']
     features_to_exclude = ['None']
-    #tanh performed the best for activation layer 1 2024-03-16,2024-03-20
     activation_functions_layer1 = ['tanh']
-    #RELU performed by far the best for activation layer 2 2024-03-15
     activation_functions_layer2 = ['relu']
-    #RELU performed by far the best for activation layer 3 2024-03-18
     activation_functions_layer3 = ['relu']
-    #Embedding gives almost universally worse results 2024-03-16
     should_embed_features = [False]
     train_immediate=False
     train_barebones=False
@@ -173,6 +208,7 @@ def runDeepRegression(ts_sample_value, cluster_value):
         total_epochs += epoch
     start_time = time.time()
     print(f"Will iterate over {total_iterations} iterations for {total_epochs} epochs in total")
+    
     # Iterate over hyperparameter values
     for epochs in epochs_values:
         for batch_size in batch_size_values:
@@ -249,6 +285,7 @@ def runDeepRegression(ts_sample_value, cluster_value):
 
 ts_sample_values = [30, 60, 90, 120]
   
+#Looping over the different time series sample values
 for ts in ts_sample_values:
     print(f"Running for ts_sample_value: {ts}")
     Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 

@@ -10,7 +10,7 @@ import numpy as np
 #meta_lower_bound = the lower bound for the number of half minutes for an ID to be included in the meta dataframe
 #empty_charge = the number of half minutes in the beginning of a time series for an ID to be considered as an empty charge and discarded
 #streak_percentage = the percentage of the last contiguous streak of "Charging" values for the car to be considered fully charged
-#should_filter_1911001328A_2_and_1911001328A_1 = whether to filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1
+#should_filter_1911001328A_2_and_1911001328A_1 = whether to filter away all rows with chargingpoint=1911001328A_2 or 1911001328A_1 (incorrect measurements from these)
 #export_meta = whether to export the meta dataframe to a csv file
 #export_extracted = whether to export the extracted dataframe to a csv file
 #export_filtered = whether to export the filtered dataframe to a csv file (data that has been ifltered away from the main dataframe)

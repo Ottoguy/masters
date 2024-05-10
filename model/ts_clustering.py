@@ -8,9 +8,20 @@ from datetime import datetime
 import numpy as np
 
 # num_cores: Use joblib for parallel processing, set to -1 to use all available cores
-# num_clusters_1_phase_range: Range of numbers of clusters to try for 1-Phase data
-# num_clusters_3_phase_range: Range of numbers of clusters to try for 3-Phase data
 # use_all_3_phase_data: Set to True to use all 3 phases for 3-Phase data, set to False to use only Phase1Voltage and Phase1Current
+# use_voltage: Set to True to use voltage data, set to False to use only current data
+# min_cluster_size: Minimum number of samples in a cluster
+# max_cluster_size: Maximum number of samples in a cluster
+# handle_min_clusters: Set to 'merge' to merge clusters with less than min_cluster_size samples, set to 'reassign' to reassign samples to other clusters, set to 'outliers' to mark clusters as outliers
+# handle_max_clusters: Set to 'split' to split clusters with more than max_cluster_size samples, set to 'reassign' to reassign samples to other clusters
+# calculate_silhouette: Set to True to calculate silhouette score, set to False to skip calculation
+# algorithm: Set to 'tskmeans' to use TimeSeriesKMeans, set to 'kernelkmeans' to use KernelKMeans, set to 'kshape' to use KShape
+# max_iter: Maximum number of iterations for the algorithm
+# tol: Tolerance for convergence
+# n_init: Number of initializations to perform
+# metric: Metric to use for clustering
+# max_iter_barycenter: Maximum number of iterations for the barycenter computation
+# ts_samples: Number of time series samples to use
 def TsClustering(ts_samples, num_clusters, algorithm, max_iter, tol, n_init, metric, max_iter_barycenter, use_voltage, use_all3_phases, min_cluster_size, max_cluster_size, handle_min_clusters, handle_max_clusters, calculate_silhouette):
     # Specify the directory where your files are located
     folder_path = 'prints/extracted/' + str(ts_samples) + '/'
