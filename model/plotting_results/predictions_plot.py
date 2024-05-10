@@ -42,6 +42,8 @@ def predictions_plot():
     #Delete all rows except every unique value of "TS_Samples" with the lowest "RMSE_Clusters"
     data = data.drop_duplicates(subset=['TS_Samples'], keep='first')
 
+    print(data)
+
     #Make an array of the 'Timestamp' column
     timestamps = data['Timestamp'].to_numpy()
 

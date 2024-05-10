@@ -26,15 +26,25 @@ def readmerge():
     # Load your data from the latest file
     data = pd.read_csv(latest_file)
 
-    # Drop specified columns
-    data = data.drop(columns=['RMSE_Intermediate', 'RMSE_Clusters', 'RMSE_Immediate', 'RMSE_Barebones', 'MAE_Intermediate', 'MAE_Clusters', 'MAE_Immediate', 'MAE_Barebones', 'Timestamp'])
+    folder2_path = 'prints/backup_oldruns/dl_merge/'
+    file_pattern2 = '*'
+    file_list2 = glob.glob(os.path.join(folder2_path, file_pattern2))
+    file_list2.sort(key=os.path.getmtime, reverse=True)
+    latest_file2 = file_list2[0]
+    data2 = pd.read_csv(latest_file2)
 
-    # Print unique values of each column
-    for column in data.columns:
-        print(f"Unique values in column '{column}':")
-        unique_values = data[column].unique()
-        for value in unique_values:
-            print(value)
-        print("\n")
+    #Merge the two dataframes
+    data = pd.concat([data, data2])
 
+    #Delete all duplicate rows
+    data = data.drop_duplicates()
+
+    #Keep only rows with TS_Samples = 120
+    #data = data[data.TS_Samples == 120]
+
+    # Sort by lowest
+    data = data.sort_values(by=['RMSE_Intermediate'])
+
+    #pint first 5 rows
+    print(data.head())
 readmerge()

@@ -37,8 +37,10 @@ def TsClusteringPlotting(ts_samples, tot_clusters):
     num_clusters = df_clusters['Cluster'].nunique()
     print(f"Number of clusters: {num_clusters}")
 
-    current_columns = ['Phase1Current', 'Phase2Current', 'Phase3Current']
-    voltage_columns = ['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']
+    #current_columns = ['Phase1Current', 'Phase2Current', 'Phase3Current']
+    #voltage_columns = ['Phase1Voltage', 'Phase2Voltage', 'Phase3Voltage']
+    current_columns = ['Phase1Current']
+    voltage_columns = ['Phase1Voltage']
 
     # Create subplots with one row per cluster and two columns (current and voltage)
     fig, axes = plt.subplots(num_clusters, 2, figsize=(12, 4*num_clusters), sharex=True)
@@ -74,20 +76,20 @@ def TsClusteringPlotting(ts_samples, tot_clusters):
                 axes[cluster_id, 1].plot(x_values, voltage_values, label=f'{voltage_column} - ID {id_data["ID"].iloc[0]}')
 
         # Set titles, labels, legends, etc. for each subplot
-        axes[cluster_id, 0].set_title(f'Cluster {cluster_id} - Current')
-        axes[cluster_id, 0].set_ylabel('Current')
+        axes[cluster_id, 0].set_title(f'Cluster {cluster_id} - Current', fontsize=14)
+        axes[cluster_id, 0].set_ylabel('Current', fontsize=12)
         axes[cluster_id, 0].grid(True)
         #axes[cluster_id, 0].legend()
 
-        axes[cluster_id, 1].set_title(f'Cluster {cluster_id} - Voltage')
-        axes[cluster_id, 1].set_ylabel('Voltage')
+        axes[cluster_id, 1].set_title(f'Cluster {cluster_id} - Voltage', fontsize=14)
+        axes[cluster_id, 1].set_ylabel('Voltage', fontsize=12)
         axes[cluster_id, 1].grid(True)
         #axes[cluster_id, 1].legend()
 
     # Add overall titles, labels, etc. for the entire figure
-    plt.suptitle(f'{ts_samples} – Current and Voltage Time Series for {num_clusters} clusters')
-    plt.xlabel('Time')
-    plt.tight_layout()
+    plt.suptitle(f'{ts_samples} – Current and Voltage Time Series for {num_clusters} clusters', fontsize=16)
+    plt.xlabel('Time', fontsize=14)
+    #plt.tight_layout()
 
     results_dir = "plots/ts_clustering/" + str(ts_samples) + "/"
     if not os.path.exists(results_dir):

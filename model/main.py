@@ -130,11 +130,11 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     #If ts_clustering_plotting is True, plot the clustering results
     if ts_clustering_plotting:
         print("Plotting time series clustering")
-        TsClusteringPlotting(ts_samples=ts_sample_value, tot_clusters=10)
+        TsClusteringPlotting(ts_samples=ts_sample_value, tot_clusters=6)
     
     #The "not" check is here since deep regression is already called if true
     if deep_regression and not ts_clustering:
-        cluster_values = [5]
+        cluster_values = [17]
         for cluster in cluster_values:
             print(f"Running deep regression for cluster: {cluster}")
             runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=cluster)
@@ -282,10 +282,10 @@ def runDeepRegression(ts_sample_value, cluster_value):
                                                         print("Execution time: {} seconds".format(execution_time))
                                                         print("Code execution completed.")
 
-ts_sample_values = [120]
+ts_sample_values = [60]
   
 #Looping over the different time series sample values
 for ts in ts_sample_values:
     print(f"Running for ts_sample_value: {ts}")
     Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-        ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = ts, merge_dl=True)
+        ts_clustering=False, ts_clustering_plotting=True, deep_regression=False, ts_sample_value = ts, merge_dl=False)

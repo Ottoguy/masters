@@ -22,6 +22,16 @@ def relative_improvement():# Specify the directory where your files are located
     # Load your data from the latest file
     data = pd.read_csv(latest_file)
 
+    folder2_path = 'prints/backup_oldruns/dl_merge/'
+    file_pattern2 = '*'
+    file_list2 = glob.glob(os.path.join(folder2_path, file_pattern2))
+    file_list2.sort(key=os.path.getmtime, reverse=True)
+    latest_file2 = file_list2[0]
+    data2 = pd.read_csv(latest_file2)
+
+    #Merge the two dataframes
+    data = pd.concat([data, data2])
+
     # Delete all duplicate rows
     data = data.drop_duplicates()
 
@@ -35,10 +45,19 @@ def relative_improvement():# Specify the directory where your files are located
     data = data.dropna(subset=['TS_Samples'])
 
     # Sort by lowest MAE_Intermediate within each unique combination of TS_Samples
-    data_intermediate = data.sort_values(by=['TS_Samples', 'Clusters', 'MAE_Intermediate'])
+    data_intermediate = data.sort_values(by=['TS_Samples', 'MAE_Intermediate'])
 
     # Save the first row for every unique TS_Samples based on MAE_Intermediate
-    best_intermediate = data_intermediate.drop_duplicates(subset=['TS_Samples', 'Clusters'])
+    best_intermediate = data_intermediate.drop_duplicates(subset=['TS_Samples'])
+
+    #Delete "clusters" column from the best_intermediate dataframe
+    best_intermediate = best_intermediate.drop(columns=['Clusters'])
+
+    #Copy every row from the best_intermediate dataframe 19 times
+    best_intermediate = best_intermediate.loc[best_intermediate.index.repeat(19)].reset_index(drop=True)
+
+    #Create a new column 'Clusters' in the best_intermediate dataframe with values from 2 to 20
+    best_intermediate['Clusters'] = np.tile(np.arange(2, 21), len(best_intermediate) // 19)
 
     # Sort by lowest MAE_Clusters within each unique combination of Clusters and TS_Samples
     data_clusters = data.sort_values(by=['TS_Samples', 'Clusters', 'MAE_Clusters'])

@@ -24,6 +24,16 @@ def error_minutes():
     # Load your data from the latest file
     data = pd.read_csv(latest_file)
 
+    folder2_path = 'prints/backup_oldruns/dl_merge/'
+    file_pattern2 = '*'
+    file_list2 = glob.glob(os.path.join(folder2_path, file_pattern2))
+    file_list2.sort(key=os.path.getmtime, reverse=True)
+    latest_file2 = file_list2[0]
+    data2 = pd.read_csv(latest_file2)
+
+    #Merge the two dataframes
+    data = pd.concat([data, data2])
+
     # Delete all duplicate rows
     data = data.drop_duplicates()
 
@@ -57,10 +67,12 @@ def error_minutes():
         plt.scatter(sorted_group['Clusters'], sorted_group['MAE_Clusters'], label=f"TS_Samples = {name}", color=colors[i])
         plt.plot(sorted_group['Clusters'], sorted_group['MAE_Clusters'], linestyle='-', color=colors[i])
 
-    plt.xlabel('Clusters')
-    plt.ylabel('MAE in minutes')
-    plt.title('Mean absolute error in minutes for different clusters and TS_Samples')
+    plt.xlabel('Clusters', fontsize=14)
+    plt.ylabel('MAE in minutes', fontsize=14)
+    plt.title('Mean absolute error in minutes for different clusters and TS_Samples', fontsize=16)
     plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
     plt.legend()
     plt.grid(True)
     plt.show()

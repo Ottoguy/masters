@@ -37,6 +37,15 @@ def DurationBoxplot():
     #Define the features to plot
     features_to_plot = ['Parking duration', 'Charging duration']
 
+    #Print the mean of Charging duration, excluding those below 15
+    print(meta_df[meta_df['Charging duration'] > 15]['Charging duration'].mean())
+    #Print the mean of Charging duration, excluding those below 30
+    print(meta_df[meta_df['Charging duration'] > 30]['Charging duration'].mean())
+    #Print the mean of Charging duration, excluding those below 45
+    print(meta_df[meta_df['Charging duration'] > 45]['Charging duration'].mean())
+    #Print the mean of Charging duration, excluding those below 60
+    print(meta_df[meta_df['Charging duration'] > 60]['Charging duration'].mean())
+
     # Create subplots
     fig, axs = plt.subplots(2, 1, figsize=(8, 10))  # 2 rows, 1 column
 

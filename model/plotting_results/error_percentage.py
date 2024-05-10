@@ -23,6 +23,16 @@ def error_percentage():
     # Load your data from the latest file
     data = pd.read_csv(latest_file)
 
+    folder2_path = 'prints/backup_oldruns/dl_merge/'
+    file_pattern2 = '*'
+    file_list2 = glob.glob(os.path.join(folder2_path, file_pattern2))
+    file_list2.sort(key=os.path.getmtime, reverse=True)
+    latest_file2 = file_list2[0]
+    data2 = pd.read_csv(latest_file2)
+
+    #Merge the two dataframes
+    data = pd.concat([data, data2])
+
     # Delete all duplicate rows
     data = data.drop_duplicates()
 
@@ -41,9 +51,9 @@ def error_percentage():
     # Group data by 'TS_Samples'
     grouped_data = data.groupby('TS_Samples')
 
-    #Express "MAE_Clusters" and "MAE_Intermediate" as percentages of TS_Samples
-    data['MAE_Clusters'] = data['MAE_Clusters'] / data['TS_Samples'] * 100
-    data['MAE_Intermediate'] = data['MAE_Intermediate'] / data['TS_Samples'] * 100
+    #Express "MAE_Clusters" and "MAE_Intermediate" as percentages of the mean (472 half minutes)
+    data['MAE_Clusters'] = data['MAE_Clusters'] / 472 * 100
+    data['MAE_Intermediate'] = data['MAE_Intermediate'] / 472 * 100
 
     # Define colormap
     colors = plt.cm.viridis(np.linspace(0, 1, len(grouped_data)))
