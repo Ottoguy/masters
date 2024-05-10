@@ -1,7 +1,5 @@
 from plotting_meta.connection_duration_a import ConnectionDurationA
 from plotting_meta.connection_duration_b import ConnectionDurationB
-from plotting_meta.cov_time import CovTime
-from plotting_meta.cov import Cov
 from plotting_meta.current_difference import CurrentDifference
 from plotting_meta.features_v_half_minutes import FeaturesVHalfMinutes
 from plotting_meta.hour_connected import HourConnected

@@ -134,7 +134,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     #The "not" check is here since deep regression is already called if true
     if deep_regression and not ts_clustering:
-        cluster_values = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        cluster_values = [5]
         for cluster in cluster_values:
             print(f"Running deep regression for cluster: {cluster}")
             runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=cluster)
@@ -183,6 +183,7 @@ def runDeepRegression(ts_sample_value, cluster_value):
     train_immediate=False
     train_barebones=False
     learning_rates = [0.005]
+    random_values = [11, 12, 13]
 
     # Create an empty DataFrame to store the results
     results_df_dl = pd.DataFrame(columns=['RMSE_Clusters'])
@@ -200,8 +201,6 @@ def runDeepRegression(ts_sample_value, cluster_value):
         * len(activation_functions_layer3)
         * len(should_embed_features)
     )
-
-    random_values = [6]
 
     total_epochs = 0
     for epoch in epochs_values:
@@ -283,7 +282,7 @@ def runDeepRegression(ts_sample_value, cluster_value):
                                                         print("Execution time: {} seconds".format(execution_time))
                                                         print("Code execution completed.")
 
-ts_sample_values = [30, 60, 90, 120]
+ts_sample_values = [120]
   
 #Looping over the different time series sample values
 for ts in ts_sample_values:

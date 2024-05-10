@@ -86,11 +86,11 @@ def resultsplot():# Specify the directory where your files are located
         plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], label=f"TS_Samples = {name} (Intermediate)", color=colors[i], marker='x')
         plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], linestyle='--', color=colors[i])
 
-    plt.xlabel('Clusters')
-    plt.ylabel('RMSE')
-    plt.title('RMSE vs Clusters for different TS_Samples')
+    plt.xlabel('Clusters', fontsize=14)
+    plt.ylabel('RMSE', fontsize=14)
+    plt.title('RMSE vs Clusters for different TS_Samples', fontsize=16)
     plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
-    plt.legend()
+    plt.legend(fontsize=14)
     plt.grid(True)
     plt.show()
 
