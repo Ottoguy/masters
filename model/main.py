@@ -47,7 +47,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     if ts_clustering:
         print("Clustering time series")
-        num_clusters = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        num_clusters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         #num_clusters = [10]
         #algorithms = ['tskmeans', 'kernelkmeans', 'kshape']
         algorithms = ['tskmeans']
@@ -107,7 +107,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
     
     #The "not" check since it is already called if true
     if deep_regression and not ts_clustering:
-        cluster_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        cluster_values = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         for cluster in cluster_values:
             print(f"Running deep regression for cluster: {cluster}")
             runDeepRegression(ts_sample_value=ts_sample_value, cluster_value=cluster)
@@ -122,8 +122,7 @@ def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extr
 def runDeepRegression(ts_sample_value, cluster_value):
     print("Performing deep regression")
     # Set the ranges of values for hyperparameters
-    #750+ epochs best
-    epochs_values = [1500]  # Update with your desired values
+    epochs_values = [150]  # Update with your desired values
     #64 useless, 16 best 2024-03-17, smaller not too good
     batch_size_values = [16]  # Update with your desired values
     #256 best, 32 not good 2024-03-17
@@ -167,7 +166,7 @@ def runDeepRegression(ts_sample_value, cluster_value):
         * len(should_embed_features)
     )
 
-    random_values = [1, 2, 3, 4, 5]
+    random_values = [6]
 
     total_epochs = 0
     for epoch in epochs_values:
@@ -248,9 +247,9 @@ def runDeepRegression(ts_sample_value, cluster_value):
                                                         print("Execution time: {} seconds".format(execution_time))
                                                         print("Code execution completed.")
 
-ts_sample_values = [60, 90, 120]
+ts_sample_values = [30, 60, 90, 120]
   
 for ts in ts_sample_values:
     print(f"Running for ts_sample_value: {ts}")
     Main(preprocessing=False, preproc_split=False, plotting_meta=False, plotting_df=False, plotting_extracted=False, plotting_filtered=False, 
-        ts_clustering=True, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = ts, merge_dl=True)
+        ts_clustering=False, ts_clustering_plotting=False, deep_regression=True, ts_sample_value = ts, merge_dl=True)

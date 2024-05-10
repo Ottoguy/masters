@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def relative_improvement():# Specify the directory where your files are located
-    folder_path = 'prints/backup_oldruns/dl_merge/'
+    folder_path = 'prints/dl_merge/'
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -67,8 +67,8 @@ def relative_improvement():# Specify the directory where your files are located
         plt.plot(sample_data['Clusters'], sample_data['Percentage_Decrease'], marker='o', label=f'TS_Samples = {sample}', alpha=1.0)
 
     plt.xlabel('Clusters')
-    plt.ylabel('Percentage decrease in error')
-    plt.title('Percentage decrease in error when using clusters')
+    plt.ylabel('Percentage decrease in MAE')
+    plt.title('Percentage decrease in MAE when using clusters')
     plt.legend()
     plt.grid(which='both', linestyle=':', linewidth=0.5)  # Set grid for both major and minor ticks
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.0f}%'))  # Set y-axis ticks to include percent sign

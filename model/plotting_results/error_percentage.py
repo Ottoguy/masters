@@ -6,7 +6,7 @@ import pandas as pd
 
 def error_percentage():
     # Specify the directory where your files are located
-    folder_path = 'prints/backup_oldruns/dl_merge/'
+    folder_path = 'prints/dl_merge/'
 
     # Create a pattern to match files in the specified format
     file_pattern = '*'
@@ -57,7 +57,7 @@ def error_percentage():
         plt.plot(sorted_group['Clusters'], sorted_group['MAE_Clusters'], linestyle='-', color=colors[i])
 
     plt.xlabel('Clusters')
-    plt.ylabel('Error (%)')
+    plt.ylabel('Error (%) [MAE]')
     plt.title('Error in percentages for different Clusters and TS_Samples')
     plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
     plt.legend()
