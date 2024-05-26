@@ -15,10 +15,11 @@ import time
 
 #This is the main function. This is always the file to run, unless specific result plots are wanted. /Otto Palmlöf 2024-05-10
 
-#The functions called save their results as files in the "prints" folder and then in subfolders based on the function called.
+#The functions called save their results as files in the subfolders within the "prints" folder.
 #These folders are also used by other functions to read the results, so it is important to run the functions in the correct order.
 #The functions are called by setting the corresponding boolean to True. The functions are called in the order they are defined in the Main function.
 #The functions for plotting instead most often save the plots in the "plots" folder.
+#DATA IS LOADED FROM 'data/Dansmästaren/Charger_Data/', where the 'data' folder is in the same folder as the 'model' folder
 
 #preprocessing: If True, the data is loaded and preprocessed
 #preproc_split: If True, the preprocessed data is split into immediate, intermediate and final features
@@ -31,8 +32,6 @@ import time
 #deep_regression: If True, the deep learning regression is run
 #ts_sample_value: The value of the time series samples to use
 #merge_dl: If True, the deep learning results are merged to a single file, which is easily readable, sorted by RMSE
-
-#DATA IS LOADED FROM 'data/Dansmästaren/Charger_Data/', where the 'data' folder is in the same folder as the 'model' folder
 
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
           ts_clustering_plotting, deep_regression, ts_sample_value, merge_dl):

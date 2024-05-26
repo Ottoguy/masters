@@ -40,6 +40,3 @@ def DeepLearningPlotting():
 
     # Show the plot
     plt.show()
-
-# Call the function
-DeepLearningPlotting()
