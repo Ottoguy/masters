@@ -1,4 +1,14 @@
 
 data/
 plots/
-prints/
+prints/backup_oldruns
+prints/all
+prints/deep_learning
+prints/dl_merge
+prints/dl_overview
+prints/extracted
+prints/meta
+prints/preproc_final
+prints/preproc_immediate
+prints/preproc_intermediate
+prints/ts_eval

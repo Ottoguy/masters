@@ -31,6 +31,9 @@ import time
 #deep_regression: If True, the deep learning regression is run
 #ts_sample_value: The value of the time series samples to use
 #merge_dl: If True, the deep learning results are merged to a single file, which is easily readable, sorted by RMSE
+
+#DATA IS LOADED FROM 'data/Dansmästaren/Charger_Data/', where the 'data' folder is in the same folder as the 'model' folder
+
 def Main(preprocessing, preproc_split, plotting_meta, plotting_df, plotting_extracted, plotting_filtered, ts_clustering,
           ts_clustering_plotting, deep_regression, ts_sample_value, merge_dl):
     print("Main function called")
