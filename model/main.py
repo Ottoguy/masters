@@ -13,12 +13,14 @@ import os
 from datetime import datetime
 import time
 
-#This is the main function. This is always the file to run, unless specific result plots are wanted. /Otto Palmlöf 2024-05-10
+#This is the main function. This is always the file to run, unless specific result plots are wanted.
+#Use this code however you may like, though credit is appreciated. /Otto Palmlöf 2024-05-26, contact: otto.palmlof@gmail.com
 
 #The functions called save their results as files in the subfolders within the "prints" folder.
 #These folders are also used by other functions to read the results, so it is important to run the functions in the correct order.
 #The functions are called by setting the corresponding boolean to True. The functions are called in the order they are defined in the Main function.
 #The functions for plotting instead most often save the plots in the "plots" folder.
+#The code for result plotting (within the "plotting_results" folder) is done outside of this  main function, and the results are read from the "prints" folder.
 #DATA IS LOADED FROM 'data/Dansmästaren/Charger_Data/', where the 'data' folder is in the same folder as the 'model' folder
 
 #preprocessing: If True, the data is loaded and preprocessed
