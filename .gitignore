@@ -12,3 +12,4 @@ prints/preproc_immediate
 prints/preproc_intermediate
 prints/ts_eval
 model/__pycache__/
+.vscode/
