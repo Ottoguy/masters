@@ -42,8 +42,18 @@ def readmerge():
     #Keep only rows with TS_Samples = 120
     #data = data[data.TS_Samples == 120]
 
+    #Delete columns where MAE_Intermediate is NaN
+    data = data.dropna(subset=['MAE_Clusters'])
+    data = data.dropna(subset=['TS_Samples'])
+
+    #Delete all columns except "TS_Samples", "Clusters" and "MAE_Intermediate"
+    data = data[['TS_Samples', 'Clusters', 'MAE_Clusters']]
+
     # Sort by lowest
-    data = data.sort_values(by=['RMSE_Intermediate'])
+    data = data.sort_values(by=['MAE_Clusters'])
+
+    #Delete all rows witha combination of TS_Sampels and Clusters that has already been used
+    data = data.drop_duplicates(subset=['TS_Samples'])
 
     #pint first 5 rows
     print(data.head())

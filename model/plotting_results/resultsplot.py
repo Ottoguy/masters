@@ -61,6 +61,13 @@ def resultsplot():# Specify the directory where your files are located
     # Group data by 'TS_Samples'
     grouped_data = merged_data.groupby('TS_Samples')
 
+    #Divide the RMSE columns by 2
+    merged_data['RMSE_Intermediate'] = merged_data['RMSE_Intermediate'] / 2
+    merged_data['RMSE_Clusters'] = merged_data['RMSE_Clusters'] / 2
+
+    #rename "TS_Samples" to "n"
+    merged_data = merged_data.rename(columns={'TS_Samples': 'n'})
+
     # Define colormap
     colors = plt.cm.viridis(np.linspace(0, 1, len(grouped_data)))
 
@@ -69,28 +76,28 @@ def resultsplot():# Specify the directory where your files are located
         # Sort the data within the group based on 'Clusters' column
         sorted_group = group.sort_values(by='Clusters')
         # Plot scatter points and lines for "RMSE_Clusters"
-        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], label=f"TS_Samples = {name}", color=colors[i])
+        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], label=f"n = {name}", color=colors[i])
         plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Clusters'], linestyle='-', color=colors[i])
 
     # Sort by lowest RMSE
     merged_data = merged_data.sort_values(by=['RMSE_Intermediate'])
     
     # Group data by 'TS_Samples'
-    grouped_data = merged_data.groupby('TS_Samples')
+    grouped_data = merged_data.groupby('n')
 
     # Plot each group separately
     for i, (name, group) in enumerate(grouped_data):
         # Sort the data within the group based on 'Clusters' column
         sorted_group = group.sort_values(by='Clusters')
         # Plot scatter points and lines for "RMSE_Intermediate"
-        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], label=f"TS_Samples = {name} (Intermediate)", color=colors[i], marker='x')
+        plt.scatter(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], label=f"n = {name} (Intermediate)", color=colors[i], marker='x')
         plt.plot(sorted_group['Clusters'], sorted_group['RMSE_Intermediate'], linestyle='--', color=colors[i])
 
-    plt.xlabel('Clusters', fontsize=14)
-    plt.ylabel('RMSE', fontsize=14)
-    plt.title('RMSE vs Clusters for different TS_Samples', fontsize=16)
+    plt.xlabel('Clusters', fontsize=16)
+    plt.ylabel('RMSE in minutes', fontsize=16)
+    plt.title('RMSE vs Clusters for different n', fontsize=18)
     plt.xticks(np.arange(2, 21, step=1))  # Set x-axis ticks from 2 to 20
-    plt.legend(fontsize=14)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.12, 1.15), fontsize=13)
     plt.grid(True)
     plt.show()
 
