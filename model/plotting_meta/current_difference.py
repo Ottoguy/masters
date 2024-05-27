@@ -44,10 +44,10 @@ def CurrentDifference():
     # Bar for values > 3
     plt.bar(['> 3'], [len(above_3)], color='skyblue', edgecolor='black')
 
-    plt.xlabel('Average Current Difference')
-    plt.ylabel('Count')
-    plt.title('Distribution of Average Current Differences')
-    plt.xticks(rotation=45, ha='right')
+    plt.xlabel('Average Current Difference', fontsize=18)
+    plt.ylabel('Count', fontsize=18)
+    plt.title('Distribution of Average Current Differences', fontsize=22)
+    plt.xticks(rotation=45, ha='right', fontsize=16)
     plt.tight_layout()
 
     # Save the figure with the current date and time in the filename

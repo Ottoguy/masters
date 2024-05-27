@@ -44,10 +44,10 @@ def VoltageDifference():
     # Bar for values > 2
     plt.bar(['> 2'], [len(above_2)], color='skyblue', edgecolor='black')
 
-    plt.xlabel('Average Voltage Difference')
-    plt.ylabel('Count')
-    plt.title('Distribution of Average Voltage Differences')
-    plt.xticks(rotation=45, ha='right')
+    plt.xlabel('Average Voltage Difference', fontsize=18)
+    plt.ylabel('Count', fontsize=18)
+    plt.title('Distribution of Average Voltage Differences', fontsize=22)
+    plt.xticks(rotation=45, ha='right', fontsize=16)
     plt.tight_layout()
 
     # Save the figure with the current date and time in the filename
