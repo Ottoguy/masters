@@ -15,7 +15,8 @@ göra nya kluster med den nya datan. I filen "main.py" finns detaljer om hur
 nya kluster kan genereras. All kod kallas indirekt från main.py, förutom
 de i mappen "plotting_results", som endast används för metaanalys av resultat.
 
-pdf:en är mitt examnesarbete, med information om hur detta funkar.
+pdf:en är mitt examnesarbete, med information om hur detta funkar. Koden lär
+vara mer lättföreståelig givet att man läst den.
 
 /Otto Palmlöf 2024-06-07
 
